@@ -1,0 +1,12 @@
+{
+  "raceName": "Test Trail 30K",
+  "checkpoints": [
+    { "name": "Couvet", "distance": 0, "icon": "start", "arrivalTime": "0:00", "notes": "" },
+    { "name": "Noiraigue", "distance": 3.5, "icon": "water", "arrivalTime": "0:35", "notes": "多带水" },
+    { "name": "Chasseron", "distance": 7.0, "icon": "food", "arrivalTime": "1:50", "notes": "收登山杖" },
+    { "name": "Col de l'Aiguillon", "distance": 12.0, "icon": "cutoff", "arrivalTime": "3:20", "notes": "关门6h" },
+    { "name": "Les Places", "distance": 18.0, "icon": "water", "arrivalTime": "5:05", "notes": "吃3根胶" },
+    { "name": "La Roche", "distance": 24.0, "icon": "food", "arrivalTime": "6:25", "notes": "" },
+    { "name": "Couvet", "distance": 29.5, "icon": "finish", "arrivalTime": "7:35", "notes": "" }
+  ]
+}

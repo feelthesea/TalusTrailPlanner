@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talus - Trail Roadbook Generator — 越野跑路书生成器</title>
+  <meta name="description" content="Upload a GPX file and create a beautiful trail-race roadbook with elevation profile, checkpoint annotations, and segment statistics.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ═══ Page Header ═══ -->
+  <header class="page-header">
+    <h1>🏔️ Talus - Trail Roadbook Generator</h1>
+    <div style="margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+      <span class="subtitle" style="margin: 0; font-size: 0.78rem; color: var(--text-muted);">越野跑路书生成器</span>
+      <span style="font-size: 0.68rem; color: rgba(255,255,255,0.45); font-weight: 500;">Vibe coded by <strong style="color: var(--accent);">Laurent L</strong></span>
+    </div>
+  </header>
+
+  <!-- ═══ Toolbar ═══ -->
+  <div class="toolbar" id="toolbar">
+    <!-- GPX upload -->
+    <div class="group">
+      <button class="btn" id="btn-gpx" title="Upload GPX file">
+        <span class="icon">📂</span> 上传 GPX
+      </button>
+      <input type="file" id="input-gpx" accept=".gpx" class="hidden">
+    </div>
+
+    <!-- Race name -->
+    <div class="group">
+      <label class="field-label" for="input-name">比赛名称</label>
+      <input type="text" id="input-name" class="input-field" placeholder="e.g. UTMB 2026" style="width:200px">
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- JSON import / export -->
+    <div class="group">
+      <button class="btn" id="btn-import" title="Import checkpoint data from JSON">
+        <span class="icon">📥</span> 导入 JSON
+      </button>
+      <input type="file" id="input-json" accept=".json" class="hidden">
+      <button class="btn" id="btn-template-json" title="Download JSON configuration template">
+        <span class="icon">📋</span> 下载模板
+      </button>
+      <button class="btn" id="btn-export-json" title="Export checkpoint data as JSON">
+        <span class="icon">📤</span> 导出 JSON
+      </button>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Image export -->
+    <div class="group">
+      <label class="field-label" for="export-ratio">导出比例</label>
+      <select id="export-ratio" class="input-field" style="width:260px; height: 32px; padding: 4px 8px; font-size: 0.78rem;">
+        <option value="auto">默认自适应 (无白边)</option>
+        <option value="16-9">16:9 横屏 (如 iPhone 6/7/8, 经典安卓机型)</option>
+        <option value="19.5-9">19.5:9 横屏 (如 iPhone X/11/12/13/14/15/16, 主流全面屏)</option>
+        <option value="4-3">4:3 横屏 (如 iPad, 平板电脑)</option>
+      </select>
+    </div>
+
+    <div class="group">
+      <div class="dropdown" id="export-dropdown">
+        <button class="btn btn-primary" id="btn-export-img">
+          <span class="icon">🖼️</span> 下载图片 ▾
+        </button>
+        <div class="dropdown-menu" id="export-menu">
+          <button data-scale="1">1× 标准分辨率</button>
+          <button data-scale="2">2× 高清 (推荐)</button>
+          <button data-scale="3">3× 超高清 (打印)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Main Full-Width Stack Layout ═══ -->
+  <div class="main-layout">
+    <!-- ═══ 1. Profile Viewer (Elevation Chart) ═══ -->
+    <section class="profile-section">
+      <div class="profile-wrapper" id="profile-container">
+        <div class="profile-placeholder" id="profile-placeholder">
+          <div class="big-icon">🗻</div>
+          <div>上传 GPX 文件以生成高程剖面图</div>
+          <div style="font-size:0.78rem; color:var(--text-muted);">Upload a GPX file to generate the elevation profile</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 2. CP Editor Table ═══ -->
+    <section class="cp-section">
+      <h2><span>📍</span> CP 点 / 补给站 列表</h2>
+      <div class="cp-table-wrap">
+        <table class="cp-table" id="cp-table">
+          <thead>
+            <tr>
+              <th class="col-num">#</th>
+              <th class="col-name">名称</th>
+              <th class="col-dist">距起点 (km)</th>
+              <th class="col-icon">首选图标</th>
+              <th class="col-time">抵达cp点总用时</th>
+              <th class="col-notes">备注 (支持回车多行)</th>
+              <th class="col-action"></th>
+            </tr>
+          </thead>
+          <tbody id="cp-tbody">
+            <!-- rows injected by app.js -->
+          </tbody>
+        </table>
+        <div class="add-row-bar">
+          <button class="btn" id="btn-add-cp">
+            <span class="icon">＋</span> 添加 CP 点
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 3. Horizontal Points of Interest Detailed Settings Panel (Bottom Dashboard) ═══ -->
+    <aside class="poi-panel" id="poi-panel">
+      <!-- Full-Width CP Tabs bar with arrow scroll buttons -->
+      <div class="poi-panel-header-tabs">
+        <h3>📍 检查点详细视觉配置</h3>
+        <div class="poi-tabs-container" style="flex: 1; max-width: 600px; margin-left: 16px;">
+          <div class="poi-tabs" id="poi-tabs">
+            <!-- tabs injected dynamically -->
+          </div>
+          <div class="poi-tabs-scroll-btns">
+            <button class="poi-scroll-arrow" id="btn-poi-tab-up">▲</button>
+            <button class="poi-scroll-arrow" id="btn-poi-tab-down">▼</button>
+          </div>
+        </div>
+        
+      </div>
+
+      <!-- Horizontal Dashboard Content -->
+      <div class="poi-content">
+        <!-- COLUMN 1: Basic Settings & Global Size -->
+        <div class="poi-form-grid-horizontal">
+          <h4>基本信息与全局字号</h4>
+          <div class="poi-field">
+            <label for="poi-position">CP位置距离 (公里)</label>
+            <input type="number" id="poi-position" step="0.1" min="0" value="0">
+          </div>
+          
+          <div class="poi-form-row inline" style="margin: 4px 0;">
+            <input type="checkbox" id="poi-intermediate" class="chk-box">
+            <label for="poi-intermediate">用于分段统计点 (划分子赛段)</label>
+          </div>
+
+          <!-- Individual Font Size Controls (Granular visual settings) -->
+          <div class="poi-font-sizes-title" style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px;">各元素字号大小设置 (像素)</div>
+          <div class="poi-font-sizes-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 4px;">
+            <div class="poi-field">
+              <label style="font-size:0.68rem;">比赛名称</label>
+              <input type="number" id="fs-title" min="8" max="30" value="18" style="height: 25px; padding: 2px 5px; font-size: 0.74rem;">
+            </div>
+            <div class="poi-field">
+              <label style="font-size:0.68rem;">CP点名称</label>
+              <input type="number" id="fs-cpname" min="8" max="25" value="12" style="height: 25px; padding: 2px 5px; font-size: 0.74rem;">
+            </div>
+            <div class="poi-field">
+              <label style="font-size:0.68rem;">CP点海拔</label>
+              <input type="number" id="fs-cpelev" min="8" max="25" value="11" style="height: 25px; padding: 2px 5px; font-size: 0.74rem;">
+            </div>
+            <div class="poi-field">
+              <label style="font-size:0.68rem;">预计用时</label>
+              <input type="number" id="fs-cptime" min="8" max="25" value="11" style="height: 25px; padding: 2px 5px; font-size: 0.74rem;">
+            </div>
+            <div class="poi-field">
+              <label style="font-size:0.68rem;">备注信息</label>
+              <input type="number" id="fs-cpnotes" min="8" max="25" value="10" style="height: 25px; padding: 2px 5px; font-size: 0.74rem;">
+            </div>
+            <div class="poi-field">
+              <label style="font-size:0.68rem;">区间分段</label>
+              <input type="number" id="fs-segment" min="8" max="25" value="11" style="height: 25px; padding: 2px 5px; font-size: 0.74rem;">
+            </div>
+            <div class="poi-field" style="grid-column: span 2;">
+              <label style="font-size:0.68rem;">底部累计距离</label>
+              <input type="number" id="fs-cumuldist" min="8" max="25" value="12" style="height: 25px; padding: 2px 5px; font-size: 0.74rem;">
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUMN 2: Multi-Icons Config -->
+        <div class="poi-form-grid-horizontal">
+          <h4>图标与标志组合 (最多叠加3层)</h4>
+          
+          <div class="poi-form-grid-3" style="grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px;">
+            <div class="poi-field">
+              <label for="poi-icon-size">图标绘制大小</label>
+              <input type="number" id="poi-icon-size" min="10" max="60" value="20">
+            </div>
+            <div class="poi-field">
+              <label for="poi-icon-rotation">图标旋转角度 (°)</label>
+              <input type="number" id="poi-icon-rotation" value="0">
+            </div>
+          </div>
+
+          <div class="poi-horizontal-icons-grid">
+            <!-- Icon 1 -->
+            <div class="poi-icon-group" data-icon-index="0">
+              <h5>图标 1 (首选)</h5>
+              <div class="poi-field" style="margin-bottom: 4px;">
+                <label>符号</label>
+                <select class="poi-symbol-select">
+                  <option value="">(无图标)</option>
+                  <option value="start">🟢 起点 (Start)</option>
+                  <option value="finish">🔴 终点 (Finish)</option>
+                  <option value="water">💧 水站 (Water)</option>
+                  <option value="food">🍽️ 补给站 (Food)</option>
+                  <option value="cutoff">⚠️ 关门点 (Cutoff)</option>
+                  <option value="cp">📍 检查点 (CP)</option>
+                  <option value="chapel">⛪ 教堂 (Chapel)</option>
+                  <option value="danger">⚡ 危险 (Danger)</option>
+                  <option value="peak">🏔️ 山峰 (Peak)</option>
+                  <option value="medical">🏥 医疗点 (Medical)</option>
+                  <option value="toilet">🚽 厕所 (Toilet)</option>
+                  <option value="info">ℹ️ 咨询处 (Info)</option>
+                </select>
+              </div>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <div class="poi-field">
+                  <label>背景颜色</label>
+                  <div class="color-picker-wrapper" style="width: 76px;">
+                    <input type="text" class="poi-color-hex" value="#4e4e4e" style="width: 45px; font-size: 0.7rem;">
+                    <input type="color" class="poi-color-picker" value="#4e4e4e" style="width:16px; height:16px;">
+                  </div>
+                </div>
+                <div class="poi-field">
+                  <label>图案</label>
+                  <div class="toggle-buttons" style="height: 25px;">
+                    <button class="toggle-btn active" style="padding: 0 4px; font-size: 0.7rem;" data-val="White">白</button>
+                    <button class="toggle-btn" style="padding: 0 4px; font-size: 0.7rem;" data-val="Black">黑</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Icon 2 -->
+            <div class="poi-icon-group" data-icon-index="1">
+              <h5>图标 2</h5>
+              <div class="poi-field" style="margin-bottom: 4px;">
+                <label>符号</label>
+                <select class="poi-symbol-select">
+                  <option value="">(无图标)</option>
+                  <option value="start">🟢 起点 (Start)</option>
+                  <option value="finish">🔴 终点 (Finish)</option>
+                  <option value="water">💧 水站 (Water)</option>
+                  <option value="food">🍽️ 补给站 (Food)</option>
+                  <option value="cutoff">⚠️ 关门点 (Cutoff)</option>
+                  <option value="cp">📍 检查点 (CP)</option>
+                  <option value="chapel">⛪ 教堂 (Chapel)</option>
+                  <option value="danger">⚡ 危险 (Danger)</option>
+                  <option value="peak">🏔️ 山峰 (Peak)</option>
+                  <option value="medical">🏥 医疗点 (Medical)</option>
+                  <option value="toilet">🚽 厕所 (Toilet)</option>
+                  <option value="info">ℹ️ 咨询处 (Info)</option>
+                </select>
+              </div>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <div class="poi-field">
+                  <label>背景颜色</label>
+                  <div class="color-picker-wrapper" style="width: 76px;">
+                    <input type="text" class="poi-color-hex" value="#4e4e4e" style="width: 45px; font-size: 0.7rem;">
+                    <input type="color" class="poi-color-picker" value="#4e4e4e" style="width:16px; height:16px;">
+                  </div>
+                </div>
+                <div class="poi-field">
+                  <label>图案</label>
+                  <div class="toggle-buttons" style="height: 25px;">
+                    <button class="toggle-btn active" style="padding: 0 4px; font-size: 0.7rem;" data-val="White">白</button>
+                    <button class="toggle-btn" style="padding: 0 4px; font-size: 0.7rem;" data-val="Black">黑</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Icon 3 -->
+            <div class="poi-icon-group" data-icon-index="2">
+              <h5>图标 3</h5>
+              <div class="poi-field" style="margin-bottom: 4px;">
+                <label>符号</label>
+                <select class="poi-symbol-select">
+                  <option value="">(无图标)</option>
+                  <option value="start">🟢 起点 (Start)</option>
+                  <option value="finish">🔴 终点 (Finish)</option>
+                  <option value="water">💧 水站 (Water)</option>
+                  <option value="food">🍽️ 补给站 (Food)</option>
+                  <option value="cutoff">⚠️ 关门点 (Cutoff)</option>
+                  <option value="cp">📍 检查点 (CP)</option>
+                  <option value="chapel">⛪ 教堂 (Chapel)</option>
+                  <option value="danger">⚡ 危险 (Danger)</option>
+                  <option value="peak">🏔️ 山峰 (Peak)</option>
+                  <option value="medical">🏥 医疗点 (Medical)</option>
+                  <option value="toilet">🚽 厕所 (Toilet)</option>
+                  <option value="info">ℹ️ 咨询处 (Info)</option>
+                </select>
+              </div>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <div class="poi-field">
+                  <label>背景颜色</label>
+                  <div class="color-picker-wrapper" style="width: 76px;">
+                    <input type="text" class="poi-color-hex" value="#4e4e4e" style="width: 45px; font-size: 0.7rem;">
+                    <input type="color" class="poi-color-picker" value="#4e4e4e" style="width:16px; height:16px;">
+                  </div>
+                </div>
+                <div class="poi-field">
+                  <label>图案</label>
+                  <div class="toggle-buttons" style="height: 25px;">
+                    <button class="toggle-btn active" style="padding: 0 4px; font-size: 0.7rem;" data-val="White">白</button>
+                    <button class="toggle-btn" style="padding: 0 4px; font-size: 0.7rem;" data-val="Black">黑</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUMN 3: Axis Configuration -->
+        <div class="poi-form-grid-horizontal">
+          <h4>垂直指示辅助线</h4>
+          <div class="poi-field">
+            <label>指示线颜色</label>
+            <div class="color-picker-wrapper" style="width: 100%;">
+              <input type="text" id="poi-axis-color-hex" value="#4e4e4e">
+              <input type="color" id="poi-axis-color" value="#4e4e4e">
+            </div>
+          </div>
+          <div class="poi-field">
+            <label>指示线粗细 (px)</label>
+            <input type="number" id="poi-axis-thickness" value="2" min="1" max="10">
+          </div>
+          <div class="poi-field checkbox-field" style="margin-top: 8px;">
+            <input type="checkbox" id="poi-axis-broken" class="chk-box">
+            <label for="poi-axis-broken" style="font-size: 0.74rem;">指示线在海拔曲线处断开</label>
+          </div>
+        </div>
+
+        <!-- COLUMN 4: Associated Text Annotations -->
+        <div class="poi-form-grid-horizontal">
+          <h4>图表内嵌自定义标注 (支持旋转/排列)</h4>
+          <div class="poi-texts-settings-row" style="grid-template-columns: 1fr 60px 1.2fr; gap: 8px;">
+            <div class="poi-field">
+              <label>标注颜色</label>
+              <div class="color-picker-wrapper" style="width: 100%;">
+                <input type="text" id="poi-text-color-hex" value="#4e4e4e">
+                <input type="color" id="poi-text-color" value="#4e4e4e">
+              </div>
+            </div>
+            <div class="poi-field">
+              <label>字号 (px)</label>
+              <input type="number" id="poi-text-size" value="10" min="6" max="24">
+            </div>
+            <div class="poi-field">
+              <label for="poi-text-orientation">排列方向</label>
+              <select id="poi-text-orientation" style="height: 29px; padding: 2px 6px; font-size: 0.74rem;">
+                <option value="To the right">靠右横排 (To Right)</option>
+                <option value="To the left">靠左横排 (To Left)</option>
+                <option value="Rotated -90°">靠右竖排 (Rotated -90°)</option>
+                <option value="Rotated 90°">靠左竖排 (Rotated 90°)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 2x3 layout for texts -->
+          <div class="poi-texts-grid-horizontal">
+            <div class="poi-field">
+              <label>左侧 - 下</label>
+              <input type="text" id="poi-txt-left-bottom" placeholder="无">
+            </div>
+            <div class="poi-field">
+              <label>左侧 - 中</label>
+              <input type="text" id="poi-txt-left-middle" placeholder="无">
+            </div>
+            <div class="poi-field">
+              <label>左侧 - 上</label>
+              <input type="text" id="poi-txt-left-top" placeholder="无">
+            </div>
+            <div class="poi-field">
+              <label>右侧 - 下</label>
+              <input type="text" id="poi-txt-right-bottom" placeholder="无">
+            </div>
+            <div class="poi-field">
+              <label>右侧 - 中</label>
+              <input type="text" id="poi-txt-right-middle" placeholder="无">
+            </div>
+            <div class="poi-field">
+              <label>右侧 - 上</label>
+              <input type="text" id="poi-txt-right-top" placeholder="无">
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ═══ Toast ═══ -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ═══ Scripts (order matters: utils first) ═══ -->
+  <script src="js/utils.js"></script>
+  <script src="js/gpx-parser.js"></script>
+  <script src="js/profile.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
