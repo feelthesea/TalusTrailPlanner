@@ -22,8 +22,8 @@
   <div class="toolbar" id="toolbar">
     <!-- GPX upload -->
     <div class="group">
-      <button class="btn" id="btn-gpx" data-i18n="uploadGpx" title="Upload GPX file">
-        <span class="icon">📂</span> 上传 GPX
+      <button class="btn" id="btn-gpx" title="Upload GPX file">
+        <span class="icon">📂</span> <span data-i18n="uploadGpx">上传 GPX</span>
       </button>
       <input type="file" id="input-gpx" accept=".gpx" class="hidden">
     </div>
@@ -38,15 +38,15 @@
 
     <!-- JSON import / export -->
     <div class="group">
-      <button class="btn" id="btn-import" data-i18n="importJson" title="Import checkpoint data from JSON">
-        <span class="icon">📥</span> 导入 JSON
+      <button class="btn" id="btn-import" title="Import checkpoint data from JSON">
+        <span class="icon">📥</span> <span data-i18n="importJson">导入 JSON</span>
       </button>
       <input type="file" id="input-json" accept=".json" class="hidden">
-      <button class="btn" id="btn-template-json" data-i18n="downloadTemplate" title="Download JSON configuration template">
-        <span class="icon">📋</span> 下载模板
+      <button class="btn" id="btn-template-json" title="Download JSON configuration template">
+        <span class="icon">📋</span> <span data-i18n="downloadTemplate">下载模板</span>
       </button>
-      <button class="btn" id="btn-export-json" data-i18n="exportJson" title="Export checkpoint data as JSON">
-        <span class="icon">📤</span> 导出 JSON
+      <button class="btn" id="btn-export-json" title="Export checkpoint data as JSON">
+        <span class="icon">📤</span> <span data-i18n="exportJson">导出 JSON</span>
       </button>
     </div>
 
@@ -74,8 +74,8 @@
 
     <div class="group">
       <div class="dropdown" id="export-dropdown">
-        <button class="btn btn-primary" id="btn-export-img" data-i18n="downloadPng">
-          <span class="icon">🖼️</span> 下载图片 ▾
+        <button class="btn btn-primary" id="btn-export-img">
+          <span class="icon">🖼️</span> <span data-i18n="downloadPng">下载图片 ▾</span>
         </button>
         <div class="dropdown-menu" id="export-menu">
           <button data-scale="1" data-i18n="scale1">1× 标准分辨率</button>
@@ -120,8 +120,8 @@
           </tbody>
         </table>
         <div class="add-row-bar">
-          <button class="btn" id="btn-add-cp" data-i18n="addCpBtn">
-            <span class="icon">＋</span> 添加 CP 点
+          <button class="btn" id="btn-add-cp">
+            <span class="icon">＋</span> <span data-i18n="addCpBtn">添加 CP 点</span>
           </button>
         </div>
       </div>

@@ -13,6 +13,7 @@
   // ── i18n Translation Dictionary ─────────────────────────────────────
   var T = {
     zh: {
+      pageTitle: "🏔️ Talus - Trail Roadbook Generator",
       headerSubtitle: "越野跑路书生成器",
       vibeCodedBy: "Vibe coded by",
       uploadGpx: "上传 GPX",
@@ -39,7 +40,7 @@
       colIcon: "首选图标",
       colTime: "抵达cp点总用时",
       colNotes: "备注 (支持回车多行)",
-      addCpBtn: "＋ 添加 CP 点",
+      addCpBtn: "添加 CP 点",
       poiPanelTitle: "📍 检查点详细视觉配置",
       poiTabAdd: "+ 添加",
       poiCol1Title: "基本信息与全局字号",
@@ -122,6 +123,7 @@
       defaultFinishName: "终点"
     },
     en: {
+      pageTitle: "🏔️ Talus - Trail Roadbook Generator",
       headerSubtitle: "Trail Roadbook Generator",
       vibeCodedBy: "Vibe coded by",
       uploadGpx: "Upload GPX",
@@ -135,7 +137,7 @@
       ratio16_9: "16:9 Landscape (e.g. iPhone 6/7/8)",
       ratio19_5_9: "19.5:9 Landscape (e.g. iPhone X/11-16)",
       ratio4_3: "4:3 Landscape (e.g. iPad)",
-      downloadPng: "Download Image ▾",
+      downloadPng: "Download PNG ▾",
       scale1: "1× Standard",
       scale2: "2× HD (Recommended)",
       scale3: "3× Ultra HD (Print)",
@@ -148,7 +150,7 @@
       colIcon: "Primary Icon",
       colTime: "Total Time to CP",
       colNotes: "Notes (supports Enter)",
-      addCpBtn: "＋ Add Checkpoint",
+      addCpBtn: "Add Checkpoint",
       poiPanelTitle: "📍 Checkpoint Visual Settings",
       poiTabAdd: "+ Add",
       poiCol1Title: "Basic Info & Font Sizes",
@@ -1040,10 +1042,10 @@
 
     dom.poiTxtLeftBottom.value  = cp.texts.leftBottom || '';
     dom.poiTxtLeftMiddle.value  = cp.texts.leftMiddle || '';
-    dom.poiTxtLeftTop.value     = cp.texts.leftTop || '';
-    dom.poiTxtRightBottom.value = cp.texts.rightBottom || '';
-    dom.poiTxtRightMiddle.value = cp.texts.rightMiddle || '';
-    dom.poiTxtRightTop.value    = cp.texts.rightTop || '';
+    dom.poiTxtLeftTop     = cp.texts.leftTop || '';
+    dom.poiTxtRightBottom = cp.texts.rightBottom || '';
+    dom.poiTxtRightMiddle = cp.texts.rightMiddle || '';
+    dom.poiTxtRightTop    = cp.texts.rightTop || '';
 
     // Load multiple icons row values
     dom.poiPanel.querySelectorAll('.poi-icon-group').forEach(function (groupEl) {
@@ -1253,14 +1255,7 @@
     document.querySelectorAll('[data-i18n]').forEach(function (el) {
       var key = el.dataset.i18n;
       if (dict[key] !== undefined) {
-        var iconEl = el.querySelector('.icon');
-        if (iconEl) {
-          el.innerHTML = '';
-          el.appendChild(iconEl);
-          el.appendChild(document.createTextNode(' ' + dict[key]));
-        } else {
-          el.textContent = dict[key];
-        }
+        el.textContent = dict[key];
       }
     });
 
