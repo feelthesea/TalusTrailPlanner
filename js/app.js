@@ -1,13 +1,245 @@
 /**
- * Talus - Trail Roadbook Generator — Main Application (v4)
+ * Talus - Trail Roadbook Generator — Main Application (v5)
  *
  * Wires together: GPX parser, CP table editor, SVG profile renderer, image export,
  * and the advanced detailed horizontal Points of Interest editing panel.
+ * Equipped with full dynamic Chinese/English localization (i18n).
  */
 (function () {
   'use strict';
 
   var TR = window.TrailRoadbook;
+
+  // ── i18n Translation Dictionary ─────────────────────────────────────
+  var T = {
+    zh: {
+      headerSubtitle: "越野跑路书生成器",
+      vibeCodedBy: "Vibe coded by",
+      uploadGpx: "上传 GPX",
+      raceNameLabel: "比赛名称",
+      importJson: "导入 JSON",
+      downloadTemplate: "下载模板",
+      exportJson: "导出 JSON",
+      languageLabel: "🌐 语言 / Language",
+      exportRatioLabel: "导出比例",
+      ratioAuto: "默认自适应 (无白边)",
+      ratio16_9: "16:9 横屏 (如 iPhone 6/7/8, 经典安卓机型)",
+      ratio19_5_9: "19.5:9 横屏 (如 iPhone X/11-16, 主流全面屏)",
+      ratio4_3: "4:3 横屏 (如 iPad, 平板电脑)",
+      downloadPng: "下载图片 ▾",
+      scale1: "1× 标准分辨率",
+      scale2: "2× 高清 (推荐)",
+      scale3: "3× 超高清 (打印)",
+      placeholderText: "上传 GPX 文件以生成高程剖面图",
+      placeholderTextSub: "Upload a GPX file to generate the elevation profile",
+      cpTableTitle: "📍 CP 点 / 补给站 列表",
+      colNum: "#",
+      colName: "名称",
+      colDist: "距起点 (km)",
+      colIcon: "首选图标",
+      colTime: "抵达cp点总用时",
+      colNotes: "备注 (支持回车多行)",
+      addCpBtn: "＋ 添加 CP 点",
+      poiPanelTitle: "📍 检查点详细视觉配置",
+      poiTabAdd: "+ 添加",
+      poiCol1Title: "基本信息与全局字号",
+      poiCol1Pos: "CP位置距离 (公里)",
+      poiCol1Intermediate: "用于分段统计点 (划分子赛段)",
+      poiCol1FontSizesTitle: "各元素字号大小设置 (像素)",
+      fsLabelTitle: "比赛名称",
+      fsLabelCpName: "CP点名称",
+      fsLabelCpElev: "CP点海拔",
+      fsLabelCpTime: "预计用时",
+      fsLabelCpNotes: "备注信息",
+      fsLabelSegment: "区间分段",
+      fsLabelCumulDist: "底部累计距离",
+      poiCol2Title: "图标与标志组合 (最多叠加3层)",
+      poiCol2Size: "图标绘制大小",
+      poiCol2Rot: "图标旋转角度 (°)",
+      poiIconGroup0: "图标 1 (首选)",
+      poiIconGroup1: "图标 2",
+      poiIconGroup2: "图标 3",
+      poiLabelSymbol: "符号",
+      poiLabelBg: "背景颜色",
+      poiLabelGlyph: "图案",
+      btnWhite: "白",
+      btnBlack: "黑",
+      poiCol3Title: "垂直指示辅助线",
+      poiCol3Color: "指示线颜色",
+      poiCol3Thickness: "指示线粗细 (px)",
+      poiCol3Broken: "指示线在海拔曲线处断开",
+      poiCol4Title: "图表内嵌自定义标注 (支持旋转/排列)",
+      poiCol4Color: "标注颜色",
+      poiCol4Size: "字号 (px)",
+      poiCol4Orient: "排列方向",
+      orientRight: "靠右横排 (To Right)",
+      orientLeft: "靠左横排 (To Left)",
+      orientRotMinus90: "靠右竖排 (Rotated -90°)",
+      orientRot90: "靠左竖排 (Rotated 90°)",
+      labelLeftBottom: "左侧 - 下",
+      labelLeftMiddle: "左侧 - 中",
+      labelLeftTop: "左侧 - 上",
+      labelRightBottom: "右侧 - 下",
+      labelRightMiddle: "右侧 - 中",
+      labelRightTop: "右侧 - 上",
+      
+      iconStart: "🟢 起点 (Start)",
+      iconFinish: "🔴 终点 (Finish)",
+      iconWater: "💧 水站 (Water)",
+      iconFood: "🍽️ 补给站 (Food)",
+      iconCutoff: "⚠️ 关门点 (Cutoff)",
+      iconCp: "📍 检查点 (CP)",
+      iconChapel: "⛪ 教堂 (Chapel)",
+      iconDanger: "⚡ 危险 (Danger)",
+      iconPeak: "🏔️ 山峰 (Peak)",
+      iconMedical: "🏥 医疗点 (Medical)",
+      iconToilet: "🚽 厕所 (Toilet)",
+      iconInfo: "ℹ️ 咨询处 (Info)",
+      iconNone: "(无图标)",
+      
+      toastAddCp: "已添加新CP点，位置为 ",
+      toastAddCpTail: " 公里 ✓",
+      toastGpxSuccess: "GPX 载入成功：共 ",
+      toastGpxSuccessMid: " 个坐标点，全长 ",
+      toastGpxSuccessTail: " 公里 ✓",
+      toastGpxError: "GPX 错误：",
+      toastImportSuccess: "配置导入成功 ✓",
+      toastImportError: "导入格式错误：",
+      toastExportSuccess: "配置导出成功 ✓",
+      toastGpxFirst: "请先上传比赛路线的 GPX 文件。",
+      toastExporting: "正在导出 ",
+      toastKeepOne: "必须保留至少一个检查点。",
+      toastDeleted: "检查点已删除 ✓",
+      toastTemplateSuccess: "模板 JSON 下载成功 ✓",
+      newCpName: "新检查点",
+      deleteCpTitle: "删除此CP",
+      placeholderCpNameInput: "CP名称",
+      placeholderTimeInput: "抵达用时 H:MM",
+      placeholderNotesInput: "备注",
+      placeholderTextNone: "无",
+      
+      defaultStartName: "起点",
+      defaultFinishName: "终点"
+    },
+    en: {
+      headerSubtitle: "Trail Roadbook Generator",
+      vibeCodedBy: "Vibe coded by",
+      uploadGpx: "Upload GPX",
+      raceNameLabel: "Race Name",
+      importJson: "Import JSON",
+      downloadTemplate: "Template",
+      exportJson: "Export JSON",
+      languageLabel: "🌐 语言 / Language",
+      exportRatioLabel: "Aspect Ratio",
+      ratioAuto: "Auto-fit (No Padding)",
+      ratio16_9: "16:9 Landscape (e.g. iPhone 6/7/8)",
+      ratio19_5_9: "19.5:9 Landscape (e.g. iPhone X/11-16)",
+      ratio4_3: "4:3 Landscape (e.g. iPad)",
+      downloadPng: "Download Image ▾",
+      scale1: "1× Standard",
+      scale2: "2× HD (Recommended)",
+      scale3: "3× Ultra HD (Print)",
+      placeholderText: "Upload a GPX file to generate the elevation profile",
+      placeholderTextSub: "Upload a GPX file to generate the elevation profile",
+      cpTableTitle: "📍 Checkpoint / CP List",
+      colNum: "#",
+      colName: "Name",
+      colDist: "Distance (km)",
+      colIcon: "Primary Icon",
+      colTime: "Total Time to CP",
+      colNotes: "Notes (supports Enter)",
+      addCpBtn: "＋ Add Checkpoint",
+      poiPanelTitle: "📍 Checkpoint Visual Settings",
+      poiTabAdd: "+ Add",
+      poiCol1Title: "Basic Info & Font Sizes",
+      poiCol1Pos: "CP Distance (km)",
+      poiCol1Intermediate: "Use for segment split stats",
+      poiCol1FontSizesTitle: "Granular Font Sizes (px)",
+      fsLabelTitle: "Race Title",
+      fsLabelCpName: "CP Name",
+      fsLabelCpElev: "CP Elev",
+      fsLabelCpTime: "Time",
+      fsLabelCpNotes: "Notes",
+      fsLabelSegment: "Segment",
+      fsLabelCumulDist: "Cumul Dist",
+      poiCol2Title: "Icon Stack Configuration (Max 3)",
+      poiCol2Size: "Icon Scale Size",
+      poiCol2Rot: "Icon Rotation (°)",
+      poiIconGroup0: "Icon 1 (Primary)",
+      poiIconGroup1: "Icon 2",
+      poiIconGroup2: "Icon 3",
+      poiLabelSymbol: "Symbol",
+      poiLabelBg: "Bg Color",
+      poiLabelGlyph: "Glyph",
+      btnWhite: "White",
+      btnBlack: "Black",
+      poiCol3Title: "Vertical Guide Axis",
+      poiCol3Color: "Line Color",
+      poiCol3Thickness: "Line Thickness (px)",
+      poiCol3Broken: "Break line under curve",
+      poiCol4Title: "Chart Inside Annotations",
+      poiCol4Color: "Text Color",
+      poiCol4Size: "Size (px)",
+      poiCol4Orient: "Alignment",
+      orientRight: "To Right",
+      orientLeft: "To Left",
+      orientRotMinus90: "Rotated -90°",
+      orientRot90: "Rotated 90°",
+      labelLeftBottom: "Left - Bottom",
+      labelLeftMiddle: "Left - Middle",
+      labelLeftTop: "Left - Top",
+      labelRightBottom: "Right - Bottom",
+      labelRightMiddle: "Right - Middle",
+      labelRightTop: "Right - Top",
+      
+      iconStart: "🟢 Start",
+      iconFinish: "🔴 Finish",
+      iconWater: "💧 Water",
+      iconFood: "🍽️ Food",
+      iconCutoff: "⚠️ Cutoff",
+      iconCp: "📍 Checkpoint (CP)",
+      iconChapel: "⛪ Chapel",
+      iconDanger: "⚡ Danger",
+      iconPeak: "🏔️ Peak",
+      iconMedical: "🏥 Medical",
+      iconToilet: "🚽 Toilet",
+      iconInfo: "ℹ️ Info",
+      iconNone: "(No Icon)",
+      
+      toastAddCp: "Added new Checkpoint at ",
+      toastAddCpTail: " km ✓",
+      toastGpxSuccess: "GPX loaded successfully: ",
+      toastGpxSuccessMid: " trackpoints, total ",
+      toastGpxSuccessTail: " km ✓",
+      toastGpxError: "GPX Error: ",
+      toastImportSuccess: "Configuration imported successfully ✓",
+      toastImportError: "Import format error: ",
+      toastExportSuccess: "Configuration exported successfully ✓",
+      toastGpxFirst: "Please upload the GPX route file first.",
+      toastExporting: "Exporting ",
+      toastKeepOne: "Must keep at least one checkpoint.",
+      toastDeleted: "Checkpoint deleted ✓",
+      toastTemplateSuccess: "Template JSON downloaded successfully ✓",
+      newCpName: "New Checkpoint",
+      deleteCpTitle: "Delete Checkpoint",
+      placeholderCpNameInput: "CP Name",
+      placeholderTimeInput: "Time H:MM",
+      placeholderNotesInput: "Notes",
+      placeholderTextNone: "None",
+      
+      defaultStartName: "Start",
+      defaultFinishName: "Finish"
+    }
+  };
+
+  function detectLanguage() {
+    var lang = navigator.language || navigator.userLanguage || 'en';
+    lang = lang.toLowerCase();
+    if (lang.indexOf('zh') !== -1) {
+      return 'zh';
+    }
+    return 'en';
+  }
 
   // ── State ──────────────────────────────────────────────────────────
   var state = {
@@ -23,10 +255,8 @@
     fontSizeSegment: 11,
     fontSizeCumulDist: 12,
     imageTheme: 'day',     // preserved for configuration backward compatibility
-    checkpoints: [
-      { name: 'Start',  distance: 0, icon: 'start',  arrivalTime: '0:00', notes: '' },
-      { name: 'Finish', distance: 0, icon: 'finish', arrivalTime: '', notes: '' }
-    ]
+    language: 'zh',        // active language
+    checkpoints: []        // dynamically initialized
   };
 
   // Helper colors matching profile.js
@@ -135,6 +365,7 @@
     dom.btnExportImg = document.getElementById('btn-export-img');
     dom.exportMenu   = document.getElementById('export-menu');
     dom.exportRatio  = document.getElementById('export-ratio');
+    dom.selectLang   = document.getElementById('select-lang');
     dom.profileContainer = document.getElementById('profile-container');
     dom.placeholder  = document.getElementById('profile-placeholder');
     dom.cpTbody      = document.getElementById('cp-tbody');
@@ -177,12 +408,20 @@
     dom.poiTxtRightMiddle = document.getElementById('poi-txt-right-middle');
     dom.poiTxtRightTop    = document.getElementById('poi-txt-right-top');
 
+    // Detect browser language and initialize dynamic checkpoints
+    state.language = detectLanguage();
+    if (state.checkpoints.length === 0) {
+      var isZH = (state.language === 'zh');
+      state.checkpoints = [
+        { name: isZH ? '起点' : 'Start',  distance: 0, icon: 'start',  arrivalTime: '0:00', notes: '' },
+        { name: isZH ? '终点' : 'Finish', distance: 0, icon: 'finish', arrivalTime: '', notes: '' }
+      ];
+    }
+
     normalizeAllCPs();
     bindEvents();
     bindPOIEvents();
-    renderCPTable();
-    renderPOITabs();
-    loadActiveCPDetails();
+    applyLanguage(); // Automatically translates all static HTML on first load
   }
 
   // ── Event Bindings ──────────────────────────────────────────────────
@@ -204,6 +443,12 @@
 
     // JSON export
     dom.btnExportJson.addEventListener('click', handleJsonExport);
+
+    // Language selector change
+    dom.selectLang.addEventListener('change', function () {
+      state.language = this.value;
+      applyLanguage();
+    });
 
     // Image export dropdown
     dom.btnExportImg.addEventListener('click', function (e) {
@@ -246,7 +491,7 @@
     }
 
     var newCP = normalizeCP({
-      name: '新检查点',
+      name: T[state.language].newCpName,
       distance: newDist,
       icon: 'water',
       arrivalTime: '',
@@ -265,7 +510,7 @@
     renderPOITabs();
     loadActiveCPDetails();
     scheduleRender();
-    toast('已添加新CP点，位置为 ' + newDist + ' 公里 ✓');
+    toast(T[state.language].toastAddCp + newDist + T[state.language].toastAddCpTail);
   }
 
   function sortCheckpoints() {
@@ -295,9 +540,9 @@
       renderPOITabs();
       loadActiveCPDetails();
       renderProfile();
-      toast('GPX 载入成功：共 ' + pts.length + ' 个坐标点，全长 ' + totalDist.toFixed(1) + ' 公里 ✓');
+      toast(T[state.language].toastGpxSuccess + pts.length + T[state.language].toastGpxSuccessMid + totalDist.toFixed(1) + T[state.language].toastGpxSuccessTail);
     }).catch(function (err) {
-      toast('GPX 错误：' + err.message);
+      toast(T[state.language].toastGpxError + err.message);
     });
 
     dom.inputGpx.value = '';
@@ -336,19 +581,19 @@
         if (data.imageTheme) {
           state.imageTheme = data.imageTheme;
         }
+        if (data.language) {
+          state.language = data.language;
+        }
         if (Array.isArray(data.checkpoints)) {
           state.checkpoints = data.checkpoints;
         }
         sortCheckpoints();
         normalizeAllCPs();
         state.activeCPIndex = 0;
-        renderCPTable();
-        renderPOITabs();
-        loadActiveCPDetails();
-        scheduleRender();
-        toast('配置导入成功 ✓');
+        applyLanguage();
+        toast(T[state.language].toastImportSuccess);
       } catch (err) {
-        toast('导入格式错误：' + err.message);
+        toast(T[state.language].toastImportError + err.message);
       }
     };
     reader.readAsText(file);
@@ -366,6 +611,7 @@
       fontSizeSegment: state.fontSizeSegment,
       fontSizeCumulDist: state.fontSizeCumulDist,
       imageTheme: state.imageTheme,
+      language: state.language,
       checkpoints: state.checkpoints
     };
     var json = JSON.stringify(data, null, 2);
@@ -377,25 +623,25 @@
     a.click();
     document.body.removeChild(a);
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
-    toast('配置导出成功 ✓');
+    toast(T[state.language].toastExportSuccess);
   }
 
   // ── Image Export ────────────────────────────────────────────────────
   function handleImageExport(scale) {
     if (!state.trackpoints) {
-      toast('请先上传比赛路线的 GPX 文件。');
+      toast(T[state.language].toastGpxFirst);
       return;
     }
     var svgEl = dom.profileContainer.querySelector('svg');
     if (!svgEl) {
-      toast('无法生成导出图片。');
+      toast('Error: SVG not found.');
       return;
     }
     var filename = (state.raceName || 'roadbook').replace(/[^a-zA-Z0-9_\-\u4e00-\u9fff]/g, '_');
     var ratio = dom.exportRatio.value;
 
     TR.exporter.exportToPNG(svgEl, scale, filename, ratio);
-    toast('正在导出 ' + scale + '× PNG 图片 (' + ratio + ')…');
+    toast(T[state.language].toastExporting + scale + '× PNG (' + ratio + ')…');
   }
 
   // ── CP Table Rendering ──────────────────────────────────────────────
@@ -403,6 +649,7 @@
     dom.cpTbody.innerHTML = '';
     
     var sortedCps = state.checkpoints.slice();
+    var lang = state.language;
     
     sortedCps.forEach(function (cp, idx) {
       var globalIdx = state.checkpoints.indexOf(cp);
@@ -415,14 +662,14 @@
 
       tr.innerHTML =
         '<td class="col-num">' + seqLabel + '</td>' +
-        '<td class="col-name"><input type="text" data-idx="' + globalIdx + '" data-field="name" value="' + esc(cp.name) + '" placeholder="CP名称"></td>' +
+        '<td class="col-name"><input type="text" data-idx="' + globalIdx + '" data-field="name" value="' + esc(cp.name) + '" placeholder="' + T[lang].placeholderCpNameInput + '"></td>' +
         '<td class="col-dist"><input type="number" data-idx="' + globalIdx + '" data-field="distance" value="' + cp.distance + '" step="0.1" min="0" placeholder="0.0"></td>' +
         '<td class="col-icon"><select data-idx="' + globalIdx + '" data-field="icon">' +
           iconOptions(cp.icons[0].symbol) +
         '</select></td>' +
-        '<td class="col-time"><input type="text" data-idx="' + globalIdx + '" data-field="arrivalTime" value="' + esc(cp.arrivalTime) + '" placeholder="抵达用时 H:MM"></td>' +
-        '<td class="col-notes"><textarea data-idx="' + globalIdx + '" data-field="notes" placeholder="备注">' + esc(cp.notes) + '</textarea></td>' +
-        '<td class="col-action"><button class="btn-delete" data-idx="' + globalIdx + '" title="删除此CP">✕</button></td>';
+        '<td class="col-time"><input type="text" data-idx="' + globalIdx + '" data-field="arrivalTime" value="' + esc(cp.arrivalTime) + '" placeholder="' + T[lang].placeholderTimeInput + '"></td>' +
+        '<td class="col-notes"><textarea data-idx="' + globalIdx + '" data-field="notes" placeholder="' + T[lang].placeholderNotesInput + '">' + esc(cp.notes) + '</textarea></td>' +
+        '<td class="col-action"><button class="btn-delete" data-idx="' + globalIdx + '" title="' + T[lang].deleteCpTitle + '">✕</button></td>';
       
       // Highlight row on click
       tr.addEventListener('click', function (e) {
@@ -480,7 +727,7 @@
 
   function handleDeleteCP(idx) {
     if (state.checkpoints.length <= 1) {
-      toast('必须保留至少一个检查点。');
+      toast(T[state.language].toastKeepOne);
       return;
     }
     state.checkpoints.splice(idx, 1);
@@ -495,23 +742,25 @@
     renderPOITabs();
     loadActiveCPDetails();
     scheduleRender();
-    toast('检查点已删除 ✓');
+    toast(T[state.language].toastDeleted);
   }
 
   function iconOptions(selected) {
+    var lang = state.language;
+    var dict = T[lang];
     var opts = [
-      ['start',  '🟢 起点 (Start)'],
-      ['finish', '🔴 终点 (Finish)'],
-      ['water',  '💧 水站 (Water)'],
-      ['food',   '🍽️ 补给站 (Food)'],
-      ['cutoff', '⚠️ 关门点 (Cutoff)'],
-      ['cp',     '📍 检查点 (CP)'],
-      ['chapel', '⛪ 教堂 (Chapel)'],
-      ['danger', '⚡ 危险 (Danger)'],
-      ['peak',   '🏔️ 山峰 (Peak)'],
-      ['medical','🏥 医疗点 (Medical)'],
-      ['toilet', '🚽 厕所 (Toilet)'],
-      ['info',   'ℹ️ 咨询处 (Info)']
+      ['start',  dict.iconStart],
+      ['finish', dict.iconFinish],
+      ['water',  dict.iconWater],
+      ['food',   dict.iconFood],
+      ['cutoff', dict.iconCutoff],
+      ['cp',     dict.iconCp],
+      ['chapel', dict.iconChapel],
+      ['danger', dict.iconDanger],
+      ['peak',   dict.iconPeak],
+      ['medical',dict.iconMedical],
+      ['toilet', dict.iconToilet],
+      ['info',   dict.iconInfo]
     ];
     return opts.map(function (o) {
       return '<option value="' + o[0] + '"' + (o[0] === selected ? ' selected' : '') + '>' + o[1] + '</option>';
@@ -731,6 +980,7 @@
   // Render navigation tabs in POI panel
   function renderPOITabs() {
     dom.poiTabs.innerHTML = '';
+    var lang = state.language;
     
     state.checkpoints.forEach(function (cp, idx) {
       var isSelected = (idx === state.activeCPIndex);
@@ -752,7 +1002,7 @@
 
     var addTab = document.createElement('button');
     addTab.className = 'poi-tab poi-tab-add';
-    addTab.textContent = '+ 添加';
+    addTab.textContent = T[lang].poiTabAdd;
     addTab.addEventListener('click', handleAddCP);
     dom.poiTabs.appendChild(addTab);
   }
@@ -817,8 +1067,6 @@
     });
   }
 
-
-
   // ── Profile Rendering Debouncer ────────────────────────────────────
   var renderTimer = null;
 
@@ -854,8 +1102,9 @@
 
   // ── JSON Template Download ──────────────────────────────────────────
   function handleJsonTemplateDownload() {
+    var isZH = (state.language === 'zh');
     var template = {
-      raceName: "Talus 经典越野跑 100K",
+      raceName: isZH ? "Talus 经典越野跑 100K" : "Talus Classic Trail 100K",
       fontSizeTitle: 18,
       fontSizeCPName: 12,
       fontSizeCPElev: 11,
@@ -864,12 +1113,13 @@
       fontSizeSegment: 11,
       fontSizeCumulDist: 12,
       imageTheme: "day",
+      language: state.language,
       checkpoints: [
         {
-          name: "起点 (Couvet)",
+          name: isZH ? "起点 (Couvet)" : "Start (Couvet)",
           distance: 0.0,
           arrivalTime: "0:00",
-          notes: "检查装备 / 起跑",
+          notes: isZH ? "检查装备 / 起跑" : "Gear Check / Start",
           useForIntermediateDistances: true,
           iconSize: 20,
           iconRotation: 0,
@@ -886,14 +1136,16 @@
           textOrientation: "To the right",
           texts: {
             leftBottom: "", leftMiddle: "", leftTop: "",
-            rightBottom: "起跑点", rightMiddle: "海拔 727m", rightTop: ""
+            rightBottom: isZH ? "起跑点" : "Start Line",
+            rightMiddle: isZH ? "海拔 727m" : "Elev 727m",
+            rightTop: ""
           }
         },
         {
           name: "CP1 (Noiraigue)",
           distance: 12.2,
           arrivalTime: "1:15",
-          notes: "提供热食 / 水",
+          notes: isZH ? "提供热食 / 水" : "Hot Food & Water",
           useForIntermediateDistances: true,
           iconSize: 20,
           iconRotation: 0,
@@ -910,14 +1162,16 @@
           textOrientation: "To the right",
           texts: {
             leftBottom: "", leftMiddle: "", leftTop: "",
-            rightBottom: "首个补给", rightMiddle: "关门时间 3h", rightTop: ""
+            rightBottom: isZH ? "首个补给" : "First Aid",
+            rightMiddle: isZH ? "关门时间 3h" : "Cutoff 3h",
+            rightTop: ""
           }
         },
         {
           name: "CP2 (Chasseron)",
           distance: 40.5,
           arrivalTime: "4:35",
-          notes: "高海拔山顶 / 强风",
+          notes: isZH ? "高海拔山顶 / 强风" : "High Summit & Strong Wind",
           useForIntermediateDistances: true,
           iconSize: 20,
           iconRotation: 0,
@@ -933,15 +1187,16 @@
           textSize: 10,
           textOrientation: "To the right",
           texts: {
-            leftBottom: "关门点 13:30", leftMiddle: "", leftTop: "",
+            leftBottom: isZH ? "关门点 13:30" : "Cutoff 13:30",
+            leftMiddle: "", leftTop: "",
             rightBottom: "", rightMiddle: "", rightTop: ""
           }
         },
         {
-          name: "终点 (Couvet)",
+          name: isZH ? "终点 (Couvet)" : "Finish (Couvet)",
           distance: 108.7,
           arrivalTime: "13:35",
-          notes: "完赛包领取",
+          notes: isZH ? "完赛包领取" : "Finish Bag Collection",
           useForIntermediateDistances: true,
           iconSize: 20,
           iconRotation: 0,
@@ -958,7 +1213,9 @@
           textOrientation: "To the right",
           texts: {
             leftBottom: "", leftMiddle: "", leftTop: "",
-            rightBottom: "完赛拱门", rightMiddle: "海拔 727m", rightTop: ""
+            rightBottom: isZH ? "完赛拱门" : "Finish Arch",
+            rightMiddle: isZH ? "海拔 727m" : "Elev 727m",
+            rightTop: ""
           }
         }
       ]
@@ -967,12 +1224,12 @@
     var blob = new Blob([json], { type: 'application/json' });
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'talus_roadbook_template.json';
+    a.download = isZH ? 'talus_roadbook_template_cn.json' : 'talus_roadbook_template_en.json';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
-    toast('模板 JSON 下载成功 ✓');
+    toast(T[state.language].toastTemplateSuccess);
   }
 
   // ── Toast ───────────────────────────────────────────────────────────
@@ -985,6 +1242,72 @@
     toastTimer = setTimeout(function () {
       dom.toast.classList.remove('show');
     }, 3000);
+  }
+
+  // ── i18n Declarative Dynamic Switcher ──────────────────────────────
+  function applyLanguage() {
+    var lang = state.language;
+    var dict = T[lang];
+
+    // 1. Translate all static elements with data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var key = el.dataset.i18n;
+      if (dict[key] !== undefined) {
+        var iconEl = el.querySelector('.icon');
+        if (iconEl) {
+          el.innerHTML = '';
+          el.appendChild(iconEl);
+          el.appendChild(document.createTextNode(' ' + dict[key]));
+        } else {
+          el.textContent = dict[key];
+        }
+      }
+    });
+
+    // 2. Translate placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+      var key = el.dataset.i18nPlaceholder;
+      if (dict[key] !== undefined) {
+        el.setAttribute('placeholder', dict[key]);
+      }
+    });
+
+    // 3. Translate titles (tooltips)
+    document.querySelectorAll('[data-i18n-title]').forEach(function (el) {
+      var key = el.dataset.i18nTitle;
+      if (dict[key] !== undefined) {
+        el.setAttribute('title', dict[key]);
+      }
+    });
+
+    // Sync dropdown state
+    if (dom.selectLang) {
+      dom.selectLang.value = lang;
+    }
+
+    // Translate dynamic options in Export Ratio Select
+    if (dom.exportRatio) {
+      dom.exportRatio.options[0].text = dict.ratioAuto;
+      dom.exportRatio.options[1].text = dict.ratio16_9;
+      dom.exportRatio.options[2].text = dict.ratio19_5_9;
+      dom.exportRatio.options[3].text = dict.ratio4_3;
+    }
+
+    // Translate Image Resolution options
+    if (dom.exportMenu) {
+      var scaleBtns = dom.exportMenu.querySelectorAll('button');
+      if (scaleBtns.length === 3) {
+        scaleBtns[0].textContent = dict.scale1;
+        scaleBtns[1].textContent = dict.scale2;
+        scaleBtns[2].textContent = dict.scale3;
+      }
+    }
+
+    // Trigger full layout redraw
+    renderCPTable();
+    renderPOITabs();
+    loadActiveCPDetails();
+    scheduleRender();
   }
 
   // ── Boot ────────────────────────────────────────────────────────────
