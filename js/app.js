@@ -247,13 +247,13 @@
     gpxFileName: '',
     raceName: '',
     activeCPIndex: 0,      // selected CP in POI editor
-    fontSizeTitle: 18,     // Individual roadbook element font sizes (Requested)
+    fontSizeTitle: 16,     // Individual roadbook element font sizes (Requested)
     fontSizeCPName: 14,    // Default CP Name to 14px
-    fontSizeCPElev: 11,
+    fontSizeCPElev: 14,
     fontSizeCPTime: 20,    // Default Expected Time to 20px
     fontSizeCPNotes: 18,   // Default Notes Info to 18px
-    fontSizeSegment: 11,
-    fontSizeCumulDist: 12,
+    fontSizeSegment: 16,
+    fontSizeCumulDist: 16,
     imageTheme: 'day',     // preserved for configuration backward compatibility
     language: 'zh',        // active language
     checkpoints: []        // dynamically initialized
@@ -976,51 +976,15 @@
     dom.poiPanel.querySelectorAll('.poi-icon-group').forEach(function (groupEl) {
       var iconIdx = parseInt(groupEl.dataset.iconIndex, 10);
       var symbolSelect = groupEl.querySelector('.poi-symbol-select');
-      var colorHex     = groupEl.querySelector('.poi-color-hex');
-      var colorPicker  = groupEl.querySelector('.poi-color-picker');
-      var toggleWhite  = groupEl.querySelector('.toggle-btn[data-val="White"]');
-      var toggleBlack  = groupEl.querySelector('.toggle-btn[data-val="Black"]');
 
       symbolSelect.addEventListener('change', function () {
         var activeCP = state.checkpoints[state.activeCPIndex];
         if (activeCP) {
           activeCP.icons[iconIdx].symbol = this.value;
-          
-          if (this.value && !activeCP.icons[iconIdx].color) {
-            var col = getLegacyIconColor(this.value);
-            activeCP.icons[iconIdx].color = col;
-            colorPicker.value = col;
-            colorHex.value = col;
-          }
           renderCPTable();
           scheduleRender();
         }
       });
-
-      bindColorPicker(colorPicker, colorHex, function (col) {
-        var activeCP = state.checkpoints[state.activeCPIndex];
-        if (activeCP) {
-          activeCP.icons[iconIdx].color = col;
-          scheduleRender();
-        }
-      });
-
-      function setToggle(val) {
-        var activeCP = state.checkpoints[state.activeCPIndex];
-        if (activeCP) {
-          activeCP.icons[iconIdx].iconColor = val;
-          if (val === 'White') {
-            toggleWhite.classList.add('active');
-            toggleBlack.classList.remove('active');
-          } else {
-            toggleBlack.classList.add('active');
-            toggleWhite.classList.remove('active');
-          }
-          scheduleRender();
-        }
-      }
-      toggleWhite.addEventListener('click', function () { setToggle('White'); });
-      toggleBlack.addEventListener('click', function () { setToggle('Black'); });
     });
   }
 
@@ -1104,19 +1068,6 @@
       var ico = cp.icons[iconIdx] || { symbol: '', color: '#4e4e4e', iconColor: 'White' };
 
       groupEl.querySelector('.poi-symbol-select').value = ico.symbol;
-      groupEl.querySelector('.poi-color-picker').value = ico.color;
-      groupEl.querySelector('.poi-color-hex').value = ico.color;
-
-      var toggleWhite = groupEl.querySelector('.toggle-btn[data-val="White"]');
-      var toggleBlack = groupEl.querySelector('.toggle-btn[data-val="Black"]');
-
-      if (ico.iconColor === 'White') {
-        toggleWhite.classList.add('active');
-        toggleBlack.classList.remove('active');
-      } else {
-        toggleBlack.classList.add('active');
-        toggleWhite.classList.remove('active');
-      }
     });
   }
 
