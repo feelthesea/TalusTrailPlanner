@@ -22,8 +22,8 @@ Simply import your GPX track file, add checkpoints (CPs), dynamically edit cumul
 - 📝 **Flexible Page Tweak Panel**:
   - Add custom inside-chart annotations (Associated Texts) supporting customized rotations and alignments.
   - Tweak granular font sizes (in pixels) for every element (Race name, CP Name, CP Elev, Time, Notes, Segments, Cumulative dist).
-  - Vertical guide axes support clean "break line under elevation curve" settings.
-- 📱 **Multi-Ratio Wallpapers**: Export PNGs in Auto-fit, 16:9 Landscape, 19.5:9 Full-screen Landscape (perfect for modern全面屏 smartphones like iPhone X/11-16), or 4:3 Tablet ratios at 1× / 2× / 3× resolutions.
+  - Vertical guide axes default to dynamic "break line under elevation curve" settings for a premium presentation.
+- 📱 **Multi-Ratio Wallpapers**: Export PNGs in Auto-fit (No Padding), 19.5:9 Full-screen Landscape (perfect for iPhone 17/16), or 20:9 Landscape (perfect for Xiaomi, Huawei Pura, and mainstream Android screens) at 1× / 2× / 3× resolutions.
 - 📥 **JSON Backup & Templates**: Easily import or export all your checkpoint visual configurations as a local JSON file for future edits, with a one-click template download feature.
 - 🌐 **Dynamic UI Internationalization**: Supports full Chinese and English switching with automatic browser language locale detection.
 

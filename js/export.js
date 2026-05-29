@@ -45,9 +45,8 @@
       canvasH = Math.round(drawH);
     } else {
       var ratioVal = 1.0;
-      if (ratio === '16-9') ratioVal = 16.0 / 9.0;
-      else if (ratio === '19.5-9') ratioVal = 19.5 / 9.0;
-      else if (ratio === '4-3') ratioVal = 4.0 / 3.0;
+      if (ratio === '19.5-9') ratioVal = 19.5 / 9.0;
+      else if (ratio === '20-9') ratioVal = 20.0 / 9.0;
 
       var svgRatio = svgW / svgH;
 

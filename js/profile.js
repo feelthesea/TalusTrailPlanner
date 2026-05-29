@@ -31,7 +31,7 @@
     y.iconCY      = cur + 14;                          cur += 28; // Icon row
     y.nameAnchor  = cur;                                cur += 70; // Rotated CP names
     y.elevBase    = cur + 15;                           cur += 20; // Elevations
-    y.timeBase    = cur + 15;                           cur += 20; // Times
+    y.timeBase    = cur + 15;                           cur += 32; // Times (Increased space to 32px for two rows)
     y.notesBase   = cur + 12;                           cur += 32; // Notes
     cur += 4; // gapAbove
     y.chartTop    = cur;
@@ -66,7 +66,7 @@
       case 'water':
         return 'M 0,-4.5 C -2.2,-1 -3.2,0.8 -3.2,2 C -3.2,3.8 -1.8,4.8 0,4.8 C 1.8,4.8 3.2,3.8 3.2,2 C 3.2,0.8 2.2,-1 0,-4.5 Z';
       case 'food':
-        return 'M -2.5,-3.5 v 3 M -1.5,-3.5 v 3 M -0.5,-3.5 v 3 M -1.5, -0.5 v 4 M 1.5,-3.5 C 3,-3.5 3,0 1.5,0 M 1.5,0 v 3.5';
+        return 'M -3,-4.5 v 3.5 h 0.8 v -3.5 h 0.8 v 3.5 h 0.8 v -3.5 h 0.8 v 3.5 c 0,1.2 -0.8,2 -2,2 v 4 h -0.8 v -4 c -1.2,0 -2,-0.8 -2,-2 v -3.5 z M 2,-4.5 c 1.2,0 2.2,1.2 2.2,2.8 c 0,1.6 -1,2.8 -2.2,2.8 v 4.5 h -0.8 v -4.5 c -1.2,0 -2.2,-1.2 -2.2,-2.8 c 0,-1.6 1,-2.8 2.2,-2.8 z';
       case 'cutoff':
         return 'M 0,-3.5 A 3.5,3.5 0 1 0 0.01,-3.5 Z M 0,-2 V 0 H 1.5';
       case 'cp':
@@ -93,31 +93,31 @@
 
   // Universal Premium High-Contrast Palette (Legible under bright sun and comfortable at night)
   var C_universal = {
-    bg:            '#ffffff',               // Pure white backdrop for maximum sunlight contrast and clean print style
-    titleText:     '#0f172a',               // Dark slate for title
-    elevLine:      '#b91c1c',               // Bold UTMB-style deep crimson elevation curve
-    elevFill:      'rgba(185,28,28,0.06)',  // Subtle crimson tint under elevation curve
-    gradBar:       'rgba(14,165,233,0.42)', // Vibrant sky-blue slope bars (density represents steepness)
-    cpLine:        'rgba(100,116,139,0.35)', // Slate vertical guides (confined strictly to chart area)
-    cpLineStart:   '#059669',               // Emerald green for start line
-    cpLineFinish:  '#dc2626',               // Crimson red for finish line
-    iconDefault:   '#2563eb',               // Vibrant royal blue
-    iconStart:     '#059669',               // Emerald green
-    iconFinish:    '#dc2626',               // Crimson red
+    bg:            '#fcfaf5',               // Topographic sand/cream backdrop for professional outdoor aesthetics
+    titleText:     '#1e293b',               // Sophisticated dark slate for title
+    elevLine:      '#0d5236',               // Bold deep pine forest green for high contrast elevation tracking
+    elevFill:      'rgba(13,82,54,0.05)',   // Soft mossy pine green curve fill
+    gradBar:       'rgba(245,158,11,0.28)', // Soft warm amber/gold slope steepness density bars
+    cpLine:        'rgba(100,116,139,0.18)', // Subtle guide lines in the chart area
+    cpLineStart:   '#0d5236',               // Pine green start line
+    cpLineFinish:  '#b91c1c',               // Crimson red finish line
+    iconDefault:   '#475569',               // Neutral slate gray
+    iconStart:     '#0d5236',               // Pine green
+    iconFinish:    '#b91c1c',               // Crimson red
     iconWater:     '#0284c7',               // Water blue
-    iconFood:      '#ea580c',               // Food orange
-    iconCutoff:    '#dc2626',               // Cutoff red
-    cpName:        '#0f172a',               // Bold slate for POI text
-    elevLabel:     '#0f172a',
-    timeLabel:     '#4f46e5',               // Deep indigo for times
-    segTimeLabel:  '#4f46e5',               // Indigo for segment times
-    notesText:     '#ea580c',               // Bright orange so notes stand out
-    segInfoBg:     '#f8fafc',               // Clean slate backdrop for segment stats grid
-    segInfoBorder: '#cbd5e1',               // Slate border
-    segInfoText:   '#0f172a',               // Deep slate for stats
-    cumulText:     '#4f46e5',               // Indigo
-    gridLine:      'rgba(148,163,184,0.16)', // Extremely subtle grid lines
-    axisText:      '#475569',               // Slate gray for axis values
+    iconFood:      '#d97706',               // Food orange
+    iconCutoff:    '#b91c1c',               // Cutoff red
+    cpName:        '#1e293b',               // Sophisticated charcoal slate for CP text
+    elevLabel:     '#1e293b',
+    timeLabel:     '#1e1b4b',               // Deep navy/indigo for arrival times
+    segTimeLabel:  '#1e1b4b',               // Indigo for segment times
+    notesText:     '#9a3412',               // Sophisticated Burnt Sienna so notes are highly readable
+    segInfoBg:     '#ffffff',               // Pure white statistics backdrop for maximum legibility
+    segInfoBorder: '#e2e8f0',               // Light slate border
+    segInfoText:   '#1e293b',               // Dark slate for stats
+    cumulText:     '#1e1b4b',               // Deep navy
+    gridLine:      'rgba(148,163,184,0.10)', // Minimal grid line distraction
+    axisText:      '#64748b',               // Neutral gray for axis values
     peakLabel:     '#64748b',
   };
 
@@ -200,9 +200,8 @@
     var chartH = 260;
     if (ratio && ratio !== 'auto') {
       var ratioVal = 1.0;
-      if (ratio === '16-9') ratioVal = 16.0 / 9.0;
-      else if (ratio === '19.5-9') ratioVal = 19.5 / 9.0;
-      else if (ratio === '4-3') ratioVal = 4.0 / 3.0;
+      if (ratio === '19.5-9') ratioVal = 19.5 / 9.0;
+      else if (ratio === '20-9') ratioVal = 20.0 / 9.0;
 
       var titleH = name ? 24 : 0;
       var constantH = titleH + 28 + 70 + 20 + 20 + 32 + 4 + 4 + 60 + 24 + 10;
@@ -345,15 +344,15 @@
     }));
   }
 
-  // ── CP vertical lines (Extended to connect icons, names, and chart, matching sample) ─────
+  // ── CP vertical lines (Confined strictly inside elevation chart area) ─────
   function renderCPLines(svg, cps, pts, m, Y) {
     cps.forEach(function (cp) {
       var x = m.distToX(cp.distance);
       var col = cp.axisColor || cpLineColor(cp.icons[0].symbol);
-      var thk = cp.axisThickness || 2;
-      var isBroken = !!cp.axisBroken;
+      var thk = cp.axisThickness || 1; // Default axis thickness to 1
+      var isBroken = true; // Set to default broken gap
 
-      var lineTop = Y.nameAnchor; // Connects all the way to the top of name row, right below the icon
+      var lineTop = Y.chartTop; // Confine axis to chart area, preventing name/notes blocking
 
       if (isBroken) {
         var elev = u().interpolateElevation(pts, cp.distance);
@@ -469,36 +468,29 @@
     });
   }
 
-  // ── Time labels (Total arrival time at CP lines, and interval segment times centered between CPs) ──
+  // ── Time labels (Total arrival time and Interval segment time split into two rows under CPs) ──
   function renderTimeLabels(svg, cps, times, m, Y, fontSize) {
-    // 1. Draw cumulative arrival time at each CP line (x position of CP)
     cps.forEach(function (cp, idx) {
       var x = m.distToX(cp.distance);
       var cumulVal = times[idx].cumul;
       
+      // Line 1: Total Arrival Time
       svg.appendChild(el('text', {
         x: x, y: Y.timeBase,
         'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '700',
         fill: C.timeLabel
       }, u().formatTime(cumulVal)));
-    });
 
-    // 2. Draw interval segment time between CPs (centered at mx)
-    for (var i = 0; i < cps.length - 1; i++) {
-      var x1 = m.distToX(cps[i].distance);
-      var x2 = m.distToX(cps[i + 1].distance);
-      var mx = (x1 + x2) / 2;
-
-      var segVal = times[i + 1].segment;
-
-      if (segVal > 0) {
+      // Line 2: Interval Segment Time (under CP, in brackets)
+      var segVal = times[idx].segment;
+      if (idx > 0) {
         svg.appendChild(el('text', {
-          x: mx, y: Y.timeBase,
-          'text-anchor': 'middle', 'font-size': String(fontSize - 1), 'font-weight': '600',
+          x: x, y: Y.timeBase + 14,
+          'text-anchor': 'middle', 'font-size': String(fontSize - 2), 'font-weight': '600',
           fill: C.segTimeLabel
         }, '(' + u().formatTime(segVal) + ')'));
       }
-    }
+    });
   }
 
   // ── Notes (Supports Multi-line splitting) ───────────────────────────
@@ -561,35 +553,24 @@
 
       // Line 1: Segment Distance (Bold and crisp)
       svg.appendChild(el('text', {
-        x: mx, y: Y.segTop + 22,
+        x: mx, y: Y.segLine1,
         'text-anchor': 'middle', 'font-size': String(fontSize + 1), 'font-weight': '800',
         fill: C.segInfoText
       }, stats.distance + ' km'));
 
-      // Line 2: Segment Climb & Descent on the same row for superior legibility (▲ for gain, ▼ for loss)
-      var textGroup = el('g');
-      
-      var climbText   = '▲ ' + stats.dPlus + 'm';
-      var descentText = '▼ ' + stats.dMinus + 'm';
-      
-      // We draw them in a single text node but split them with spacing so they look beautiful
-      var textEl = el('text', {
-        x: mx, y: Y.segTop + 44,
-        'text-anchor': 'middle', 'font-size': String(fontSize - 1), 'font-weight': '700'
-      });
-      
-      // Emerald Green for climb
-      var tspanClimb = el('tspan', { fill: '#10b981' }, climbText);
-      // Separation space
-      var tspanSpace = el('tspan', { fill: C.segInfoText }, '   ');
-      // Vivid Red for descent
-      var tspanDescent = el('tspan', { fill: '#ef4444' }, descentText);
-      
-      textEl.appendChild(tspanClimb);
-      textEl.appendChild(tspanSpace);
-      textEl.appendChild(tspanDescent);
-      
-      svg.appendChild(textEl);
+      // Line 2: Segment Climb (Emerald Green)
+      svg.appendChild(el('text', {
+        x: mx, y: Y.segLine2,
+        'text-anchor': 'middle', 'font-size': String(fontSize - 1), 'font-weight': '700',
+        fill: '#10b981'
+      }, '▲ ' + stats.dPlus + 'm'));
+
+      // Line 3: Segment Descent (Vivid Red)
+      svg.appendChild(el('text', {
+        x: mx, y: Y.segLine3,
+        'text-anchor': 'middle', 'font-size': String(fontSize - 1), 'font-weight': '700',
+        fill: '#ef4444'
+      }, '▼ ' + stats.dMinus + 'm'));
     }
   }
 

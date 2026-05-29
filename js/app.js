@@ -24,9 +24,8 @@
       languageLabel: "🌐 语言 / Language",
       exportRatioLabel: "导出比例",
       ratioAuto: "默认自适应 (无白边)",
-      ratio16_9: "16:9 横屏 (如 iPhone 6/7/8, 经典安卓机型)",
-      ratio19_5_9: "19.5:9 横屏 (如 iPhone X/11-16, 主流全面屏)",
-      ratio4_3: "4:3 横屏 (如 iPad, 平板电脑)",
+      ratio19_5_9: "19.5:9横屏（iPhone 17/16）",
+      ratio20_9: "20:9（小米、华为 Pura、主流安卓）",
       downloadPng: "下载图片 ▾",
       scale1: "1× 标准分辨率",
       scale2: "2× 高清 (推荐)",
@@ -69,7 +68,7 @@
       poiCol3Color: "指示线颜色",
       poiCol3Thickness: "指示线粗细 (px)",
       poiCol3Broken: "指示线在海拔曲线处断开",
-      poiCol4Title: "图表内嵌自定义标注 (支持旋转/排列)",
+      poiCol4Title: "图表内嵌自定义标注",
       poiCol4Color: "标注颜色",
       poiCol4Size: "字号 (px)",
       poiCol4Orient: "排列方向",
@@ -134,9 +133,8 @@
       languageLabel: "🌐 语言 / Language",
       exportRatioLabel: "Aspect Ratio",
       ratioAuto: "Auto-fit (No Padding)",
-      ratio16_9: "16:9 Landscape (e.g. iPhone 6/7/8)",
-      ratio19_5_9: "19.5:9 Landscape (e.g. iPhone X/11-16)",
-      ratio4_3: "4:3 Landscape (e.g. iPad)",
+      ratio19_5_9: "19.5:9 Landscape (iPhone 17/16)",
+      ratio20_9: "20:9 Landscape (Xiaomi/Huawei/Android)",
       downloadPng: "Download PNG ▾",
       scale1: "1× Standard",
       scale2: "2× HD (Recommended)",
@@ -250,10 +248,10 @@
     raceName: '',
     activeCPIndex: 0,      // selected CP in POI editor
     fontSizeTitle: 18,     // Individual roadbook element font sizes (Requested)
-    fontSizeCPName: 12,
+    fontSizeCPName: 14,    // Default CP Name to 14px
     fontSizeCPElev: 11,
-    fontSizeCPTime: 11,
-    fontSizeCPNotes: 10,
+    fontSizeCPTime: 20,    // Default Expected Time to 20px
+    fontSizeCPNotes: 18,   // Default Notes Info to 18px
     fontSizeSegment: 11,
     fontSizeCumulDist: 12,
     imageTheme: 'day',     // preserved for configuration backward compatibility
@@ -317,11 +315,11 @@
     });
 
     if (cp.axisColor === undefined) cp.axisColor = getLegacyCPLineColor(cp.icons[0].symbol);
-    if (cp.axisThickness === undefined) cp.axisThickness = 2;
-    if (cp.axisBroken === undefined) cp.axisBroken = false;
+    if (cp.axisThickness === undefined) cp.axisThickness = 1; // Default to 1px
+    if (cp.axisBroken === undefined) cp.axisBroken = true; // Default broken gap to true
 
-    if (cp.textColor === undefined) cp.textColor = '#4e4e4e';
-    if (cp.textSize === undefined) cp.textSize = 10;
+    if (cp.textColor === undefined) cp.textColor = '#1e293b';
+    if (cp.textSize === undefined) cp.textSize = 18; // Default inside chart text size to 18px
     if (cp.textOrientation === undefined) cp.textOrientation = 'To the right';
 
     if (!cp.texts) {
@@ -377,12 +375,17 @@
     // POI Editor Panel references
     dom.poiPanel          = document.getElementById('poi-panel');
     dom.poiTabs           = document.getElementById('poi-tabs');
-    dom.btnPoiTabUp       = document.getElementById('btn-poi-tab-up'); // scrolls horizontally left now
-    dom.btnPoiTabDown     = document.getElementById('btn-poi-tab-down'); // scrolls horizontally right now
+    dom.btnPoiTabUp       = document.getElementById('btn-poi-tab-up');
+    dom.btnPoiTabDown     = document.getElementById('btn-poi-tab-down');
     dom.poiIntermediate   = document.getElementById('poi-intermediate');
     dom.poiPosition       = document.getElementById('poi-position');
     dom.poiIconSize       = document.getElementById('poi-icon-size');
     dom.poiIconRotation   = document.getElementById('poi-icon-rotation');
+
+    // Linking CP details input fields in right pane
+    dom.poiNameDetail     = document.getElementById('poi-name-detail');
+    dom.poiTimeDetail     = document.getElementById('poi-time-detail');
+    dom.poiNotesDetail    = document.getElementById('poi-notes-detail');
 
     // Granular roadbook element font size controls (Requested)
     dom.fsTitle       = document.getElementById('fs-title');
@@ -666,11 +669,7 @@
         '<td class="col-num">' + seqLabel + '</td>' +
         '<td class="col-name"><input type="text" data-idx="' + globalIdx + '" data-field="name" value="' + esc(cp.name) + '" placeholder="' + T[lang].placeholderCpNameInput + '"></td>' +
         '<td class="col-dist"><input type="number" data-idx="' + globalIdx + '" data-field="distance" value="' + cp.distance + '" step="0.1" min="0" placeholder="0.0"></td>' +
-        '<td class="col-icon"><select data-idx="' + globalIdx + '" data-field="icon">' +
-          iconOptions(cp.icons[0].symbol) +
-        '</select></td>' +
         '<td class="col-time"><input type="text" data-idx="' + globalIdx + '" data-field="arrivalTime" value="' + esc(cp.arrivalTime) + '" placeholder="' + T[lang].placeholderTimeInput + '"></td>' +
-        '<td class="col-notes"><textarea data-idx="' + globalIdx + '" data-field="notes" placeholder="' + T[lang].placeholderNotesInput + '">' + esc(cp.notes) + '</textarea></td>' +
         '<td class="col-action"><button class="btn-delete" data-idx="' + globalIdx + '" title="' + T[lang].deleteCpTitle + '">✕</button></td>';
       
       // Highlight row on click
@@ -777,12 +776,48 @@
   // ── Points of Interest Sidebar Panel ───────────────────────────────
   function bindPOIEvents() {
     // Horizontal Tab scroll (left/right)
-    dom.btnPoiTabUp.addEventListener('click', function () {
-      dom.poiTabs.scrollLeft -= 80;
-    });
-    dom.btnPoiTabDown.addEventListener('click', function () {
-      dom.poiTabs.scrollLeft += 80;
-    });
+    if (dom.btnPoiTabUp) {
+      dom.btnPoiTabUp.addEventListener('click', function () {
+        dom.poiTabs.scrollLeft -= 80;
+      });
+    }
+    if (dom.btnPoiTabDown) {
+      dom.btnPoiTabDown.addEventListener('click', function () {
+        dom.poiTabs.scrollLeft += 80;
+      });
+    }
+
+    // Bidirectional sync for Right-side CP Details Panel inputs
+    if (dom.poiNameDetail) {
+      dom.poiNameDetail.addEventListener('input', function () {
+        var activeCP = state.checkpoints[state.activeCPIndex];
+        if (activeCP) {
+          activeCP.name = this.value;
+          renderCPTable(); // Sync to left table
+          scheduleRender(); // Redraw chart
+        }
+      });
+    }
+    if (dom.poiTimeDetail) {
+      dom.poiTimeDetail.addEventListener('input', function () {
+        var activeCP = state.checkpoints[state.activeCPIndex];
+        if (activeCP) {
+          activeCP.arrivalTime = this.value;
+          renderCPTable(); // Sync to left table
+          scheduleRender(); // Redraw chart
+        }
+      });
+    }
+    if (dom.poiNotesDetail) {
+      dom.poiNotesDetail.addEventListener('input', function () {
+        var activeCP = state.checkpoints[state.activeCPIndex];
+        if (activeCP) {
+          activeCP.notes = this.value;
+          renderCPTable(); // Sync to left table
+          scheduleRender(); // Redraw chart
+        }
+      });
+    }
 
     // Bidirectional color picker binding
     function bindColorPicker(pickerEl, hexEl, updateCallback) {
@@ -860,45 +895,55 @@
       }
     });
 
-    dom.poiIconSize.addEventListener('change', function () {
+    var handlerIconSize = function () {
       var activeCP = state.checkpoints[state.activeCPIndex];
       if (activeCP) {
         activeCP.iconSize = parseInt(this.value, 10) || 20;
         scheduleRender();
       }
-    });
+    };
+    dom.poiIconSize.addEventListener('change', handlerIconSize);
+    dom.poiIconSize.addEventListener('input', handlerIconSize);
 
-    dom.poiIconRotation.addEventListener('change', function () {
+    var handlerIconRotation = function () {
       var activeCP = state.checkpoints[state.activeCPIndex];
       if (activeCP) {
         activeCP.iconRotation = parseInt(this.value, 10) || 0;
         scheduleRender();
       }
-    });
+    };
+    dom.poiIconRotation.addEventListener('change', handlerIconRotation);
+    dom.poiIconRotation.addEventListener('input', handlerIconRotation);
 
-    dom.poiAxisThickness.addEventListener('change', function () {
+    var handlerAxisThickness = function () {
       var activeCP = state.checkpoints[state.activeCPIndex];
       if (activeCP) {
-        activeCP.axisThickness = parseInt(this.value, 10) || 2;
+        activeCP.axisThickness = parseInt(this.value, 10) || 1;
         scheduleRender();
       }
-    });
+    };
+    dom.poiAxisThickness.addEventListener('change', handlerAxisThickness);
+    dom.poiAxisThickness.addEventListener('input', handlerAxisThickness);
 
-    dom.poiAxisBroken.addEventListener('change', function () {
+    if (dom.poiAxisBroken) {
+      dom.poiAxisBroken.addEventListener('change', function () {
+        var activeCP = state.checkpoints[state.activeCPIndex];
+        if (activeCP) {
+          activeCP.axisBroken = this.checked;
+          scheduleRender();
+        }
+      });
+    }
+
+    var handlerTextSize = function () {
       var activeCP = state.checkpoints[state.activeCPIndex];
       if (activeCP) {
-        activeCP.axisBroken = this.checked;
+        activeCP.textSize = parseInt(this.value, 10) || 18;
         scheduleRender();
       }
-    });
-
-    dom.poiTextSize.addEventListener('change', function () {
-      var activeCP = state.checkpoints[state.activeCPIndex];
-      if (activeCP) {
-        activeCP.textSize = parseInt(this.value, 10) || 10;
-        scheduleRender();
-      }
-    });
+    };
+    dom.poiTextSize.addEventListener('change', handlerTextSize);
+    dom.poiTextSize.addEventListener('input', handlerTextSize);
 
     dom.poiTextOrientation.addEventListener('change', function () {
       var activeCP = state.checkpoints[state.activeCPIndex];
@@ -981,6 +1026,7 @@
 
   // Render navigation tabs in POI panel
   function renderPOITabs() {
+    if (!dom.poiTabs) return;
     dom.poiTabs.innerHTML = '';
     var lang = state.language;
     
@@ -1019,6 +1065,11 @@
     dom.poiIconSize.value = cp.iconSize;
     dom.poiIconRotation.value = cp.iconRotation;
 
+    // Basic CP details input synchronization
+    if (dom.poiNameDetail) dom.poiNameDetail.value = cp.name || '';
+    if (dom.poiTimeDetail) dom.poiTimeDetail.value = cp.arrivalTime || '';
+    if (dom.poiNotesDetail) dom.poiNotesDetail.value = cp.notes || '';
+
     // Granular Font Sizes sync (Requested)
     if (dom.fsTitle) dom.fsTitle.value = state.fontSizeTitle;
     if (dom.fsCPName) dom.fsCPName.value = state.fontSizeCPName;
@@ -1032,7 +1083,7 @@
     dom.poiAxisColor.value = cp.axisColor || '#4e4e4e';
     dom.poiAxisColorHex.value = cp.axisColor || '#4e4e4e';
     dom.poiAxisThickness.value = cp.axisThickness;
-    dom.poiAxisBroken.checked = !!cp.axisBroken;
+    if (dom.poiAxisBroken) dom.poiAxisBroken.checked = !!cp.axisBroken;
 
     // Associated texts
     dom.poiTextColor.value = cp.textColor || '#4e4e4e';
@@ -1042,10 +1093,10 @@
 
     dom.poiTxtLeftBottom.value  = cp.texts.leftBottom || '';
     dom.poiTxtLeftMiddle.value  = cp.texts.leftMiddle || '';
-    dom.poiTxtLeftTop     = cp.texts.leftTop || '';
-    dom.poiTxtRightBottom = cp.texts.rightBottom || '';
-    dom.poiTxtRightMiddle = cp.texts.rightMiddle || '';
-    dom.poiTxtRightTop    = cp.texts.rightTop || '';
+    dom.poiTxtLeftTop.value     = cp.texts.leftTop || '';
+    dom.poiTxtRightBottom.value = cp.texts.rightBottom || '';
+    dom.poiTxtRightMiddle.value = cp.texts.rightMiddle || '';
+    dom.poiTxtRightTop.value    = cp.texts.rightTop || '';
 
     // Load multiple icons row values
     dom.poiPanel.querySelectorAll('.poi-icon-group').forEach(function (groupEl) {
@@ -1126,15 +1177,15 @@
           iconSize: 20,
           iconRotation: 0,
           icons: [
-            { symbol: "start", color: "#059669", iconColor: "White" },
+            { symbol: "start", color: "#0d5236", iconColor: "White" },
             { symbol: "", color: "#4e4e4e", iconColor: "White" },
             { symbol: "", color: "#4e4e4e", iconColor: "White" }
           ],
-          axisColor: "#059669",
-          axisThickness: 2,
-          axisBroken: false,
-          textColor: "#0f172a",
-          textSize: 10,
+          axisColor: "#0d5236",
+          axisThickness: 1,
+          axisBroken: true,
+          textColor: "#1e293b",
+          textSize: 18,
           textOrientation: "To the right",
           texts: {
             leftBottom: "", leftMiddle: "", leftTop: "",
@@ -1152,15 +1203,15 @@
           iconSize: 20,
           iconRotation: 0,
           icons: [
-            { symbol: "food", color: "#ea580c", iconColor: "White" },
+            { symbol: "food", color: "#d97706", iconColor: "White" },
             { symbol: "water", color: "#0284c7", iconColor: "White" },
             { symbol: "", color: "#4e4e4e", iconColor: "White" }
           ],
-          axisColor: "rgba(100,116,139,0.35)",
-          axisThickness: 2,
+          axisColor: "rgba(100,116,139,0.18)",
+          axisThickness: 1,
           axisBroken: true,
-          textColor: "#0f172a",
-          textSize: 9,
+          textColor: "#1e293b",
+          textSize: 18,
           textOrientation: "To the right",
           texts: {
             leftBottom: "", leftMiddle: "", leftTop: "",
@@ -1178,15 +1229,15 @@
           iconSize: 20,
           iconRotation: 0,
           icons: [
-            { symbol: "peak", color: "#2563eb", iconColor: "White" },
-            { symbol: "cutoff", color: "#dc2626", iconColor: "White" },
+            { symbol: "peak", color: "#475569", iconColor: "White" },
+            { symbol: "cutoff", color: "#b91c1c", iconColor: "White" },
             { symbol: "", color: "#4e4e4e", iconColor: "White" }
           ],
-          axisColor: "#dc2626",
-          axisThickness: 2.5,
-          axisBroken: false,
-          textColor: "#dc2626",
-          textSize: 10,
+          axisColor: "#b91c1c",
+          axisThickness: 1,
+          axisBroken: true,
+          textColor: "#b91c1c",
+          textSize: 18,
           textOrientation: "To the right",
           texts: {
             leftBottom: isZH ? "关门点 13:30" : "Cutoff 13:30",
@@ -1203,15 +1254,15 @@
           iconSize: 20,
           iconRotation: 0,
           icons: [
-            { symbol: "finish", color: "#dc2626", iconColor: "White" },
+            { symbol: "finish", color: "#b91c1c", iconColor: "White" },
             { symbol: "", color: "#4e4e4e", iconColor: "White" },
             { symbol: "", color: "#4e4e4e", iconColor: "White" }
           ],
-          axisColor: "#dc2626",
-          axisThickness: 2,
-          axisBroken: false,
-          textColor: "#0f172a",
-          textSize: 10,
+          axisColor: "#b91c1c",
+          axisThickness: 1,
+          axisBroken: true,
+          textColor: "#1e293b",
+          textSize: 18,
           textOrientation: "To the right",
           texts: {
             leftBottom: "", leftMiddle: "", leftTop: "",
@@ -1283,9 +1334,8 @@
     // Translate dynamic options in Export Ratio Select
     if (dom.exportRatio) {
       dom.exportRatio.options[0].text = dict.ratioAuto;
-      dom.exportRatio.options[1].text = dict.ratio16_9;
-      dom.exportRatio.options[2].text = dict.ratio19_5_9;
-      dom.exportRatio.options[3].text = dict.ratio4_3;
+      dom.exportRatio.options[1].text = dict.ratio19_5_9;
+      dom.exportRatio.options[2].text = dict.ratio20_9;
     }
 
     // Translate Image Resolution options
