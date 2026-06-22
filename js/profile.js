@@ -259,6 +259,7 @@
     renderYAxis(svg, m, Y, fsCPElev);
     renderGradientBars(svg, smoothPts, m, Y);
     renderElevationCurve(svg, pts, m, Y);
+    // renderLegend(svg, m, Y, fsCPElev); // Render Sisyf slope legend (hidden per user request)
     renderCPLines(svg, cps, pts, m, Y, staggerLevels);
     renderCPIcons(svg, cps, seqLabels, m, Y);
     renderCPNames(svg, cps, m, Y, fsCPName, staggerLevels);
@@ -329,27 +330,116 @@
     return 10 * mag;
   }
 
-  // ── Gradient density bars ───────────────────────────────────────────
+  // ── Gradient density bars colored by slope category (Sisyf style) ──
   function renderGradientBars(svg, pts, m, Y) {
     var totalDist = pts[pts.length - 1].distance;
-    var d = '';
+    
+    // Sisyf-style slope steepness colors
+    var colors = {
+      flat: '#8cb878',       // <5% (soft green)
+      moderate: '#ecc65a',   // 5-10% (soft yellow/gold)
+      steep: '#e09953',      // 10-15% (orange)
+      verySteep: '#cb5353',  // 15-20% (red)
+      extreme: '#8f3a38'     // >20% (dark red/brown)
+    };
+
+    // Grouping path drawing commands by color bucket to keep DOM overhead low (only 5 elements created)
+    var paths = {
+      flat: '',
+      moderate: '',
+      steep: '',
+      verySteep: '',
+      extreme: ''
+    };
+    
     for (var x = 70; x <= 70 + m.chartW; x += 1) {
       var dist = ((x - 70) / m.chartW) * totalDist;
-      var grad = Math.abs(u().gradientAtDistance(pts, dist, 0.2));
-      var spacing;
-      if      (grad > 25) spacing = 1;
-      else if (grad > 15) spacing = 2;
-      else if (grad > 8)  spacing = 3;
-      else if (grad > 4)  spacing = 5;
-      else                 spacing = 7;
-      if ((x - 70) % spacing !== 0) continue;
+      var grad = u().gradientAtDistance(pts, dist, 0.2); // Slope gradient in %
       var elev = u().interpolateElevation(pts, dist);
       var yTop = Math.max(m.eleToY(elev), Y.chartTop);
-      d += 'M' + x + ',' + yTop + 'V' + Y.chartBot;
+      
+      var absSlope = Math.abs(grad);
+      var bucket = 'flat';
+      if (absSlope >= 20) bucket = 'extreme';
+      else if (absSlope >= 15) bucket = 'verySteep';
+      else if (absSlope >= 10) bucket = 'steep';
+      else if (absSlope >= 5) bucket = 'moderate';
+      
+      paths[bucket] += ' M' + x + ',' + yTop + 'V' + Y.chartBot;
     }
-    if (d) {
-      svg.appendChild(el('path', { d: d, stroke: C.gradBar, 'stroke-width': '1', fill: 'none' }));
-    }
+    
+    // Append aggregated path bucket to SVG
+    Object.keys(paths).forEach(function (key) {
+      var d = paths[key];
+      if (d) {
+        svg.appendChild(el('path', {
+          d: d,
+          stroke: colors[key],
+          'stroke-width': '1.5',
+          fill: 'none'
+        }));
+      }
+    });
+  }
+
+  // ── Legend renderer for slope steepness values ─────────────────────
+  function renderLegend(svg, m, Y, fontSize) {
+    var xEnd = 70 + m.chartW;
+    var y = Y.chartTop - 10;
+    
+    var colors = {
+      flat: '#8cb878',
+      moderate: '#ecc65a',
+      steep: '#e09953',
+      verySteep: '#cb5353',
+      extreme: '#8f3a38'
+    };
+    
+    var items = [
+      { label: '>20%', color: colors.extreme },
+      { label: '15-20%', color: colors.verySteep },
+      { label: '10-15%', color: colors.steep },
+      { label: '5-10%', color: colors.moderate },
+      { label: '<5%', color: colors.flat }
+    ];
+    
+    var curX = xEnd;
+    items.forEach(function (item) {
+      // Label text
+      var labelNode = el('text', {
+        x: curX, y: y,
+        'text-anchor': 'end',
+        'font-size': '10px',
+        'font-family': 'monospace',
+        fill: '#64748b'
+      }, item.label);
+      svg.appendChild(labelNode);
+      
+      // Adjust alignment width (approx 5.5px per character)
+      var textW = item.label.length * 5.5;
+      curX -= (textW + 6);
+      
+      // Color indicator dot
+      var dot = el('circle', {
+        cx: curX, cy: y - 3,
+        r: 3.5,
+        fill: item.color,
+        stroke: 'none'
+      });
+      svg.appendChild(dot);
+      curX -= 14;
+    });
+    
+    // Draw "PENTE" tag
+    var labelText = el('text', {
+      x: curX, y: y,
+      'text-anchor': 'end',
+      'font-size': '10px',
+      'font-weight': '700',
+      fill: '#64748b',
+      'letter-spacing': '0.5'
+    }, 'PENTE');
+    svg.appendChild(labelText);
   }
 
   // ── Elevation curve ─────────────────────────────────────────────────

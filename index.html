@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Talus - Trail Roadbook Generator — 越野跑路书生成器</title>
   <meta name="description" content="Upload a GPX file and create a beautiful trail-race roadbook with elevation profile, checkpoint annotations, and segment statistics.">
-  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=6.1">
 </head>
 <body>
 
@@ -31,7 +34,13 @@
     <!-- Race name -->
     <div class="group">
       <label class="field-label" for="input-name" data-i18n="raceNameLabel">比赛名称</label>
-      <input type="text" id="input-name" class="input-field" placeholder="e.g. UTMB 2026" style="width:200px">
+      <input type="text" id="input-name" class="input-field" placeholder="e.g. UTMB 2026" style="width:160px">
+    </div>
+
+    <!-- Race start date/time -->
+    <div class="group">
+      <label class="field-label" for="input-start-time" data-i18n="raceStartLabel">出发时间</label>
+      <select id="input-start-time" class="input-field" style="width:150px"></select>
     </div>
 
     <div class="sep"></div>
@@ -160,6 +169,25 @@
             <button class="btn" id="btn-add-cp">
               <span class="icon">＋</span> <span data-i18n="addCpBtn">添加 CP 点</span>
             </button>
+          </div>
+        </div>
+
+        <!-- ═══ 3. Summary & Verification Panel (Sisyf style) ═══ -->
+        <div class="summary-and-checks">
+          <!-- Summary Card -->
+          <div class="panel-card summary-card">
+            <h3 data-i18n="summaryTitle">📋 计划汇总</h3>
+            <div id="summary-content" class="summary-content">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+          
+          <!-- Verification Card -->
+          <div class="panel-card checks-card">
+            <h3 data-i18n="verificationTitle">✓ 计划检查</h3>
+            <div id="checks-content" class="checks-content">
+              <!-- Dynamically populated -->
+            </div>
           </div>
         </div>
       </section>
@@ -337,6 +365,105 @@
               </div>
             </div>
           </div>
+
+          <!-- COLUMN 5: Nutrition Strategy (Sisyf style) -->
+          <div class="poi-form-grid-horizontal" style="grid-column: span 2; margin-top: 10px; border-top: 1.5px dashed var(--border-subtle); padding-top: 12px;">
+            <h4 data-i18n="poiCol5Title" style="margin-bottom: 8px;">补给计划 (Nutrition Plan)</h4>
+            <div class="poi-form-grid-3" style="grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
+              <div class="poi-field">
+                <label for="poi-water" data-i18n="labelWater">水分补充 (mL/h)</label>
+                <select id="poi-water" class="input-field">
+                  <option value="0">0 mL/h</option>
+                  <option value="100">100 mL/h</option>
+                  <option value="150">150 mL/h</option>
+                  <option value="200">200 mL/h</option>
+                  <option value="250">250 mL/h</option>
+                  <option value="300">300 mL/h</option>
+                  <option value="350">350 mL/h</option>
+                  <option value="400">400 mL/h</option>
+                  <option value="450">450 mL/h</option>
+                  <option value="500">500 mL/h</option>
+                  <option value="550">550 mL/h</option>
+                  <option value="600">600 mL/h</option>
+                  <option value="650">650 mL/h</option>
+                  <option value="700">700 mL/h</option>
+                  <option value="750">750 mL/h</option>
+                  <option value="800">800 mL/h</option>
+                  <option value="850">850 mL/h</option>
+                  <option value="900">900 mL/h</option>
+                  <option value="950">950 mL/h</option>
+                  <option value="1000">1000 mL/h</option>
+                </select>
+              </div>
+              <div class="poi-field">
+                <label for="poi-carbs" data-i18n="labelCarbs">碳水化合物 (g/h)</label>
+                <select id="poi-carbs" class="input-field">
+                  <option value="0">0 g/h</option>
+                  <option value="10">10 g/h</option>
+                  <option value="20">20 g/h</option>
+                  <option value="25">25 g/h</option>
+                  <option value="30">30 g/h</option>
+                  <option value="35">35 g/h</option>
+                  <option value="40">40 g/h</option>
+                  <option value="45">45 g/h</option>
+                  <option value="50">50 g/h</option>
+                  <option value="55">55 g/h</option>
+                  <option value="60">60 g/h</option>
+                  <option value="65">65 g/h</option>
+                  <option value="70">70 g/h</option>
+                  <option value="75">75 g/h</option>
+                  <option value="80">80 g/h</option>
+                  <option value="85">85 g/h</option>
+                  <option value="90">90 g/h</option>
+                  <option value="95">95 g/h</option>
+                  <option value="100">100 g/h</option>
+                  <option value="105">105 g/h</option>
+                  <option value="110">110 g/h</option>
+                  <option value="115">115 g/h</option>
+                  <option value="120">120 g/h</option>
+                </select>
+              </div>
+              <div class="poi-field">
+                <label for="poi-sodium" data-i18n="labelSodium">钠补充 (mg/L)</label>
+                <select id="poi-sodium" class="input-field">
+                  <option value="0">0 mg/L</option>
+                  <option value="100">100 mg/L</option>
+                  <option value="200">200 mg/L</option>
+                  <option value="300">300 mg/L</option>
+                  <option value="400">400 mg/L</option>
+                  <option value="500">500 mg/L</option>
+                  <option value="600">600 mg/L</option>
+                  <option value="700">700 mg/L</option>
+                  <option value="800">800 mg/L</option>
+                  <option value="900">900 mg/L</option>
+                  <option value="1000">1000 mg/L</option>
+                  <option value="1100">1100 mg/L</option>
+                  <option value="1200">1200 mg/L</option>
+                </select>
+              </div>
+              <div class="poi-field">
+                <label for="poi-caffeine" data-i18n="labelCaffeine">咖啡因 (mg/h)</label>
+                <select id="poi-caffeine" class="input-field">
+                  <option value="0">0 mg/h</option>
+                  <option value="10">10 mg/h</option>
+                  <option value="20">20 mg/h</option>
+                  <option value="30">30 mg/h</option>
+                  <option value="40">40 mg/h</option>
+                  <option value="50">50 mg/h</option>
+                  <option value="60">60 mg/h</option>
+                  <option value="70">70 mg/h</option>
+                  <option value="80">80 mg/h</option>
+                  <option value="90">90 mg/h</option>
+                  <option value="100">100 mg/h</option>
+                  <option value="110">110 mg/h</option>
+                  <option value="120">120 mg/h</option>
+                  <option value="130">130 mg/h</option>
+                  <option value="140">140 mg/h</option>
+                  <option value="150">150 mg/h</option>
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
       </aside>
     </div>
@@ -346,10 +473,10 @@
   <div class="toast" id="toast"></div>
 
   <!-- ═══ Scripts (order matters: utils first) ═══ -->
-  <script src="js/utils.js?v=5.1"></script>
-  <script src="js/gpx-parser.js?v=5.1"></script>
-  <script src="js/profile.js?v=5.1"></script>
-  <script src="js/export.js?v=5.1"></script>
-  <script src="js/app.js?v=5.1"></script>
+  <script src="js/utils.js?v=6.1"></script>
+  <script src="js/gpx-parser.js?v=6.1"></script>
+  <script src="js/profile.js?v=6.1"></script>
+  <script src="js/export.js?v=6.1"></script>
+  <script src="js/app.js?v=6.1"></script>
 </body>
 </html>
