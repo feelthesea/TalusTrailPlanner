@@ -189,6 +189,14 @@
               <!-- Dynamically populated -->
             </div>
           </div>
+
+          <!-- Ravito Calculator Card -->
+          <div class="panel-card ravito-calc-card">
+            <h3 data-i18n="ravitoCalcTitle">📦 补给计算器</h3>
+            <div id="ravito-calc-content">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
         </div>
       </section>
 
@@ -223,75 +231,33 @@
               <textarea id="poi-notes-detail" class="input-field" placeholder="备注信息" style="height: 56px; resize: vertical;"></textarea>
             </div>
             
+            <div class="poi-field" style="margin-bottom: 6px;">
+              <label for="poi-stop-duration" data-i18n="labelStopDuration">⏸️ 停留时间 (分钟)</label>
+              <input type="number" id="poi-stop-duration" min="0" max="120" value="0" step="1">
+            </div>
+
             <div class="poi-form-row inline" style="margin: 6px 0;">
               <input type="checkbox" id="poi-intermediate" class="chk-box">
               <label for="poi-intermediate" data-i18n="poiCol1Intermediate">用于分段统计点 (划分子赛段)</label>
             </div>
           </div>
 
-          <!-- COLUMN 2: Multi-Icons Config -->
+          <!-- COLUMN 2: CP Type / Icon -->
           <div class="poi-form-grid-horizontal">
-            <h4 data-i18n="poiCol2Title">图标与标志组合 (最多叠加3层)</h4>
-            
-            <div class="poi-form-grid-3" style="grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px;">
-              <div class="poi-field">
-                <label for="poi-icon-size" data-i18n="poiCol2Size">图标绘制大小</label>
-                <input type="number" id="poi-icon-size" min="10" max="60" value="20">
-              </div>
-              <div class="poi-field">
-                <label for="poi-icon-rotation" data-i18n="poiCol2Rot">图标旋转角度 (°)</label>
-                <input type="number" id="poi-icon-rotation" value="0">
-              </div>
-            </div>
-
-            <div class="poi-horizontal-icons-grid">
-              <!-- Icon 1 -->
-              <div class="poi-icon-group" data-icon-index="0">
-                <h5 data-i18n="poiIconGroup0">图标 1 (首选)</h5>
-                <div class="poi-field" style="margin-bottom: 4px;">
-                  <label data-i18n="poiLabelSymbol">符号</label>
-                  <select class="poi-symbol-select">
-                    <option value="" data-i18n="iconNone">(无图标)</option>
-                    <option value="start" data-i18n="iconStart">🟢 起点 (Start)</option>
-                    <option value="finish" data-i18n="iconFinish">🔴 终点 (Finish)</option>
-                    <option value="water" data-i18n="iconWater">💧 水站 (Water)</option>
-                    <option value="food" data-i18n="iconFood">🍽️ 补给站 (Food)</option>
-                    <option value="peak" data-i18n="iconPeak">🏔️ 山峰 (Peak)</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Icon 2 -->
-              <div class="poi-icon-group" data-icon-index="1">
-                <h5 data-i18n="poiIconGroup1">图标 2</h5>
-                <div class="poi-field" style="margin-bottom: 4px;">
-                  <label data-i18n="poiLabelSymbol">符号</label>
-                  <select class="poi-symbol-select">
-                    <option value="" data-i18n="iconNone">(无图标)</option>
-                    <option value="start" data-i18n="iconStart">🟢 起点 (Start)</option>
-                    <option value="finish" data-i18n="iconFinish">🔴 终点 (Finish)</option>
-                    <option value="water" data-i18n="iconWater">💧 水站 (Water)</option>
-                    <option value="food" data-i18n="iconFood">🍽️ 补给站 (Food)</option>
-                    <option value="peak" data-i18n="iconPeak">🏔️ 山峰 (Peak)</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Icon 3 -->
-              <div class="poi-icon-group" data-icon-index="2">
-                <h5 data-i18n="poiIconGroup2">图标 3</h5>
-                <div class="poi-field" style="margin-bottom: 4px;">
-                  <label data-i18n="poiLabelSymbol">符号</label>
-                  <select class="poi-symbol-select">
-                    <option value="" data-i18n="iconNone">(无图标)</option>
-                    <option value="start" data-i18n="iconStart">🟢 起点 (Start)</option>
-                    <option value="finish" data-i18n="iconFinish">🔴 终点 (Finish)</option>
-                    <option value="water" data-i18n="iconWater">💧 水站 (Water)</option>
-                    <option value="food" data-i18n="iconFood">🍽️ 补给站 (Food)</option>
-                    <option value="peak" data-i18n="iconPeak">🏔️ 山峰 (Peak)</option>
-                  </select>
-                </div>
-              </div>
+            <h4 data-i18n="poiCol2Title">补给站类型</h4>
+            <div class="poi-field">
+              <label for="poi-icon-select" data-i18n="poiLabelSymbol">类型图标</label>
+              <select id="poi-icon-select" class="input-field" style="height: 32px; font-size: 0.82rem;">
+                <option value="start" data-i18n="iconStart">🟢 起点</option>
+                <option value="finish" data-i18n="iconFinish">🏁 终点</option>
+                <option value="assisted" data-i18n="iconAssisted">🤝 有人协助补给站</option>
+                <option value="dropbag" data-i18n="iconDropbag">🛍️ 寄存包补给站</option>
+                <option value="classic" data-i18n="iconClassic">🍉 普通补给站</option>
+                <option value="water" data-i18n="iconWater">💧 水源点</option>
+                <option value="checkpoint" data-i18n="iconCheckpoint">🚩 打卡点</option>
+                <option value="peak" data-i18n="iconPeak">🏔️ 山峰</option>
+                <option value="danger" data-i18n="iconDanger">⚡ 危险</option>
+              </select>
             </div>
           </div>
 
@@ -442,24 +408,16 @@
                 </select>
               </div>
               <div class="poi-field">
-                <label for="poi-caffeine" data-i18n="labelCaffeine">咖啡因 (mg/h)</label>
+                <label for="poi-caffeine" data-i18n="labelCaffeine">咖啡因 (mg)</label>
                 <select id="poi-caffeine" class="input-field">
-                  <option value="0">0 mg/h</option>
-                  <option value="10">10 mg/h</option>
-                  <option value="20">20 mg/h</option>
-                  <option value="30">30 mg/h</option>
-                  <option value="40">40 mg/h</option>
-                  <option value="50">50 mg/h</option>
-                  <option value="60">60 mg/h</option>
-                  <option value="70">70 mg/h</option>
-                  <option value="80">80 mg/h</option>
-                  <option value="90">90 mg/h</option>
-                  <option value="100">100 mg/h</option>
-                  <option value="110">110 mg/h</option>
-                  <option value="120">120 mg/h</option>
-                  <option value="130">130 mg/h</option>
-                  <option value="140">140 mg/h</option>
-                  <option value="150">150 mg/h</option>
+                  <option value="0">0 mg</option>
+                  <option value="20">20 mg</option>
+                  <option value="40">40 mg</option>
+                  <option value="50">50 mg</option>
+                  <option value="80">80 mg</option>
+                  <option value="100">100 mg</option>
+                  <option value="150">150 mg</option>
+                  <option value="200">200 mg</option>
                 </select>
               </div>
             </div>

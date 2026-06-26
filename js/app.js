@@ -48,12 +48,12 @@
       poiCol1FontSizesTitle: "各元素字号大小设置 (像素)",
       fsLabelTitle: "比赛名称",
       fsLabelCpName: "CP点名称",
-      fsLabelCpElev: "CP点海拔",
+      fsLabelCpElev: "分段爬升",
       fsLabelCpTime: "预计用时",
       fsLabelCpNotes: "备注信息",
       fsLabelSegment: "区间分段",
       fsLabelCumulDist: "底部累计距离",
-      poiCol2Title: "图标与标志组合 (最多叠加3层)",
+      poiCol2Title: "图标与标志组合",
       poiCol2Size: "图标绘制大小",
       poiCol2Rot: "图标旋转角度 (°)",
       poiIconGroup0: "图标 1 (首选)",
@@ -83,19 +83,17 @@
       labelRightMiddle: "右侧 - 中",
       labelRightTop: "右侧 - 上",
       
-      iconStart: "🟢 起点 (Start)",
-      iconFinish: "🔴 终点 (Finish)",
-      iconWater: "💧 水站 (Water)",
-      iconFood: "🍽️ 补给站 (Food)",
-      iconCutoff: "⚠️ 关门点 (Cutoff)",
-      iconCp: "📍 检查点 (CP)",
-      iconChapel: "⛪ 教堂 (Chapel)",
-      iconDanger: "⚡ 危险 (Danger)",
-      iconPeak: "🏔️ 山峰 (Peak)",
-      iconMedical: "🏥 医疗点 (Medical)",
-      iconToilet: "🚽 厕所 (Toilet)",
-      iconInfo: "ℹ️ 咨询处 (Info)",
-      iconNone: "(无图标)",
+      iconStart: "🟢 起点",
+      iconFinish: "🏁 终点",
+      iconAssisted: "🤝 有人协助补给站",
+      iconDropbag: "🛍️ 寄存包补给站",
+      iconClassic: "🍉 普通补给站",
+      iconWater: "💧 水源点",
+      iconCheckpoint: "🚩 打卡点",
+      iconPeak: "🏔️ 山峰",
+      iconDanger: "⚡ 危险",
+      iconFood: "🍽️ 补给站",
+      iconCp: "📍 检查点",
       
       toastAddCp: "已添加新CP点，位置为 ",
       toastAddCpTail: " 公里 ✓",
@@ -142,16 +140,22 @@
       labelWater: "水分补充 (mL/h)",
       labelCarbs: "碳水化合物 (g/h)",
       labelSodium: "电解质钠 (mg/L)",
-      labelCaffeine: "咖啡因 (mg/h)",
+      labelCaffeine: "咖啡因 (mg)",
+      labelStopDuration: "⏸️ 停留时间 (分钟)",
+      labelPassage: "通过",
+      ravitoCalcTitle: "📦 补给计算器",
+      ravitoColName: "补给站",
+      ravitoColTime: "分段",
+      ravitoColWater: "水 (mL)",
+      ravitoColCarbs: "碳水 (g)",
+      ravitoColSodium: "钠 (mg)",
+      ravitoColCaff: "咖啡因 (mg)",
+      ravitoTotal: "总计",
 
       checkDistOk: "检查点距离顺序递增正常",
       checkDistErr: "警告：检查点距离未按递增顺序排列",
       checkFinishOk: "终点距离与路线全长匹配",
       checkFinishWarn: "提示：设定的终点距离与 GPX 全长不完全匹配 (相差较远)",
-      checkPacesOk: "各赛段配速估算均合理",
-      checkPaceFast: "警告：CP {name} 速度过快 (>25 points/h)",
-      checkPaceSlow: "警告：CP {name} 速度过慢 (<2 points/h)",
-      checkPaceMissing: "提示：CP {name} 缺失用时",
       checkWaterOk: "平均水分摄入适中 (400-800 mL/h)",
       checkWaterLow: "提示：水分补充偏低 (<400 mL/h)，可能脱水",
       checkWaterHigh: "提示：水分补充过高 (>800 mL/h)，增加胃肠负担",
@@ -164,7 +168,7 @@
       checkSodiumHigh: "提示：平均钠浓度偏高 (>700 mg/L)，可能会增加口渴感",
       checkCaffOk: "总咖啡因摄入安全",
       checkCaffHigh: "警告：总咖啡因摄入偏高 (>400 mg)，注意心慌/神经过敏风险",
-      checkGpxMissing: "提示：上传 GPX 文件后可自动检查越野爬升和速度"
+      checkGpxMissing: "提示：上传 GPX 文件后可自动检查越野爬升"
     },
     en: {
       pageTitle: "🏔️ Talus - Trail Roadbook Generator",
@@ -202,12 +206,12 @@
       poiCol1FontSizesTitle: "Granular Font Sizes (px)",
       fsLabelTitle: "Race Title",
       fsLabelCpName: "CP Name",
-      fsLabelCpElev: "CP Elev",
+      fsLabelCpElev: "Segment Climb",
       fsLabelCpTime: "Time",
       fsLabelCpNotes: "Notes",
       fsLabelSegment: "Segment",
       fsLabelCumulDist: "Cumul Dist",
-      poiCol2Title: "Icon Stack Configuration (Max 3)",
+      poiCol2Title: "Icon & Symbol Configuration",
       poiCol2Size: "Icon Scale Size",
       poiCol2Rot: "Icon Rotation (°)",
       poiIconGroup0: "Icon 1 (Primary)",
@@ -238,18 +242,16 @@
       labelRightTop: "Right - Top",
       
       iconStart: "🟢 Start",
-      iconFinish: "🔴 Finish",
-      iconWater: "💧 Water",
-      iconFood: "🍽️ Food",
-      iconCutoff: "⚠️ Cutoff",
-      iconCp: "📍 Checkpoint (CP)",
-      iconChapel: "⛪ Chapel",
-      iconDanger: "⚡ Danger",
+      iconFinish: "🏁 Finish",
+      iconAssisted: "🤝 Assisted Aid",
+      iconDropbag: "🛍️ Drop Bag",
+      iconClassic: "🍉 Classic Aid",
+      iconWater: "💧 Water Point",
+      iconCheckpoint: "🚩 Checkpoint",
       iconPeak: "🏔️ Peak",
-      iconMedical: "🏥 Medical",
-      iconToilet: "🚽 Toilet",
-      iconInfo: "ℹ️ Info",
-      iconNone: "(No Icon)",
+      iconDanger: "⚡ Danger",
+      iconFood: "🍽️ Food",
+      iconCp: "📍 Checkpoint",
       
       toastAddCp: "Added new Checkpoint at ",
       toastAddCpTail: " km ✓",
@@ -296,16 +298,22 @@
       labelWater: "Water Intake (mL/h)",
       labelCarbs: "Carbohydrates (g/h)",
       labelSodium: "Sodium Conc. (mg/L)",
-      labelCaffeine: "Caffeine (mg/h)",
+      labelCaffeine: "Caffeine (mg)",
+      labelStopDuration: "⏸️ Stop Duration (min)",
+      labelPassage: "Passage",
+      ravitoCalcTitle: "📦 Ravito Calculator",
+      ravitoColName: "Aid Station",
+      ravitoColTime: "Segment",
+      ravitoColWater: "Water (mL)",
+      ravitoColCarbs: "Carbs (g)",
+      ravitoColSodium: "Sodium (mg)",
+      ravitoColCaff: "Caffeine (mg)",
+      ravitoTotal: "Total",
 
       checkDistOk: "Checkpoint distances are strictly increasing",
       checkDistErr: "Warning: Checkpoint distances are not strictly increasing",
       checkFinishOk: "Finish distance matches GPX total length",
       checkFinishWarn: "Tip: Finish distance does not match GPX total length",
-      checkPacesOk: "All segment paces are realistic",
-      checkPaceFast: "Warning: CP {name} effort speed is too fast (>25 points/h)",
-      checkPaceSlow: "Warning: CP {name} effort speed is too slow (<2 points/h)",
-      checkPaceMissing: "Tip: CP {name} segment duration is missing",
       checkWaterOk: "Average hydration rate is balanced (400-800 mL/h)",
       checkWaterLow: "Tip: Hydration is low (<400 mL/h), risk of dehydration",
       checkWaterHigh: "Tip: Hydration is high (>800 mL/h), risk of stomach distress",
@@ -318,7 +326,7 @@
       checkSodiumHigh: "Tip: Sodium concentration is high (>700 mg/L)",
       checkCaffOk: "Total caffeine is within safe limits",
       checkCaffHigh: "Warning: Total caffeine is high (>400 mg)",
-      checkGpxMissing: "Tip: Upload a GPX file to automatically check climb and segment paces"
+      checkGpxMissing: "Tip: Upload a GPX file to automatically check climb data"
     }
   };
 
@@ -384,32 +392,24 @@
   // Schema normalization
   function normalizeCP(cp, idx) {
     if (cp.useForIntermediateDistances === undefined) cp.useForIntermediateDistances = true;
-    if (cp.iconSize === undefined) cp.iconSize = 20;
+
+    // Migrate legacy multi-icon array to single icon field
+    if (!cp.icon && cp.icons && Array.isArray(cp.icons) && cp.icons[0]) {
+      cp.icon = cp.icons[0].symbol || '';
+    }
+    if (!cp.icon) {
+      cp.icon = (idx === 0 ? 'start' : 'classic');
+    }
+    // Keep iconSize for backward compat but no longer user-editable
+    if (cp.iconSize === undefined) cp.iconSize = 22;
     if (cp.iconRotation === undefined) cp.iconRotation = 0;
 
-    if (!cp.icons || !Array.isArray(cp.icons)) {
-      var sym = cp.icon || (idx === 0 ? 'start' : 'cp');
-      cp.icons = [
-        { symbol: sym, color: getLegacyIconColor(sym), iconColor: 'White' },
-        { symbol: '', color: '#4e4e4e', iconColor: 'White' },
-        { symbol: '', color: '#4e4e4e', iconColor: 'White' }
-      ];
-    }
-    // Deep clone icons array just in case
-    cp.icons = cp.icons.map(function (ico) {
-      return {
-        symbol: ico.symbol || '',
-        color: ico.color || '#4e4e4e',
-        iconColor: ico.iconColor || 'White'
-      };
-    });
-
-    if (cp.axisColor === undefined) cp.axisColor = getLegacyCPLineColor(cp.icons[0].symbol);
-    if (cp.axisThickness === undefined) cp.axisThickness = 1; // Default to 1px
-    if (cp.axisBroken === undefined) cp.axisBroken = true; // Default broken gap to true
+    if (cp.axisColor === undefined) cp.axisColor = getLegacyCPLineColor(cp.icon);
+    if (cp.axisThickness === undefined) cp.axisThickness = 1;
+    if (cp.axisBroken === undefined) cp.axisBroken = true;
 
     if (cp.textColor === undefined) cp.textColor = '#1e293b';
-    if (cp.textSize === undefined) cp.textSize = 18; // Default inside chart text size to 18px
+    if (cp.textSize === undefined) cp.textSize = 18;
     if (cp.textOrientation === undefined) cp.textOrientation = 'To the right';
 
     if (!cp.texts) {
@@ -424,6 +424,7 @@
     if (cp.segmentTime === undefined) {
       cp.segmentTime = '';
     }
+    if (cp.stopDuration === undefined) cp.stopDuration = 0;
     if (cp.water === undefined) cp.water = 0;
     if (cp.carbs === undefined) cp.carbs = 0;
     if (cp.sodium === undefined) cp.sodium = 0;
@@ -440,7 +441,7 @@
         cp.arrivalTime = '0:00';
       } else {
         var seg = TR.utils.parseTime(cp.segmentTime || '');
-        cumul += seg;
+        cumul += seg + (cp.stopDuration || 0);
         cp.arrivalTime = TR.utils.formatTime(cumul);
       }
     });
@@ -506,6 +507,8 @@
     dom.poiPosition       = document.getElementById('poi-position');
     dom.poiIconSize       = document.getElementById('poi-icon-size');
     dom.poiIconRotation   = document.getElementById('poi-icon-rotation');
+    dom.poiIconSelect     = document.getElementById('poi-icon-select');
+    dom.poiStopDuration   = document.getElementById('poi-stop-duration');
 
     // Linking CP details input fields in right pane
     dom.poiNameDetail     = document.getElementById('poi-name-detail');
@@ -518,6 +521,7 @@
     dom.inputStartTime    = document.getElementById('input-start-time');
     dom.summaryContent    = document.getElementById('summary-content');
     dom.checksContent     = document.getElementById('checks-content');
+    dom.ravitoCalcContent = document.getElementById('ravito-calc-content');
 
     // Granular roadbook element font size controls (Requested)
     dom.fsTitle       = document.getElementById('fs-title');
@@ -640,7 +644,7 @@
     var newCP = normalizeCP({
       name: T[state.language].newCpName,
       distance: newDist,
-      icon: 'water',
+      icon: 'classic',
       arrivalTime: '',
       notes: ''
     }, state.checkpoints.length);
@@ -676,9 +680,7 @@
       // Auto-set finish distance
       var totalDist = pts[pts.length - 1].distance;
       state.checkpoints.forEach(function (cp) {
-        if (cp.icons && cp.icons[0] && cp.icons[0].symbol === 'finish' && cp.distance === 0) {
-          cp.distance = Math.round(totalDist * 100) / 100;
-        } else if (cp.icon === 'finish' && cp.distance === 0) {
+        if (cp.icon === 'finish' && cp.distance === 0) {
           cp.distance = Math.round(totalDist * 100) / 100;
         }
       });
@@ -826,17 +828,28 @@
           segDMinus = stats.dMinus;
         }
         var segTimeMins = TR.utils.parseTime(cpCurr.segmentTime || '');
-        var segHours = segTimeMins / 60;
         
         var targetTimeStr = TR.utils.formatTime(segTimeMins);
-        var segEffortDist = segDist + (segDPlus / 100);
-        var targetRate = segTimeMins > 0 ? (segEffortDist / segHours).toFixed(1) : '0.0';
+        
+        // Compute passage time (clock time at this CP)
+        var cumulMins = 0;
+        for (var ci = 1; ci <= idx; ci++) {
+          cumulMins += TR.utils.parseTime(sortedCps[ci].segmentTime || '') + (sortedCps[ci].stopDuration || 0);
+        }
+        var passageStr = '';
+        if (state.startTime) {
+          var startInfo = parseStartTime(state.startTime);
+          passageStr = formatArrivalTime(startInfo, cumulMins, lang);
+        } else {
+          passageStr = '+' + TR.utils.formatTime(cumulMins);
+        }
         
         // Nutrition hourly targets
         var water = cpCurr.water || 0;
         var carbs = cpCurr.carbs || 0;
         var sodium = cpCurr.sodium || 0;
         var caffeine = cpCurr.caffeine || 0;
+        var stopStr = (cpCurr.stopDuration > 0) ? ' · ⏸ ' + cpCurr.stopDuration + 'min' : '';
         
         detailsHtml = 
           '<td class="col-details">' +
@@ -844,16 +857,16 @@
           '    <span>' + segDist.toFixed(1) + ' km</span> · ' +
           '    <span class="gain">+' + Math.round(segDPlus) + 'm</span> · ' +
           '    <span class="loss">-' + Math.round(segDMinus) + 'm</span> · ' +
-          '    <span>⏱ ' + targetTimeStr + '</span> · ' +
-          '    <span class="pace">' + targetRate + ' pts/h</span>' +
+          '    <span>⏱ ' + targetTimeStr + '</span>' + stopStr +
           '  </div>' +
           '  <div class="seg-nut-row">' +
           '    <span class="nut-label">Nutrition</span>' +
           '    <span class="nut-val nut-water">' + water + ' mL/h</span>' +
           '    <span class="nut-val nut-carbs">' + carbs + ' g/h</span>' +
           '    <span class="nut-val nut-sodium">' + sodium + ' mg/L</span>' +
-          '    <span class="nut-val nut-caff">' + caffeine + ' mg/h</span>' +
+          '    <span class="nut-val nut-caff">' + caffeine + ' mg</span>' +
           '  </div>' +
+          '  <div class="seg-passage">' + T[lang].labelPassage + ' ' + passageStr + '</div>' +
           '</td>';
       }
 
@@ -913,8 +926,7 @@
       updateArrivalTimes();
       renderCPTable();
     } else if (field === 'icon') {
-      state.checkpoints[idx].icons[0].symbol = val;
-      state.checkpoints[idx].icons[0].color = getLegacyIconColor(val);
+      state.checkpoints[idx].icon = val;
       state.checkpoints[idx].axisColor = getLegacyCPLineColor(val);
     } else {
       state.checkpoints[idx][field] = val;
@@ -949,18 +961,15 @@
     var lang = state.language;
     var dict = T[lang];
     var opts = [
-      ['start',  dict.iconStart],
-      ['finish', dict.iconFinish],
-      ['water',  dict.iconWater],
-      ['food',   dict.iconFood],
-      ['cutoff', dict.iconCutoff],
-      ['cp',     dict.iconCp],
-      ['chapel', dict.iconChapel],
-      ['danger', dict.iconDanger],
-      ['peak',   dict.iconPeak],
-      ['medical',dict.iconMedical],
-      ['toilet', dict.iconToilet],
-      ['info',   dict.iconInfo]
+      ['start',      dict.iconStart],
+      ['finish',     dict.iconFinish],
+      ['assisted',   dict.iconAssisted],
+      ['dropbag',    dict.iconDropbag],
+      ['classic',    dict.iconClassic],
+      ['water',      dict.iconWater],
+      ['checkpoint', dict.iconCheckpoint],
+      ['peak',       dict.iconPeak],
+      ['danger',     dict.iconDanger]
     ];
     return opts.map(function (o) {
       return '<option value="' + o[0] + '"' + (o[0] === selected ? ' selected' : '') + '>' + o[1] + '</option>';
@@ -1097,12 +1106,14 @@
     var handlerIconSize = function () {
       var activeCP = state.checkpoints[state.activeCPIndex];
       if (activeCP) {
-        activeCP.iconSize = parseInt(this.value, 10) || 20;
+        activeCP.iconSize = parseInt(this.value, 10) || 22;
         scheduleRender();
       }
     };
-    dom.poiIconSize.addEventListener('change', handlerIconSize);
-    dom.poiIconSize.addEventListener('input', handlerIconSize);
+    if (dom.poiIconSize) {
+      dom.poiIconSize.addEventListener('change', handlerIconSize);
+      dom.poiIconSize.addEventListener('input', handlerIconSize);
+    }
 
     var handlerIconRotation = function () {
       var activeCP = state.checkpoints[state.activeCPIndex];
@@ -1111,8 +1122,38 @@
         scheduleRender();
       }
     };
-    dom.poiIconRotation.addEventListener('change', handlerIconRotation);
-    dom.poiIconRotation.addEventListener('input', handlerIconRotation);
+    if (dom.poiIconRotation) {
+      dom.poiIconRotation.addEventListener('change', handlerIconRotation);
+      dom.poiIconRotation.addEventListener('input', handlerIconRotation);
+    }
+
+    // Single icon select binding
+    if (dom.poiIconSelect) {
+      dom.poiIconSelect.addEventListener('change', function () {
+        var activeCP = state.checkpoints[state.activeCPIndex];
+        if (activeCP) {
+          activeCP.icon = this.value;
+          activeCP.axisColor = getLegacyCPLineColor(this.value);
+          renderCPTable();
+          scheduleRender();
+        }
+      });
+    }
+
+    // Stop duration binding
+    if (dom.poiStopDuration) {
+      var handlerStopDuration = function () {
+        var activeCP = state.checkpoints[state.activeCPIndex];
+        if (activeCP) {
+          activeCP.stopDuration = parseInt(this.value, 10) || 0;
+          updateArrivalTimes();
+          renderCPTable();
+          scheduleRender();
+        }
+      };
+      dom.poiStopDuration.addEventListener('change', handlerStopDuration);
+      dom.poiStopDuration.addEventListener('input', handlerStopDuration);
+    }
 
     var handlerAxisThickness = function () {
       var activeCP = state.checkpoints[state.activeCPIndex];
@@ -1171,20 +1212,7 @@
       });
     });
 
-    // Icon Row bindings (Icon 1, 2, 3)
-    dom.poiPanel.querySelectorAll('.poi-icon-group').forEach(function (groupEl) {
-      var iconIdx = parseInt(groupEl.dataset.iconIndex, 10);
-      var symbolSelect = groupEl.querySelector('.poi-symbol-select');
-
-      symbolSelect.addEventListener('change', function () {
-        var activeCP = state.checkpoints[state.activeCPIndex];
-        if (activeCP) {
-          activeCP.icons[iconIdx].symbol = this.value;
-          renderCPTable();
-          scheduleRender();
-        }
-      });
-    });
+    // (Legacy multi-icon bindings removed, using single icon select above)
 
     // Nutrition inputs bindings
     if (dom.poiWater) {
@@ -1279,7 +1307,7 @@
       if (selectEl.id === 'poi-water') suffix = ' mL/h';
       else if (selectEl.id === 'poi-carbs') suffix = ' g/h';
       else if (selectEl.id === 'poi-sodium') suffix = ' mg/L';
-      else if (selectEl.id === 'poi-caffeine') suffix = ' mg/h';
+      else if (selectEl.id === 'poi-caffeine') suffix = ' mg';
       opt.textContent = valStr + suffix;
       selectEl.appendChild(opt);
     }
@@ -1293,8 +1321,13 @@
 
     dom.poiIntermediate.checked = !!cp.useForIntermediateDistances;
     dom.poiPosition.value = cp.distance;
-    dom.poiIconSize.value = cp.iconSize;
-    dom.poiIconRotation.value = cp.iconRotation;
+    if (dom.poiIconSize) dom.poiIconSize.value = cp.iconSize;
+    if (dom.poiIconRotation) dom.poiIconRotation.value = cp.iconRotation;
+    if (dom.poiIconSelect) dom.poiIconSelect.value = cp.icon || 'classic';
+    if (dom.poiStopDuration) {
+      dom.poiStopDuration.value = cp.stopDuration || 0;
+      dom.poiStopDuration.disabled = (state.activeCPIndex === 0);
+    }
 
     // Basic CP details input synchronization
     if (dom.poiNameDetail) dom.poiNameDetail.value = cp.name || '';
@@ -1338,13 +1371,10 @@
     dom.poiTxtRightMiddle.value = cp.texts.rightMiddle || '';
     dom.poiTxtRightTop.value    = cp.texts.rightTop || '';
 
-    // Load multiple icons row values
-    dom.poiPanel.querySelectorAll('.poi-icon-group').forEach(function (groupEl) {
-      var iconIdx = parseInt(groupEl.dataset.iconIndex, 10);
-      var ico = cp.icons[iconIdx] || { symbol: '', color: '#4e4e4e', iconColor: 'White' };
-
-      groupEl.querySelector('.poi-symbol-select').value = ico.symbol;
-    });
+    // Single icon select sync
+    if (dom.poiIconSelect) {
+      dom.poiIconSelect.value = cp.icon || 'classic';
+    }
   }
 
   // ── Start Time Parsing & Arrival formatting ───────────────────────────
@@ -1413,13 +1443,16 @@
       }
     }
 
-    // Target Time (base prediction)
+    // Target Time (base prediction, including stop durations)
     var totalTargetMinutes = 0;
+    var totalStopMinutes = 0;
     state.checkpoints.forEach(function (cp, idx) {
       if (idx > 0) {
         totalTargetMinutes += TR.utils.parseTime(cp.segmentTime || '');
+        totalStopMinutes += (cp.stopDuration || 0);
       }
     });
+    totalTargetMinutes += totalStopMinutes;
 
     var targetTimeStr = TR.utils.formatTime(totalTargetMinutes);
     var optMins = Math.round(totalTargetMinutes * 0.95);
@@ -1427,12 +1460,6 @@
 
     var optTimeStr = TR.utils.formatTime(optMins);
     var pesTimeStr = TR.utils.formatTime(pesMins);
-
-    // Effort points (Points = Distance + D+/100)
-    var effortPoints = totalDist + (totalDPlus / 100);
-    var targetRate = totalTargetMinutes > 0 ? (effortPoints / (totalTargetMinutes / 60)).toFixed(1) : '0.0';
-    var optRate = optMins > 0 ? (effortPoints / (optMins / 60)).toFixed(1) : '0.0';
-    var pesRate = pesMins > 0 ? (effortPoints / (pesMins / 60)).toFixed(1) : '0.0';
 
     // Arrival Day/Times
     var startInfo = parseStartTime(state.startTime);
@@ -1458,7 +1485,7 @@
         
         var segWater = wRate * segHours;
         var segCarbs = cRate * segHours;
-        var segCaff = cafRate * segHours;
+        var segCaff = cafRate;
         var segSod = segWater * (sConc / 1000);
         
         totalWater += segWater;
@@ -1485,9 +1512,9 @@
       '</div>' +
       '<div class="summary-group">' +
       '  <div class="summary-group-title">' + dict.labelTemps + '</div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelPlan + '</span><span class="summary-val">' + targetTimeStr + '<span class="summary-val-sub">' + (lang === 'zh' ? '' : 'soit ') + targetRate + ' points/h</span></span></div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelOptimiste + '</span><span class="summary-val">' + optTimeStr + '<span class="summary-val-sub">' + (lang === 'zh' ? '' : 'soit ') + optRate + ' points/h</span></span></div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelPessimiste + '</span><span class="summary-val">' + pesTimeStr + '<span class="summary-val-sub">' + (lang === 'zh' ? '' : 'soit ') + pesRate + ' points/h</span></span></div>' +
+      '  <div class="summary-row"><span class="summary-label">' + dict.labelPlan + '</span><span class="summary-val">' + targetTimeStr + '</span></div>' +
+      '  <div class="summary-row"><span class="summary-label">' + dict.labelOptimiste + '</span><span class="summary-val">' + optTimeStr + '</span></div>' +
+      '  <div class="summary-row"><span class="summary-label">' + dict.labelPessimiste + '</span><span class="summary-val">' + pesTimeStr + '</span></div>' +
       '</div>' +
       '<div class="summary-group">' +
       '  <div class="summary-group-title">' + dict.labelArriveeEstime + '</div>' +
@@ -1542,53 +1569,7 @@
       checks.push({ status: 'warning', text: dict.checkGpxMissing });
     }
 
-    // Rule 3: Pace/Speed check for each segment
-    var pacesOk = true;
-    var badPaceCps = [];
-    var missingTimeCps = [];
-
-    for (var i = 1; i < state.checkpoints.length; i++) {
-      var cpPrev = state.checkpoints[i - 1];
-      var cpCurr = state.checkpoints[i];
-      var segTimeMins = TR.utils.parseTime(cpCurr.segmentTime || '');
-
-      if (segTimeMins <= 0) {
-        missingTimeCps.push(cpCurr.name || ('CP' + i));
-        pacesOk = false;
-        continue;
-      }
-
-      var segDist = cpCurr.distance - cpPrev.distance;
-      var segDPlus = 0;
-      if (state.trackpoints && state.trackpoints.length > 0) {
-        var segStats = TR.utils.segmentStats(state.trackpoints, cpPrev.distance, cpCurr.distance);
-        segDPlus = segStats.dPlus;
-      }
-
-      var segEffortDist = segDist + (segDPlus / 100);
-      var segHours = segTimeMins / 60;
-      var segSpeed = segEffortDist / segHours; // effort-km/h (points/h)
-
-      if (segSpeed > 25) {
-        badPaceCps.push({ name: cpCurr.name || ('CP' + i), reason: 'fast' });
-        pacesOk = false;
-      } else if (segSpeed < 2) {
-        badPaceCps.push({ name: cpCurr.name || ('CP' + i), reason: 'slow' });
-        pacesOk = false;
-      }
-    }
-
-    if (pacesOk) {
-      checks.push({ status: 'ok', text: dict.checkPacesOk });
-    } else {
-      missingTimeCps.forEach(function (name) {
-        checks.push({ status: 'warning', text: dict.checkPaceMissing.replace('{name}', name) });
-      });
-      badPaceCps.forEach(function (item) {
-        var tmpl = item.reason === 'fast' ? dict.checkPaceFast : dict.checkPaceSlow;
-        checks.push({ status: 'warning', text: tmpl.replace('{name}', item.name) });
-      });
-    }
+    // (Rule 3 pace check removed per user request)
 
     // Rule 4: Hydration rate target (400-800 mL/h)
     if (avgWater >= 400 && avgWater <= 800) {
@@ -1632,7 +1613,11 @@
       checks.push({ status: 'warning', text: dict.checkSodiumHigh });
     } else {
       // No sodium and no water hydration planned yet
-      checks.push({ status: 'ok', text: dict.checkSodiumOk });
+      if (totalTargetMinutes > 0) {
+        checks.push({ status: 'warning', text: dict.checkSodiumZero });
+      } else {
+        checks.push({ status: 'ok', text: dict.checkSodiumOk });
+      }
     }
 
     // Rule 7: Caffeine safety ceiling (<= 400 mg total)
@@ -1663,6 +1648,61 @@
     });
 
     dom.checksContent.innerHTML = checksHtml;
+
+    // 3. Render Ravito Calculator
+    if (dom.ravitoCalcContent) {
+      var ravitoHtml = '<table class="ravito-table">' +
+        '<thead><tr>' +
+        '<th>' + dict.ravitoColName + '</th>' +
+        '<th>' + dict.ravitoColTime + '</th>' +
+        '<th>' + dict.ravitoColWater + '</th>' +
+        '<th>' + dict.ravitoColCarbs + '</th>' +
+        '<th>' + dict.ravitoColSodium + '</th>' +
+        '<th>' + dict.ravitoColCaff + '</th>' +
+        '</tr></thead><tbody>';
+
+      var rvTotalWater = 0, rvTotalCarbs = 0, rvTotalSodium = 0, rvTotalCaff = 0;
+      var rvTotalTime = 0;
+
+      state.checkpoints.forEach(function (cp, idx) {
+        if (idx > 0) {
+          var segMins = TR.utils.parseTime(cp.segmentTime || '');
+          var segH = segMins / 60;
+          rvTotalTime += segMins;
+
+          var sWater = Math.round((cp.water || 0) * segH);
+          var sCarbs = Math.round((cp.carbs || 0) * segH);
+          var sSodium = Math.round(sWater * ((cp.sodium || 0) / 1000));
+          var sCaff = Math.round(cp.caffeine || 0);
+
+          rvTotalWater += sWater;
+          rvTotalCarbs += sCarbs;
+          rvTotalSodium += sSodium;
+          rvTotalCaff += sCaff;
+
+          ravitoHtml += '<tr>' +
+            '<td>' + (cp.name || 'CP' + idx) + '</td>' +
+            '<td>' + TR.utils.formatTime(segMins) + '</td>' +
+            '<td class="nut-water">' + sWater + '</td>' +
+            '<td class="nut-carbs">' + sCarbs + '</td>' +
+            '<td class="nut-sodium">' + sSodium + '</td>' +
+            '<td class="nut-caff">' + sCaff + '</td>' +
+            '</tr>';
+        }
+      });
+
+      ravitoHtml += '<tr>' +
+        '<td>' + dict.ravitoTotal + '</td>' +
+        '<td>' + TR.utils.formatTime(rvTotalTime) + '</td>' +
+        '<td class="nut-water">' + rvTotalWater + '</td>' +
+        '<td class="nut-carbs">' + rvTotalCarbs + '</td>' +
+        '<td class="nut-sodium">' + rvTotalSodium + '</td>' +
+        '<td class="nut-caff">' + rvTotalCaff + '</td>' +
+        '</tr>';
+
+      ravitoHtml += '</tbody></table>';
+      dom.ravitoCalcContent.innerHTML = ravitoHtml;
+    }
   }
 
   // ── Profile Rendering Debouncer ────────────────────────────────────
