@@ -29,20 +29,20 @@
 
     y.titleBase   = cur + titleH - 6;                 cur += titleH;
     y.iconCY      = cur + 14;                          cur += 28; // Icon row
-    y.nameAnchor  = cur;                                cur += 34; // Rotated CP names (was 70)
-    y.elevBase    = cur + 14;                           cur += 16; // Segment climb (was +15, += 20)
-    y.timeBase    = cur + 14;                           cur += 28; // Times (was +15, += 32)
-    y.notesBase   = cur + 12;                           cur += 28; // Notes (was +12, += 32)
+    y.nameAnchor  = cur;                                cur += 42; // CP names (expanded from 34)
+    y.elevBase    = cur + 16;                           cur += 22; // Segment climb (expanded from 16)
+    y.timeBase    = cur + 16;                           cur += 36; // Times (expanded from 28)
+    y.notesBase   = cur + 14;                           cur += 38; // Notes (expanded from 28)
     cur += 4; // gapAbove
     y.chartTop    = cur;
     y.chartBot    = cur + chartH;                      cur += chartH; // Chart height
     cur += 4; // gapBelow
     y.segTop      = cur;
-    y.segLine1    = cur + 16;
-    y.segLine2    = cur + 33;
-    y.segLine3    = cur + 50;
-                                                         cur += 60; // Segment statistics
-    y.cumulBase   = cur + 17;                           cur += 24; // Cumulative distance
+    y.segLine1    = cur + 18;
+    y.segLine2    = cur + 37;
+    y.segLine3    = cur + 56;
+                                                         cur += 70; // Segment statistics (expanded from 60)
+    y.cumulBase   = cur + 17;                           cur += 28; // Cumulative distance (expanded from 24)
     cur += 10; // padB
     y.totalH      = cur;
     return y;
@@ -200,7 +200,8 @@
     var chartH = 260;
     var margin = 20;
     var titleH = name ? 24 : 0;
-    var constantH = titleH + 28 + 34 + 16 + 28 + 28 + 4 + 4 + 60 + 24 + 10;
+    // Updated constantH to match expanded yAnchors: title + icon(28) + name(42) + elev(22) + time(36) + notes(38) + gapAbove(4) + gapBelow(4) + seg(70) + cumul(28) + padB(10)
+    var constantH = titleH + 28 + 42 + 22 + 36 + 38 + 4 + 4 + 70 + 28 + 10;
 
     if (ratio && ratio !== 'auto') {
       var ratioVal = 1.0;
@@ -209,6 +210,11 @@
 
       var svgW_outer = 70 + chartW + 55 + 2 * margin;
       chartH = Math.max(150, Math.round(svgW_outer / ratioVal - constantH - 2 * margin));
+
+      // Cap chart height at 40% of total available height to ensure text areas get enough space
+      var totalAvailH = svgW_outer / ratioVal - 2 * margin;
+      var maxChartH = Math.round(totalAvailH * 0.40);
+      if (chartH > maxChartH) chartH = Math.max(150, maxChartH);
     }
 
     var Y = yAnchors(name, chartH);
