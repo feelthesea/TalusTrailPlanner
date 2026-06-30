@@ -198,7 +198,7 @@
 
     // Calculate chart height dynamically to fit target aspect ratio exactly! (Requested)
     var chartH = 260;
-    var margin = 20;
+    var margin = 12;
     var titleH = name ? 24 : 0;
     // Updated constantH to match expanded yAnchors: title + icon(28) + name(42) + elev(22) + time(36) + notes(38) + gapAbove(4) + gapBelow(4) + seg(70) + cumul(28) + padB(10)
     var constantH = titleH + 28 + 42 + 22 + 36 + 38 + 4 + 4 + 70 + 28 + 10;
