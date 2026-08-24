@@ -1,9 +1,16 @@
 /**
- * Talus - Trail Roadbook Generator — Main Application (v5)
+ * Talus - Trail Roadbook Generator & TrailScope — Main Application (v7.0)
  *
- * Wires together: GPX parser, CP table editor, SVG profile renderer, image export,
- * and the advanced detailed horizontal Points of Interest editing panel.
- * Equipped with full dynamic Chinese/English localization (i18n).
+ * Wires together:
+ *  - GPX / KML / KMZ Multi-format Parser
+ *  - Cumulative Elevation Calculation Modes (Raw vs Smooth 4m Hysteresis)
+ *  - Interactive Leaflet Map with Multiple Tile Sources & GCJ-02 Support
+ *  - Interactive Canvas Elevation Profile with LOD & Real-time Map Cursor Sync
+ *  - Slope Gradient Distribution & Practical Technical Tips for Trail Running & Hiking
+ *  - Multi-mode Segment Statistics Table (Waypoints / Auto Slope / Fixed Distance)
+ *  - SVG Roadbook Profile Generator & Multi-Ratio High-Res Image Exporter
+ *  - Checkpoint List Editor, Nutrition Strategy & Plan Verification
+ *  - Dynamic Chinese / English i18n Localization
  */
 (function () {
   'use strict';
@@ -14,10 +21,14 @@
   var T = {
     zh: {
       pageTitle: "🏔️ Talus - Trail Roadbook Generator",
-      headerSubtitle: "越野跑路书生成器",
+      headerSubtitle: "越野跑路书与轨迹分析",
       vibeCodedBy: "Vibe coded by",
-      uploadGpx: "上传 GPX",
+      uploadTrack: "上传轨迹 (GPX/KML/KMZ)",
       raceNameLabel: "比赛名称",
+      raceStartLabel: "出发时间",
+      elevCalcModeLabel: "⚡ 爬升计算",
+      elevModeRaw: "原始数据",
+      elevModeSmooth: "平滑 (4m)",
       importJson: "导入 JSON",
       downloadTemplate: "下载模板",
       exportJson: "导出 JSON",
@@ -30,8 +41,47 @@
       scale1: "1× 标准分辨率",
       scale2: "2× 高清 (推荐)",
       scale3: "3× 超高清 (打印)",
-      placeholderText: "上传 GPX 文件以生成高程剖面图",
-      placeholderTextSub: "Upload a GPX file to generate the elevation profile",
+      placeholderText: "上传 GPX / KML / KMZ 文件以生成高程剖面路书",
+      placeholderTextSub: "Upload a GPX/KML/KMZ file to generate the roadbook & map",
+
+      // Map & Chart Explorer
+      mapExplorerTitle: "🗺️ 交互式轨迹地图与高程剖面",
+      mapSourceLabel: "底图图层",
+      colorModeLabel: "着色模式",
+      colorModeGradient: "按坡度着色 (Grade)",
+      colorModeElevation: "按海拔着色 (Elevation)",
+      btnFitMap: "居中全景",
+      interactiveChartTitle: "📈 实时高程与坡度交互剖面",
+      interactiveChartTip: "滑动悬停可实时联动地图当前点",
+
+      // Stats & Gradient Distribution & Segments
+      statsGradientTitle: "📐 坡度分布与实战技术要点",
+      segmentStatsTitle: "📋 多模式分段统计",
+      segModeWaypoint: "📍 检查点",
+      segModeAuto: "📈 坡度变化",
+      segMode1km: "📏 1 km",
+      segMode5km: "📏 5 km",
+      segColNum: "#",
+      segColDist: "分段里程",
+      segColAscent: "爬升",
+      segColDescent: "下降",
+      segColAvgGrad: "平均坡度",
+      segColMaxGrad: "最大坡度",
+      segColEstTime: "预估耗时",
+
+      // Stats Metric Labels
+      statTotalDistance: "总里程",
+      statTotalAscent: "累计爬升 (D+)",
+      statTotalDescent: "累计下降 (D-)",
+      statMaxElevation: "最高海拔",
+      statMinElevation: "最低海拔",
+      statAvgGradient: "平均坡度",
+      statMaxUphill: "最大上坡",
+      statMaxDownhill: "最大下坡",
+      statUphillDist: "上坡距离",
+      statDownhillDist: "下坡距离",
+
+      // Checkpoints & Editor
       cpTableTitle: "📍 CP 点 / 补给站 列表",
       colNum: "#",
       colName: "名称",
@@ -42,7 +92,7 @@
       addCpBtn: "添加 CP 点",
       poiPanelTitle: "📍 检查点详细视觉配置",
       poiTabAdd: "+ 添加",
-      poiCol1Title: "基本信息与全局字号",
+      poiCol1Title: "基本信息",
       poiCol1Pos: "CP位置距离 (公里)",
       poiCol1Intermediate: "用于分段统计点 (划分子赛段)",
       poiCol1FontSizesTitle: "各元素字号大小设置 (像素)",
@@ -53,21 +103,11 @@
       fsLabelCpNotes: "备注信息",
       fsLabelSegment: "区间分段",
       fsLabelCumulDist: "底部累计距离",
-      poiCol2Title: "图标与标志组合",
-      poiCol2Size: "图标绘制大小",
-      poiCol2Rot: "图标旋转角度 (°)",
-      poiIconGroup0: "图标 1 (首选)",
-      poiIconGroup1: "图标 2",
-      poiIconGroup2: "图标 3",
-      poiLabelSymbol: "符号",
-      poiLabelBg: "背景颜色",
-      poiLabelGlyph: "图案",
-      btnWhite: "白",
-      btnBlack: "黑",
+      poiCol2Title: "补给站类型",
+      poiLabelSymbol: "类型图标",
       poiCol3Title: "垂直指示辅助线",
       poiCol3Color: "指示线颜色",
       poiCol3Thickness: "指示线粗细 (px)",
-      poiCol3Broken: "指示线在海拔曲线处断开",
       poiCol4Title: "图表内嵌自定义标注",
       poiCol4Color: "标注颜色",
       poiCol4Size: "字号 (px)",
@@ -82,7 +122,8 @@
       labelRightBottom: "右侧 - 下",
       labelRightMiddle: "右侧 - 中",
       labelRightTop: "右侧 - 上",
-      
+      poiCol5Title: "补给计划 (Nutrition Plan)",
+
       iconStart: "🟢 起点",
       iconFinish: "🏁 终点",
       iconAssisted: "🤝 有人协助补给站",
@@ -92,19 +133,17 @@
       iconCheckpoint: "🚩 打卡点",
       iconPeak: "🏔️ 山峰",
       iconDanger: "⚡ 危险",
-      iconFood: "🍽️ 补给站",
-      iconCp: "📍 检查点",
-      
+
       toastAddCp: "已添加新CP点，位置为 ",
       toastAddCpTail: " 公里 ✓",
-      toastGpxSuccess: "GPX 载入成功：共 ",
-      toastGpxSuccessMid: " 个坐标点，全长 ",
-      toastGpxSuccessTail: " 公里 ✓",
-      toastGpxError: "GPX 错误：",
+      toastTrackSuccess: "轨迹载入成功：全长 ",
+      toastTrackSuccessMid: " km，累计爬升 +",
+      toastTrackSuccessTail: "m ✓",
+      toastTrackError: "轨迹解析错误：",
       toastImportSuccess: "配置导入成功 ✓",
       toastImportError: "导入格式错误：",
       toastExportSuccess: "配置导出成功 ✓",
-      toastGpxFirst: "请先上传比赛路线的 GPX 文件。",
+      toastGpxFirst: "请先上传比赛路线的 GPX / KML / KMZ 文件。",
       toastExporting: "正在导出 ",
       toastKeepOne: "必须保留至少一个检查点。",
       toastDeleted: "检查点已删除 ✓",
@@ -113,13 +152,9 @@
       deleteCpTitle: "删除此CP",
       placeholderCpNameInput: "CP名称",
       placeholderTimeInput: "用时 H:MM",
-      placeholderNotesInput: "备注",
       placeholderTextNone: "无",
-      
-      defaultStartName: "起点",
-      defaultFinishName: "终点",
 
-      // New Summary & Checklist Keys
+      // Summary & Checklist Keys
       summaryTitle: "📋 计划汇总",
       verificationTitle: "✓ 计划检查",
       labelCourse: "路线",
@@ -168,14 +203,18 @@
       checkSodiumHigh: "提示：平均钠浓度偏高 (>700 mg/L)，可能会增加口渴感",
       checkCaffOk: "总咖啡因摄入安全",
       checkCaffHigh: "警告：总咖啡因摄入偏高 (>400 mg)，注意心慌/神经过敏风险",
-      checkGpxMissing: "提示：上传 GPX 文件后可自动检查越野爬升"
+      checkGpxMissing: "提示：上传 GPX/KML/KMZ 文件后可自动检查越野爬升"
     },
     en: {
       pageTitle: "🏔️ Talus - Trail Roadbook Generator",
-      headerSubtitle: "Trail Roadbook Generator",
+      headerSubtitle: "Trail Roadbook & Track Analytics",
       vibeCodedBy: "Vibe coded by",
-      uploadGpx: "Upload GPX",
+      uploadTrack: "Upload Track (GPX/KML/KMZ)",
       raceNameLabel: "Race Name",
+      raceStartLabel: "Start Time",
+      elevCalcModeLabel: "⚡ Elevation Calc",
+      elevModeRaw: "Raw Data",
+      elevModeSmooth: "Smooth (4m)",
       importJson: "Import JSON",
       downloadTemplate: "Template",
       exportJson: "Export JSON",
@@ -188,8 +227,47 @@
       scale1: "1× Standard",
       scale2: "2× HD (Recommended)",
       scale3: "3× Ultra HD (Print)",
-      placeholderText: "Upload a GPX file to generate the elevation profile",
-      placeholderTextSub: "Upload a GPX file to generate the elevation profile",
+      placeholderText: "Upload GPX / KML / KMZ file to generate the roadbook",
+      placeholderTextSub: "Upload a GPX/KML/KMZ file to generate the roadbook & map",
+
+      // Map & Chart Explorer
+      mapExplorerTitle: "🗺️ Interactive Trail Map & Elevation Profile",
+      mapSourceLabel: "Base Map",
+      colorModeLabel: "Color Mode",
+      colorModeGradient: "By Grade",
+      colorModeElevation: "By Elevation",
+      btnFitMap: "Center Map",
+      interactiveChartTitle: "📈 Real-Time Elevation & Grade Profile",
+      interactiveChartTip: "Hover or drag to sync live location cursor with map",
+
+      // Stats & Gradient Distribution & Segments
+      statsGradientTitle: "📐 Grade Distribution & Technical Tips",
+      segmentStatsTitle: "📋 Segment Statistics",
+      segModeWaypoint: "📍 Checkpoints",
+      segModeAuto: "📈 Grade Changes",
+      segMode1km: "📏 1 km",
+      segMode5km: "📏 5 km",
+      segColNum: "#",
+      segColDist: "Segment",
+      segColAscent: "Gain",
+      segColDescent: "Loss",
+      segColAvgGrad: "Avg Grade",
+      segColMaxGrad: "Max Grade",
+      segColEstTime: "Est. Time",
+
+      // Stats Metric Labels
+      statTotalDistance: "Total Distance",
+      statTotalAscent: "Elevation Gain (D+)",
+      statTotalDescent: "Elevation Loss (D-)",
+      statMaxElevation: "Max Elevation",
+      statMinElevation: "Min Elevation",
+      statAvgGradient: "Avg Grade",
+      statMaxUphill: "Max Uphill",
+      statMaxDownhill: "Max Downhill",
+      statUphillDist: "Uphill Dist",
+      statDownhillDist: "Downhill Dist",
+
+      // Checkpoints & Editor
       cpTableTitle: "📍 Checkpoint / CP List",
       colNum: "#",
       colName: "Name",
@@ -200,7 +278,7 @@
       addCpBtn: "Add Checkpoint",
       poiPanelTitle: "📍 Checkpoint Visual Settings",
       poiTabAdd: "+ Add",
-      poiCol1Title: "Basic Info & Font Sizes",
+      poiCol1Title: "Basic Info",
       poiCol1Pos: "CP Distance (km)",
       poiCol1Intermediate: "Use for segment split stats",
       poiCol1FontSizesTitle: "Granular Font Sizes (px)",
@@ -211,21 +289,11 @@
       fsLabelCpNotes: "Notes",
       fsLabelSegment: "Segment",
       fsLabelCumulDist: "Cumul Dist",
-      poiCol2Title: "Icon & Symbol Configuration",
-      poiCol2Size: "Icon Scale Size",
-      poiCol2Rot: "Icon Rotation (°)",
-      poiIconGroup0: "Icon 1 (Primary)",
-      poiIconGroup1: "Icon 2",
-      poiIconGroup2: "Icon 3",
+      poiCol2Title: "Aid Station Type",
       poiLabelSymbol: "Symbol",
-      poiLabelBg: "Bg Color",
-      poiLabelGlyph: "Glyph",
-      btnWhite: "White",
-      btnBlack: "Black",
       poiCol3Title: "Vertical Guide Axis",
       poiCol3Color: "Line Color",
       poiCol3Thickness: "Line Thickness (px)",
-      poiCol3Broken: "Break line under curve",
       poiCol4Title: "Chart Inside Annotations",
       poiCol4Color: "Text Color",
       poiCol4Size: "Size (px)",
@@ -240,7 +308,8 @@
       labelRightBottom: "Right - Bottom",
       labelRightMiddle: "Right - Middle",
       labelRightTop: "Right - Top",
-      
+      poiCol5Title: "Nutrition Strategy",
+
       iconStart: "🟢 Start",
       iconFinish: "🏁 Finish",
       iconAssisted: "🤝 Assisted Aid",
@@ -250,19 +319,17 @@
       iconCheckpoint: "🚩 Checkpoint",
       iconPeak: "🏔️ Peak",
       iconDanger: "⚡ Danger",
-      iconFood: "🍽️ Food",
-      iconCp: "📍 Checkpoint",
-      
+
       toastAddCp: "Added new Checkpoint at ",
       toastAddCpTail: " km ✓",
-      toastGpxSuccess: "GPX loaded successfully: ",
-      toastGpxSuccessMid: " trackpoints, total ",
-      toastGpxSuccessTail: " km ✓",
-      toastGpxError: "GPX Error: ",
+      toastTrackSuccess: "Track loaded successfully: Total ",
+      toastTrackSuccessMid: " km, Gain +",
+      toastTrackSuccessTail: "m ✓",
+      toastTrackError: "Track Parse Error: ",
       toastImportSuccess: "Configuration imported successfully ✓",
       toastImportError: "Import format error: ",
       toastExportSuccess: "Configuration exported successfully ✓",
-      toastGpxFirst: "Please upload the GPX route file first.",
+      toastGpxFirst: "Please upload the GPX / KML / KMZ route file first.",
       toastExporting: "Exporting ",
       toastKeepOne: "Must keep at least one checkpoint.",
       toastDeleted: "Checkpoint deleted ✓",
@@ -271,13 +338,9 @@
       deleteCpTitle: "Delete Checkpoint",
       placeholderCpNameInput: "CP Name",
       placeholderTimeInput: "Duration H:MM",
-      placeholderNotesInput: "Notes",
       placeholderTextNone: "None",
-      
-      defaultStartName: "Start",
-      defaultFinishName: "Finish",
 
-      // New Summary & Checklist Keys
+      // Summary & Checklist Keys
       summaryTitle: "📋 Plan Summary",
       verificationTitle: "✓ Plan Verification",
       labelCourse: "Course",
@@ -312,8 +375,8 @@
 
       checkDistOk: "Checkpoint distances are strictly increasing",
       checkDistErr: "Warning: Checkpoint distances are not strictly increasing",
-      checkFinishOk: "Finish distance matches GPX total length",
-      checkFinishWarn: "Tip: Finish distance does not match GPX total length",
+      checkFinishOk: "Finish distance matches track total length",
+      checkFinishWarn: "Tip: Finish distance does not match track total length",
       checkWaterOk: "Average hydration rate is balanced (400-800 mL/h)",
       checkWaterLow: "Tip: Hydration is low (<400 mL/h), risk of dehydration",
       checkWaterHigh: "Tip: Hydration is high (>800 mL/h), risk of stomach distress",
@@ -326,110 +389,447 @@
       checkSodiumHigh: "Tip: Sodium concentration is high (>700 mg/L)",
       checkCaffOk: "Total caffeine is within safe limits",
       checkCaffHigh: "Warning: Total caffeine is high (>400 mg)",
-      checkGpxMissing: "Tip: Upload a GPX file to automatically check climb data"
+      checkGpxMissing: "Tip: Upload a track file to automatically check climb data"
     }
   };
 
   function detectLanguage() {
     var lang = navigator.language || navigator.userLanguage || 'en';
     lang = lang.toLowerCase();
-    if (lang.indexOf('zh') !== -1) {
-      return 'zh';
-    }
+    if (lang.indexOf('zh') !== -1) return 'zh';
     return 'en';
   }
 
-  // ── State ──────────────────────────────────────────────────────────
+  // ── Global State ────────────────────────────────────────────────────
   var state = {
-    trackpoints: null,     // parsed GPX data
-    gpxFileName: '',
+    trackData: null,          // enriched track object from parser
+    trackpoints: null,        // points array
+    trackFileName: '',
     raceName: '',
-    activeCPIndex: 0,      // selected CP in POI editor
-    fontSizeTitle: 16,     // Individual roadbook element font sizes (Requested)
-    fontSizeCPName: 14,    // Default CP Name to 14px
+    startTime: '周五 18:00',
+    activeCPIndex: 0,
+    elevationMode: 'smooth',  // 'smooth' (4m threshold) | 'raw'
+    colorMode: 'gradient',    // 'gradient' | 'elevation'
+    segmentMode: 'waypoint',  // 'waypoint' | 'auto' | '1000' | '5000'
+    activeSegmentIdx: -1,
+    fontSizeTitle: 16,
+    fontSizeCPName: 14,
     fontSizeCPElev: 14,
-    fontSizeCPTime: 20,    // Default Expected Time to 20px
-    fontSizeCPNotes: 18,   // Default Notes Info to 18px
+    fontSizeCPTime: 20,
+    fontSizeCPNotes: 18,
     fontSizeSegment: 16,
     fontSizeCumulDist: 16,
-    imageTheme: 'day',     // preserved for configuration backward compatibility
-    language: 'zh',        // active language
-    checkpoints: []        // dynamically initialized
+    language: 'zh',
+    checkpoints: []
   };
 
-  // Helper colors matching profile.js
-  var C = {
-    iconStart:     '#27ae60',
-    iconFinish:    '#c0392b',
-    iconWater:     '#2e86c1',
-    iconFood:      '#e67e22',
-    iconCutoff:    '#e74c3c',
-    iconDefault:   '#5b7db1',
-    cpLine:        'rgba(120,120,140,0.30)',
-    cpLineStart:   '#27ae60',
-    cpLineFinish:  '#c0392b',
-  };
+  // Expose state globally for modules
+  TR.state = state;
 
-  function getLegacyIconColor(symbol) {
-    switch (symbol) {
-      case 'start':   return C.iconStart;
-      case 'finish':  return C.iconFinish;
-      case 'water':   return C.iconWater;
-      case 'food':    return C.iconFood;
-      case 'cutoff':  return C.iconCutoff;
-      default:        return C.iconDefault;
+  // ── DOM References ──────────────────────────────────────────────────
+  var dom = {};
+
+  function init() {
+    dom.btnGpx            = document.getElementById('btn-gpx');
+    dom.inputGpx          = document.getElementById('input-gpx');
+    dom.inputName         = document.getElementById('input-name');
+    dom.inputStartTime    = document.getElementById('input-start-time');
+    dom.btnElevRaw        = document.getElementById('btn-elev-raw');
+    dom.btnElevSmooth     = document.getElementById('btn-elev-smooth');
+    dom.btnImport         = document.getElementById('btn-import');
+    dom.inputJson         = document.getElementById('input-json');
+    dom.btnTemplateJson   = document.getElementById('btn-template-json');
+    dom.btnExportJson     = document.getElementById('btn-export-json');
+    dom.btnExportImg      = document.getElementById('btn-export-img');
+    dom.exportMenu        = document.getElementById('export-menu');
+    dom.exportRatio       = document.getElementById('export-ratio');
+    dom.selectLang        = document.getElementById('select-lang');
+    dom.profileContainer  = document.getElementById('profile-container');
+    dom.placeholder       = document.getElementById('profile-placeholder');
+    dom.cpTbody           = document.getElementById('cp-tbody');
+    dom.btnAddCp          = document.getElementById('btn-add-cp');
+    dom.toast             = document.getElementById('toast');
+
+    // Map & Chart Controls
+    dom.selectMapSource   = document.getElementById('select-map-source');
+    dom.selectColorMode   = document.getElementById('select-color-mode');
+    dom.btnFitMap         = document.getElementById('btn-fit-map');
+
+    // Stats & Segments Containers
+    dom.trailStatCards    = document.getElementById('trail-stat-cards');
+    dom.gradientDistContent = document.getElementById('gradient-distribution-content');
+    dom.segmentTbody      = document.getElementById('segment-tbody');
+
+    // POI & Summary references
+    dom.poiPanel          = document.getElementById('poi-panel');
+    dom.poiIntermediate   = document.getElementById('poi-intermediate');
+    dom.poiPosition       = document.getElementById('poi-position');
+    dom.poiIconSelect     = document.getElementById('poi-icon-select');
+    dom.poiStopDuration   = document.getElementById('poi-stop-duration');
+    dom.poiNameDetail     = document.getElementById('poi-name-detail');
+    dom.poiTimeDetail     = document.getElementById('poi-time-detail');
+    dom.poiNotesDetail    = document.getElementById('poi-notes-detail');
+    dom.poiWater          = document.getElementById('poi-water');
+    dom.poiCarbs          = document.getElementById('poi-carbs');
+    dom.poiSodium         = document.getElementById('poi-sodium');
+    dom.poiCaffeine       = document.getElementById('poi-caffeine');
+    dom.summaryContent    = document.getElementById('summary-content');
+    dom.checksContent     = document.getElementById('checks-content');
+    dom.ravitoCalcContent = document.getElementById('ravito-calc-content');
+
+    // Font Sizes
+    dom.fsTitle           = document.getElementById('fs-title');
+    dom.fsCPName          = document.getElementById('fs-cpname');
+    dom.fsCPElev          = document.getElementById('fs-cpelev');
+    dom.fsCPTime          = document.getElementById('fs-cptime');
+    dom.fsCPNotes         = document.getElementById('fs-cpnotes');
+    dom.fsSegment         = document.getElementById('fs-segment');
+    dom.fsCumulDist       = document.getElementById('fs-cumuldist');
+
+    dom.poiAxisColor      = document.getElementById('poi-axis-color');
+    dom.poiAxisColorHex   = document.getElementById('poi-axis-color-hex');
+    dom.poiAxisThickness  = document.getElementById('poi-axis-thickness');
+    dom.poiTextColor      = document.getElementById('poi-text-color');
+    dom.poiTextColorHex   = document.getElementById('poi-text-color-hex');
+    dom.poiTextSize       = document.getElementById('poi-text-size');
+    dom.poiTextOrientation= document.getElementById('poi-text-orientation');
+
+    dom.poiTxtLeftBottom  = document.getElementById('poi-txt-left-bottom');
+    dom.poiTxtLeftMiddle  = document.getElementById('poi-txt-left-middle');
+    dom.poiTxtLeftTop     = document.getElementById('poi-txt-left-top');
+    dom.poiTxtRightBottom = document.getElementById('poi-txt-right-bottom');
+    dom.poiTxtRightMiddle = document.getElementById('poi-txt-right-middle');
+    dom.poiTxtRightTop    = document.getElementById('poi-txt-right-top');
+
+    // Initialize Map and Interactive Chart
+    TR.trailMap.initMap('leafletMap');
+    TR.interactiveChart.init('interactiveElevationChart', 'interactiveChartOverlay', 'chartTooltip', function (ptIdx) {
+      TR.trailMap.updateMapCurrentPoint(ptIdx);
+    });
+
+    state.language = detectLanguage();
+    if (dom.selectLang) dom.selectLang.value = state.language;
+
+    if (state.checkpoints.length === 0) {
+      var isZH = (state.language === 'zh');
+      state.checkpoints = [
+        { name: isZH ? '起点' : 'Start', distance: 0, icon: 'start', arrivalTime: '0:00', segmentTime: '0:00', notes: '' },
+        { name: isZH ? '终点' : 'Finish', distance: 0, icon: 'finish', arrivalTime: '', segmentTime: '', notes: '' }
+      ];
+    }
+
+    populateStartTimeOptions('周五 18:00');
+    normalizeAllCPs();
+    bindEvents();
+    bindPOIEvents();
+    applyLanguage();
+  }
+
+  // ── Event Bindings ──────────────────────────────────────────────────
+  function bindEvents() {
+    // Multi-format Upload (GPX / KML / KMZ)
+    dom.btnGpx.addEventListener('click', function () { dom.inputGpx.click(); });
+    dom.inputGpx.addEventListener('change', handleTrackUpload);
+
+    // Race name
+    dom.inputName.addEventListener('input', function () {
+      state.raceName = this.value;
+      scheduleRender();
+    });
+
+    // Start time
+    if (dom.inputStartTime) {
+      dom.inputStartTime.addEventListener('change', function () {
+        state.startTime = this.value;
+        scheduleRender();
+      });
+    }
+
+    // Elevation mode switches (Raw vs Smooth 4m)
+    dom.btnElevRaw.addEventListener('click', function () { setElevationMode('raw'); });
+    dom.btnElevSmooth.addEventListener('click', function () { setElevationMode('smooth'); });
+
+    // Map & Chart Explorer events
+    if (dom.selectMapSource) {
+      dom.selectMapSource.addEventListener('change', function () {
+        TR.trailMap.changeMapSource(this.value);
+      });
+    }
+    if (dom.selectColorMode) {
+      dom.selectColorMode.addEventListener('change', function () {
+        state.colorMode = this.value;
+        if (state.trackData) {
+          TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
+          TR.interactiveChart.drawChart(state.trackData, state.colorMode, state.checkpoints);
+        }
+      });
+    }
+    if (dom.btnFitMap) {
+      dom.btnFitMap.addEventListener('click', function () {
+        TR.trailMap.fitMapToTrack();
+      });
+    }
+
+    // Segment mode toggle buttons
+    document.querySelectorAll('.seg-mode-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.seg-mode-btn').forEach(function (b) { b.classList.remove('active'); });
+        this.classList.add('active');
+        state.segmentMode = this.dataset.mode;
+        renderSegmentTable();
+      });
+    });
+
+    // JSON import / export / template
+    dom.btnImport.addEventListener('click', function () { dom.inputJson.click(); });
+    dom.inputJson.addEventListener('change', handleJsonImport);
+    dom.btnTemplateJson.addEventListener('click', handleJsonTemplateDownload);
+    dom.btnExportJson.addEventListener('click', handleJsonExport);
+
+    // Language selector
+    dom.selectLang.addEventListener('change', function () {
+      state.language = this.value;
+      applyLanguage();
+    });
+
+    // Image export dropdown
+    dom.btnExportImg.addEventListener('click', function (e) {
+      e.stopPropagation();
+      dom.exportMenu.classList.toggle('open');
+    });
+    dom.exportMenu.querySelectorAll('button').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        dom.exportMenu.classList.remove('open');
+        handleImageExport(parseInt(this.dataset.scale, 10));
+      });
+    });
+    document.addEventListener('click', function () {
+      dom.exportMenu.classList.remove('open');
+    });
+
+    // Add Checkpoint
+    dom.btnAddCp.addEventListener('click', handleAddCP);
+
+    // Aspect ratio change
+    dom.exportRatio.addEventListener('change', scheduleRender);
+  }
+
+  // ── Track Upload (GPX / KML / KMZ) ──────────────────────────────────
+  function handleTrackUpload() {
+    var file = dom.inputGpx.files[0];
+    if (!file) return;
+    state.trackFileName = file.name;
+
+    TR.gpxParser.parseFile(file, state.elevationMode).then(function (trackData) {
+      state.trackData = trackData;
+      state.trackpoints = trackData.points;
+
+      var totalDist = trackData.totalDistance;
+
+      // Auto-set finish distance
+      state.checkpoints.forEach(function (cp) {
+        if (cp.icon === 'finish' && cp.distance === 0) {
+          cp.distance = Math.round(totalDist * 100) / 100;
+        }
+      });
+
+      // Merge waypoints from file into CP list if waypoints exist and CPs are just start/finish
+      if (trackData.waypoints && trackData.waypoints.length > 0 && state.checkpoints.length <= 2) {
+        trackData.waypoints.forEach(function (wp) {
+          if (wp.distance > 0.5 && wp.distance < totalDist - 0.5) {
+            state.checkpoints.push(normalizeCP({
+              name: wp.name || 'CP',
+              distance: Math.round(wp.distance * 10) / 10,
+              icon: 'classic',
+              arrivalTime: '',
+              segmentTime: '',
+              notes: wp.desc || ''
+            }, state.checkpoints.length));
+          }
+        });
+      }
+
+      sortCheckpoints();
+      normalizeAllCPs();
+      renderCPTable();
+      loadActiveCPDetails();
+      renderAllComponents();
+
+      toast(T[state.language].toastTrackSuccess + totalDist.toFixed(1) + T[state.language].toastTrackSuccessMid + Math.round(trackData.totalAscent) + T[state.language].toastTrackSuccessTail);
+    }).catch(function (err) {
+      toast(T[state.language].toastTrackError + err.message);
+    });
+
+    dom.inputGpx.value = '';
+  }
+
+  // ── Elevation Calculation Mode Switch ───────────────────────────────
+  function setElevationMode(mode) {
+    if (state.elevationMode === mode) return;
+    state.elevationMode = mode;
+    TR.elevationMode = mode;
+
+    dom.btnElevRaw.classList.toggle('active', mode === 'raw');
+    dom.btnElevSmooth.classList.toggle('active', mode === 'smooth');
+
+    if (state.trackData) {
+      var totals = TR.trailMath.ElevationCalculator.computeTotal(state.trackData.points, mode);
+      state.trackData.totalAscent = totals.ascent;
+      state.trackData.totalDescent = totals.descent;
+      TR.trailAnalysis.resetSegmentCache();
+      renderAllComponents();
     }
   }
 
-  function getLegacyCPLineColor(symbol) {
-    switch (symbol) {
-      case 'start':  return C.cpLineStart;
-      case 'finish': return C.cpLineFinish;
-      default:       return C.cpLine;
-    }
+  // ── Rendering All Visual Components ─────────────────────────────────
+  function renderAllComponents() {
+    if (!state.trackData) return;
+    renderProfile();
+    TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints);
+    TR.interactiveChart.drawChart(state.trackData, state.colorMode, state.checkpoints);
+    renderTrailSummaryStats();
+    renderGradientDistribution();
+    renderSegmentTable();
+    updateSummaryAndChecks();
   }
 
-  // Schema normalization
+  // ── 1. Trail Summary Stats Cards ────────────────────────────────────
+  function renderTrailSummaryStats() {
+    if (!dom.trailStatCards || !state.trackData) return;
+    var td = state.trackData;
+    var dict = T[state.language];
+
+    var tiles = [
+      { label: dict.statTotalDistance, val: td.totalDistance.toFixed(1) + ' km' },
+      { label: dict.statTotalAscent, val: '+' + Math.round(td.totalAscent) + ' m', color: 'var(--success)' },
+      { label: dict.statTotalDescent, val: '-' + Math.round(td.totalDescent) + ' m', color: 'var(--danger)' },
+      { label: dict.statAvgGradient, val: td.avgGradient.toFixed(1) + ' %' },
+      { label: dict.statMaxElevation, val: Math.round(td.maxElevation) + ' m', color: 'var(--trail-amber)' },
+      { label: dict.statMinElevation, val: Math.round(td.minElevation) + ' m', color: 'var(--trail-blue)' },
+      { label: dict.statMaxUphill, val: '+' + td.uphillMaxGradient.toFixed(1) + ' %' },
+      { label: dict.statMaxDownhill, val: td.downhillMaxGradient.toFixed(1) + ' %' }
+    ];
+
+    var html = '';
+    tiles.forEach(function (tile) {
+      html += '<div class="trail-stat-tile">' +
+        '<div class="label">' + tile.label + '</div>' +
+        '<div class="value"' + (tile.color ? (' style="color:' + tile.color + '"') : '') + '>' + tile.val + '</div>' +
+        '</div>';
+    });
+    dom.trailStatCards.innerHTML = html;
+  }
+
+  // ── 2. Slope Gradient Distribution & Technical Tips ─────────────────
+  function renderGradientDistribution() {
+    if (!dom.gradientDistContent || !state.trackData) return;
+    var dist = TR.trailAnalysis.calculateGradientDistribution(state.trackData, state.language);
+    if (!dist) return;
+
+    var isZH = (state.language === 'zh');
+
+    function buildSection(title, list, isUp) {
+      var barHtml = '<div class="gradient-bar-stack">';
+      list.forEach(function (l) {
+        if (l.percentage > 0) {
+          barHtml += '<div class="gradient-bar-seg" style="width:' + l.percentage.toFixed(1) + '%; background:' + l.color + '" title="' + l.name + ': ' + l.distance.toFixed(1) + 'km (' + l.percentage.toFixed(1) + '%)"></div>';
+        }
+      });
+      barHtml += '</div>';
+
+      var listHtml = '<div class="gradient-level-list">';
+      list.forEach(function (l) {
+        listHtml += '<div class="gradient-level-item">' +
+          '<div class="gradient-level-header">' +
+          '  <span class="gradient-level-badge"><span class="gradient-level-dot" style="background:' + l.color + '"></span>' + l.name + '</span>' +
+          '  <span class="gradient-level-stats">' + l.distance.toFixed(1) + ' km (' + l.percentage.toFixed(1) + '%)</span>' +
+          '</div>' +
+          '<div class="gradient-level-tip">' + l.tip + '</div>' +
+          '</div>';
+      });
+      listHtml += '</div>';
+
+      return '<div>' +
+        '<div class="gradient-section-title"><span>' + title + '</span></div>' +
+        barHtml +
+        listHtml +
+        '</div>';
+    }
+
+    var upTitle = isZH ? '🟢 上坡坡度分级 (Uphill)' : '🟢 Uphill Grade Breakdown';
+    var downTitle = isZH ? '🔵 下坡坡度分级 (Downhill)' : '🔵 Downhill Grade Breakdown';
+
+    dom.gradientDistContent.innerHTML =
+      buildSection(upTitle, dist.uphill, true) +
+      buildSection(downTitle, dist.downhill, false);
+  }
+
+  // ── 3. Multi-Mode Segment Table ─────────────────────────────────────
+  function renderSegmentTable() {
+    if (!dom.segmentTbody || !state.trackData) return;
+    var segments = TR.trailAnalysis.analyzeSegments(
+      state.trackData,
+      state.segmentMode,
+      state.checkpoints,
+      state.elevationMode,
+      state.language
+    );
+
+    var html = '';
+    segments.forEach(function (seg, idx) {
+      var isSelected = (state.activeSegmentIdx === idx);
+      var nameStr = seg.name ? (seg.name + (seg.endName ? (' → ' + seg.endName) : '')) : ('Seg ' + (idx + 1));
+      var timeStr = TR.utils.formatTime(Math.round(seg.time * 60));
+
+      html += '<tr class="segment-row' + (isSelected ? ' active-seg-row' : '') + '" data-idx="' + idx + '">' +
+        '<td>' + (idx + 1) + '</td>' +
+        '<td><strong>' + esc(nameStr) + '</strong> (' + seg.distance.toFixed(1) + 'km)</td>' +
+        '<td style="color:var(--success)">+' + Math.round(seg.ascent) + 'm</td>' +
+        '<td style="color:var(--danger)">-' + Math.round(seg.descent) + 'm</td>' +
+        '<td>' + seg.uphillAvg.toFixed(1) + '%</td>' +
+        '<td>+' + seg.maxUphillGrad.toFixed(1) + '%</td>' +
+        '<td>' + timeStr + '</td>' +
+        '</tr>';
+    });
+
+    dom.segmentTbody.innerHTML = html;
+
+    dom.segmentTbody.querySelectorAll('.segment-row').forEach(function (tr) {
+      tr.addEventListener('click', function () {
+        var idx = parseInt(this.dataset.idx, 10);
+        state.activeSegmentIdx = idx;
+        dom.segmentTbody.querySelectorAll('.segment-row').forEach(function (r) { r.classList.remove('active-seg-row'); });
+        this.classList.add('active-seg-row');
+
+        var seg = segments[idx];
+        if (seg) {
+          TR.trailMap.highlightSegment(seg.startIdx, seg.endIdx);
+          TR.interactiveChart.drawChart(state.trackData, state.colorMode, state.checkpoints, seg);
+        }
+      });
+    });
+  }
+
+  // ── CP Normalization & Ordering ─────────────────────────────────────
   function normalizeCP(cp, idx) {
     if (cp.useForIntermediateDistances === undefined) cp.useForIntermediateDistances = true;
-
-    // Migrate legacy multi-icon array to single icon field
-    if (!cp.icon && cp.icons && Array.isArray(cp.icons) && cp.icons[0]) {
-      cp.icon = cp.icons[0].symbol || '';
-    }
-    if (!cp.icon) {
-      cp.icon = (idx === 0 ? 'start' : 'classic');
-    }
-    // Keep iconSize for backward compat but no longer user-editable
-    if (cp.iconSize === undefined) cp.iconSize = 22;
-    if (cp.iconRotation === undefined) cp.iconRotation = 0;
-
-    if (cp.axisColor === undefined) cp.axisColor = getLegacyCPLineColor(cp.icon);
+    if (!cp.icon && cp.icons && Array.isArray(cp.icons) && cp.icons[0]) cp.icon = cp.icons[0].symbol || '';
+    if (!cp.icon) cp.icon = (idx === 0 ? 'start' : 'classic');
+    if (cp.axisColor === undefined) cp.axisColor = '#4e4e4e';
     if (cp.axisThickness === undefined) cp.axisThickness = 1;
-    if (cp.axisBroken === undefined) cp.axisBroken = true;
-
     if (cp.textColor === undefined) cp.textColor = '#1e293b';
     if (cp.textSize === undefined) cp.textSize = 18;
     if (cp.textOrientation === undefined) cp.textOrientation = 'To the right';
-
     if (!cp.texts) {
-      cp.texts = {
-        leftBottom: '', leftMiddle: '', leftTop: '',
-        rightBottom: '', rightMiddle: '', rightTop: ''
-      };
+      cp.texts = { leftBottom: '', leftMiddle: '', leftTop: '', rightBottom: '', rightMiddle: '', rightTop: '' };
     }
-    if (cp.arrivalTime === undefined) {
-      cp.arrivalTime = '';
-    }
-    if (cp.segmentTime === undefined) {
-      cp.segmentTime = '';
-    }
+    if (cp.arrivalTime === undefined) cp.arrivalTime = '';
+    if (cp.segmentTime === undefined) cp.segmentTime = '';
     if (cp.stopDuration === undefined) cp.stopDuration = 0;
     if (cp.water === undefined) cp.water = 0;
     if (cp.carbs === undefined) cp.carbs = 0;
     if (cp.sodium === undefined) cp.sodium = 0;
     if (cp.caffeine === undefined) cp.caffeine = 0;
-
     return cp;
   }
 
@@ -451,8 +851,6 @@
     var prevCumul = 0;
     state.checkpoints.forEach(function (cp, idx) {
       normalizeCP(cp, idx);
-      
-      // Calculate segmentTime from arrivalTime if segmentTime is not defined (backward compatibility)
       if (cp.segmentTime === undefined || cp.segmentTime === '') {
         if (idx === 0) {
           cp.segmentTime = '0:00';
@@ -466,173 +864,24 @@
           cp.segmentTime = '';
         }
       } else {
-        if (idx === 0) {
-          prevCumul = 0;
-        } else {
-          prevCumul += TR.utils.parseTime(cp.segmentTime);
-        }
+        if (idx === 0) prevCumul = 0;
+        else prevCumul += TR.utils.parseTime(cp.segmentTime);
       }
     });
-
     updateArrivalTimes();
   }
 
-  // ── DOM references ──────────────────────────────────────────────────
-  var dom = {};
-
-  function init() {
-    dom.btnGpx       = document.getElementById('btn-gpx');
-    dom.inputGpx     = document.getElementById('input-gpx');
-    dom.inputName    = document.getElementById('input-name');
-    dom.btnImport    = document.getElementById('btn-import');
-    dom.inputJson    = document.getElementById('input-json');
-    dom.btnTemplateJson = document.getElementById('btn-template-json');
-    dom.btnExportJson= document.getElementById('btn-export-json');
-    dom.btnExportImg = document.getElementById('btn-export-img');
-    dom.exportMenu   = document.getElementById('export-menu');
-    dom.exportRatio  = document.getElementById('export-ratio');
-    dom.selectLang   = document.getElementById('select-lang');
-    dom.profileContainer = document.getElementById('profile-container');
-    dom.placeholder  = document.getElementById('profile-placeholder');
-    dom.cpTbody      = document.getElementById('cp-tbody');
-    dom.btnAddCp     = document.getElementById('btn-add-cp');
-    dom.toast        = document.getElementById('toast');
-
-    // POI Editor Panel references
-    dom.poiPanel          = document.getElementById('poi-panel');
-    dom.poiTabs           = document.getElementById('poi-tabs');
-    dom.btnPoiTabUp       = document.getElementById('btn-poi-tab-up');
-    dom.btnPoiTabDown     = document.getElementById('btn-poi-tab-down');
-    dom.poiIntermediate   = document.getElementById('poi-intermediate');
-    dom.poiPosition       = document.getElementById('poi-position');
-    dom.poiIconSize       = document.getElementById('poi-icon-size');
-    dom.poiIconRotation   = document.getElementById('poi-icon-rotation');
-    dom.poiIconSelect     = document.getElementById('poi-icon-select');
-    dom.poiStopDuration   = document.getElementById('poi-stop-duration');
-
-    // Linking CP details input fields in right pane
-    dom.poiNameDetail     = document.getElementById('poi-name-detail');
-    dom.poiTimeDetail     = document.getElementById('poi-time-detail');
-    dom.poiNotesDetail    = document.getElementById('poi-notes-detail');
-    dom.poiWater          = document.getElementById('poi-water');
-    dom.poiCarbs          = document.getElementById('poi-carbs');
-    dom.poiSodium         = document.getElementById('poi-sodium');
-    dom.poiCaffeine       = document.getElementById('poi-caffeine');
-    dom.inputStartTime    = document.getElementById('input-start-time');
-    dom.summaryContent    = document.getElementById('summary-content');
-    dom.checksContent     = document.getElementById('checks-content');
-    dom.ravitoCalcContent = document.getElementById('ravito-calc-content');
-
-    // Granular roadbook element font size controls (Requested)
-    dom.fsTitle       = document.getElementById('fs-title');
-    dom.fsCPName      = document.getElementById('fs-cpname');
-    dom.fsCPElev      = document.getElementById('fs-cpelev');
-    dom.fsCPTime      = document.getElementById('fs-cptime');
-    dom.fsCPNotes     = document.getElementById('fs-cpnotes');
-    dom.fsSegment     = document.getElementById('fs-segment');
-    dom.fsCumulDist   = document.getElementById('fs-cumuldist');
-
-    dom.poiAxisColor      = document.getElementById('poi-axis-color');
-    dom.poiAxisColorHex   = document.getElementById('poi-axis-color-hex');
-    dom.poiAxisThickness   = document.getElementById('poi-axis-thickness');
-    dom.poiAxisBroken     = document.getElementById('poi-axis-broken');
-
-    dom.poiTextColor      = document.getElementById('poi-text-color');
-    dom.poiTextColorHex   = document.getElementById('poi-text-color-hex');
-    dom.poiTextSize       = document.getElementById('poi-text-size');
-    dom.poiTextOrientation = document.getElementById('poi-text-orientation');
-
-    dom.poiTxtLeftBottom  = document.getElementById('poi-txt-left-bottom');
-    dom.poiTxtLeftMiddle  = document.getElementById('poi-txt-left-middle');
-    dom.poiTxtLeftTop     = document.getElementById('poi-txt-left-top');
-    dom.poiTxtRightBottom = document.getElementById('poi-txt-right-bottom');
-    dom.poiTxtRightMiddle = document.getElementById('poi-txt-right-middle');
-    dom.poiTxtRightTop    = document.getElementById('poi-txt-right-top');
-
-    // Detect browser language and initialize dynamic checkpoints
-    state.language = detectLanguage();
-    if (state.checkpoints.length === 0) {
-      var isZH = (state.language === 'zh');
-      state.checkpoints = [
-        { name: isZH ? '起点' : 'Start',  distance: 0, icon: 'start',  arrivalTime: '0:00', notes: '' },
-        { name: isZH ? '终点' : 'Finish', distance: 0, icon: 'finish', arrivalTime: '', notes: '' }
-      ];
-    }
-
-    populateStartTimeOptions('周五 18:00');
-    state.startTime = dom.inputStartTime ? dom.inputStartTime.value : '周五 18:00';
-    normalizeAllCPs();
-    bindEvents();
-    bindPOIEvents();
-    applyLanguage(); // Automatically translates all static HTML on first load
+  function sortCheckpoints() {
+    state.checkpoints.sort(function (a, b) { return a.distance - b.distance; });
   }
 
-  // ── Event Bindings ──────────────────────────────────────────────────
-  function bindEvents() {
-    // GPX upload
-    dom.btnGpx.addEventListener('click', function () { dom.inputGpx.click(); });
-    dom.inputGpx.addEventListener('change', handleGpxUpload);
-
-    // Race name
-    dom.inputName.addEventListener('input', function () {
-      state.raceName = this.value;
-      scheduleRender();
-    });
-
-    // Start time
-    if (dom.inputStartTime) {
-      dom.inputStartTime.addEventListener('change', function () {
-        state.startTime = this.value;
-        scheduleRender();
-      });
-    }
-
-    // JSON import
-    dom.btnImport.addEventListener('click', function () { dom.inputJson.click(); });
-    dom.inputJson.addEventListener('change', handleJsonImport);
-    dom.btnTemplateJson.addEventListener('click', handleJsonTemplateDownload);
-
-    // JSON export
-    dom.btnExportJson.addEventListener('click', handleJsonExport);
-
-    // Language selector change
-    dom.selectLang.addEventListener('change', function () {
-      state.language = this.value;
-      applyLanguage();
-    });
-
-    // Image export dropdown
-    dom.btnExportImg.addEventListener('click', function (e) {
-      e.stopPropagation();
-      dom.exportMenu.classList.toggle('open');
-    });
-    dom.exportMenu.querySelectorAll('button').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        dom.exportMenu.classList.remove('open');
-        handleImageExport(parseInt(this.dataset.scale, 10));
-      });
-    });
-    document.addEventListener('click', function () {
-      dom.exportMenu.classList.remove('open');
-    });
-
-    // Add CP Point (Inserting after active CP)
-    dom.btnAddCp.addEventListener('click', handleAddCP);
-
-    // Image export ratio change triggers live preview update (Requested)
-    dom.exportRatio.addEventListener('change', scheduleRender);
-  }
-
-  // Add CP point immediately after the selected active CP
   function handleAddCP() {
     var activeCP = state.checkpoints[state.activeCPIndex];
     var newDist = 0;
     if (activeCP) {
-      // Find the next CP in terms of distance
       var sorted = state.checkpoints.slice().sort(function (a, b) { return a.distance - b.distance; });
       var activeIdxInSorted = sorted.indexOf(activeCP);
       if (activeIdxInSorted !== -1 && activeIdxInSorted < sorted.length - 1) {
-        // Place halfway between active and next
         newDist = Math.round(((activeCP.distance + sorted[activeIdxInSorted + 1].distance) / 2) * 100) / 100;
       } else {
         newDist = Math.round((activeCP.distance + 2.0) * 100) / 100;
@@ -646,212 +895,69 @@
       distance: newDist,
       icon: 'classic',
       arrivalTime: '',
+      segmentTime: '',
       notes: ''
     }, state.checkpoints.length);
 
     state.checkpoints.push(newCP);
-    
-    // Sort all checkpoints by distance
     sortCheckpoints();
     normalizeAllCPs();
-
-    // Select the newly added CP as active
     state.activeCPIndex = state.checkpoints.indexOf(newCP);
 
     renderCPTable();
-    renderPOITabs();
     loadActiveCPDetails();
     scheduleRender();
+    if (state.trackData) {
+      TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
+      renderSegmentTable();
+    }
     toast(T[state.language].toastAddCp + newDist + T[state.language].toastAddCpTail);
   }
 
-  function sortCheckpoints() {
-    state.checkpoints.sort(function (a, b) { return a.distance - b.distance; });
-  }
-
-  // ── GPX Upload ──────────────────────────────────────────────────────
-  function handleGpxUpload() {
-    var file = dom.inputGpx.files[0];
-    if (!file) return;
-    state.gpxFileName = file.name;
-
-    TR.gpxParser.parseFile(file).then(function (pts) {
-      state.trackpoints = pts;
-      // Auto-set finish distance
-      var totalDist = pts[pts.length - 1].distance;
-      state.checkpoints.forEach(function (cp) {
-        if (cp.icon === 'finish' && cp.distance === 0) {
-          cp.distance = Math.round(totalDist * 100) / 100;
-        }
-      });
-      sortCheckpoints();
-      normalizeAllCPs();
-      renderCPTable();
-      renderPOITabs();
-      loadActiveCPDetails();
-      renderProfile();
-      toast(T[state.language].toastGpxSuccess + pts.length + T[state.language].toastGpxSuccessMid + totalDist.toFixed(1) + T[state.language].toastGpxSuccessTail);
-    }).catch(function (err) {
-      toast(T[state.language].toastGpxError + err.message);
-    });
-
-    dom.inputGpx.value = '';
-  }
-
-  // ── JSON Import / Export ────────────────────────────────────────────
-  function handleJsonImport() {
-    var file = dom.inputJson.files[0];
-    if (!file) return;
-    var reader = new FileReader();
-    reader.onload = function (e) {
-      try {
-        var data = JSON.parse(e.target.result);
-        if (data.raceName) {
-          state.raceName = data.raceName;
-          dom.inputName.value = data.raceName;
-        }
-        if (data.globalFontSize) {
-          var gfs = parseInt(data.globalFontSize, 10) || 13;
-          state.fontSizeTitle     = gfs + 5;
-          state.fontSizeCPName    = gfs - 1;
-          state.fontSizeCPElev    = gfs - 2;
-          state.fontSizeCPTime    = gfs - 2;
-          state.fontSizeCPNotes   = gfs - 3;
-          state.fontSizeSegment   = gfs - 2;
-          state.fontSizeCumulDist = gfs - 1;
-        }
-        if (data.fontSizeTitle)     state.fontSizeTitle     = parseInt(data.fontSizeTitle, 10);
-        if (data.fontSizeCPName)    state.fontSizeCPName    = parseInt(data.fontSizeCPName, 10);
-        if (data.fontSizeCPElev)    state.fontSizeCPElev    = parseInt(data.fontSizeCPElev, 10);
-        if (data.fontSizeCPTime)    state.fontSizeCPTime    = parseInt(data.fontSizeCPTime, 10);
-        if (data.fontSizeCPNotes)   state.fontSizeCPNotes   = parseInt(data.fontSizeCPNotes, 10);
-        if (data.fontSizeSegment)   state.fontSizeSegment   = parseInt(data.fontSizeSegment, 10);
-        if (data.fontSizeCumulDist) state.fontSizeCumulDist = parseInt(data.fontSizeCumulDist, 10);
-
-        if (data.imageTheme) {
-          state.imageTheme = data.imageTheme;
-        }
-        if (data.language) {
-          state.language = data.language;
-        }
-        if (data.startTime) {
-          state.startTime = data.startTime;
-          populateStartTimeOptions(data.startTime);
-        }
-        if (Array.isArray(data.checkpoints)) {
-          state.checkpoints = data.checkpoints;
-        }
-        sortCheckpoints();
-        normalizeAllCPs();
-        state.activeCPIndex = 0;
-        applyLanguage();
-        toast(T[state.language].toastImportSuccess);
-      } catch (err) {
-        toast(T[state.language].toastImportError + err.message);
-      }
-    };
-    reader.readAsText(file);
-    dom.inputJson.value = '';
-  }
-
-  function handleJsonExport() {
-    var data = {
-      raceName: state.raceName,
-      fontSizeTitle: state.fontSizeTitle,
-      fontSizeCPName: state.fontSizeCPName,
-      fontSizeCPElev: state.fontSizeCPElev,
-      fontSizeCPTime: state.fontSizeCPTime,
-      fontSizeCPNotes: state.fontSizeCPNotes,
-      fontSizeSegment: state.fontSizeSegment,
-      fontSizeCumulDist: state.fontSizeCumulDist,
-      imageTheme: state.imageTheme,
-      language: state.language,
-      startTime: state.startTime || '',
-      checkpoints: state.checkpoints
-    };
-    var json = JSON.stringify(data, null, 2);
-    var blob = new Blob([json], { type: 'application/json' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = (state.raceName || 'roadbook') + '.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
-    toast(T[state.language].toastExportSuccess);
-  }
-
-  // ── Image Export ────────────────────────────────────────────────────
-  function handleImageExport(scale) {
-    if (!state.trackpoints) {
-      toast(T[state.language].toastGpxFirst);
-      return;
-    }
-    var svgEl = dom.profileContainer.querySelector('svg');
-    if (!svgEl) {
-      toast('Error: SVG not found.');
-      return;
-    }
-    var filename = (state.raceName || 'roadbook').replace(/[^a-zA-Z0-9_\-\u4e00-\u9fff]/g, '_');
-    var ratio = dom.exportRatio.value;
-
-    TR.exporter.exportToPNG(svgEl, scale, filename, ratio);
-    toast(T[state.language].toastExporting + scale + '× PNG (' + ratio + ')…');
-  }
-
-  // ── CP Table Rendering ──────────────────────────────────────────────
+  // ── CP Table Rendering & Editing ────────────────────────────────────
   function renderCPTable() {
     dom.cpTbody.innerHTML = '';
-    
     var sortedCps = state.checkpoints.slice();
     var lang = state.language;
-    
+
     sortedCps.forEach(function (cp, idx) {
       var globalIdx = state.checkpoints.indexOf(cp);
       var isSelected = (globalIdx === state.activeCPIndex);
       var tr = document.createElement('tr');
       if (isSelected) tr.classList.add('selected-row');
-      
-      // Dynamic sequence label: S, 1, 2, 3..., F
-      var seqLabel = (idx === 0) ? 'S' : (idx === sortedCps.length - 1 ? 'F' : idx);
 
+      var seqLabel = (idx === 0) ? 'S' : (idx === sortedCps.length - 1 ? 'F' : idx);
       var detailsHtml = '';
+
       if (idx > 0) {
         var cpPrev = sortedCps[idx - 1];
         var cpCurr = cp;
         var segDist = cpCurr.distance - cpPrev.distance;
-        var segDPlus = 0;
-        var segDMinus = 0;
+        var segDPlus = 0, segDMinus = 0;
+
         if (state.trackpoints && state.trackpoints.length > 0) {
-          var stats = TR.utils.segmentStats(state.trackpoints, cpPrev.distance, cpCurr.distance);
+          var stats = TR.utils.segmentStats(state.trackpoints, cpPrev.distance, cpCurr.distance, state.elevationMode);
           segDPlus = stats.dPlus;
           segDMinus = stats.dMinus;
         }
+
         var segTimeMins = TR.utils.parseTime(cpCurr.segmentTime || '');
-        
         var targetTimeStr = TR.utils.formatTime(segTimeMins);
-        
-        // Compute passage time (clock time at this CP)
+
         var cumulMins = 0;
         for (var ci = 1; ci <= idx; ci++) {
           cumulMins += TR.utils.parseTime(sortedCps[ci].segmentTime || '') + (sortedCps[ci].stopDuration || 0);
         }
-        var passageStr = '';
-        if (state.startTime) {
-          var startInfo = parseStartTime(state.startTime);
-          passageStr = formatArrivalTime(startInfo, cumulMins, lang);
-        } else {
-          passageStr = '+' + TR.utils.formatTime(cumulMins);
-        }
-        
-        // Nutrition hourly targets
+        var startInfo = parseStartTime(state.startTime);
+        var passageStr = formatArrivalTime(startInfo, cumulMins, lang);
+
         var water = cpCurr.water || 0;
         var carbs = cpCurr.carbs || 0;
         var sodium = cpCurr.sodium || 0;
         var caffeine = cpCurr.caffeine || 0;
         var stopStr = (cpCurr.stopDuration > 0) ? ' · ⏸ ' + cpCurr.stopDuration + 'min' : '';
-        
-        detailsHtml = 
+
+        detailsHtml =
           '<td class="col-details">' +
           '  <div class="seg-stats-row">' +
           '    <span>' + segDist.toFixed(1) + ' km</span> · ' +
@@ -873,17 +979,15 @@
       tr.innerHTML =
         '<td class="col-num">' + seqLabel + '</td>' +
         '<td class="col-name"><input type="text" data-idx="' + globalIdx + '" data-field="name" value="' + esc(cp.name) + '" placeholder="' + T[lang].placeholderCpNameInput + '"></td>' +
-        '<td class="col-dist"><input type="number" data-idx="' + globalIdx + '" data-field="distance" value="' + cp.distance + '" step="0.1" min="0" placeholder="0.0"></td>' +
+        '<td class="col-dist"><input type="number" data-idx="' + globalIdx + '" data-field="distance" value="' + cp.distance + '" step="0.1" min="0"></td>' +
         '<td class="col-time"><input type="text" data-idx="' + globalIdx + '" data-field="segmentTime" value="' + esc(cp.segmentTime || '') + '" placeholder="' + T[lang].placeholderTimeInput + '"' + (idx === 0 ? ' disabled' : '') + '></td>' +
         '<td class="col-action"><button class="btn-delete" data-idx="' + globalIdx + '" title="' + T[lang].deleteCpTitle + '">✕</button></td>' +
         detailsHtml;
-      
-      // Highlight row on click
+
       tr.addEventListener('click', function (e) {
         if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'BUTTON') {
           state.activeCPIndex = globalIdx;
           renderCPTable();
-          renderPOITabs();
           loadActiveCPDetails();
         }
       });
@@ -891,12 +995,11 @@
       dom.cpTbody.appendChild(tr);
     });
 
-    // Bind events on inputs
-    dom.cpTbody.querySelectorAll('input, select, textarea').forEach(function (el) {
+    dom.cpTbody.querySelectorAll('input').forEach(function (el) {
       el.addEventListener('change', handleCPTableChange);
       el.addEventListener('input', handleCPTableChange);
     });
-    
+
     dom.cpTbody.querySelectorAll('.btn-delete').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -907,33 +1010,32 @@
   }
 
   function handleCPTableChange(e) {
-    var idx   = parseInt(e.target.dataset.idx, 10);
+    var idx = parseInt(e.target.dataset.idx, 10);
     var field = e.target.dataset.field;
-    var val   = e.target.value;
+    var val = e.target.value;
 
     if (field === 'distance') {
       val = parseFloat(val) || 0;
       state.checkpoints[idx].distance = val;
-      
       var curCP = state.checkpoints[idx];
       sortCheckpoints();
       state.activeCPIndex = state.checkpoints.indexOf(curCP);
       updateArrivalTimes();
       renderCPTable();
-      renderPOITabs();
     } else if (field === 'segmentTime') {
       state.checkpoints[idx].segmentTime = val;
       updateArrivalTimes();
       renderCPTable();
-    } else if (field === 'icon') {
-      state.checkpoints[idx].icon = val;
-      state.checkpoints[idx].axisColor = getLegacyCPLineColor(val);
     } else {
       state.checkpoints[idx][field] = val;
     }
 
     loadActiveCPDetails();
     scheduleRender();
+    if (state.trackData) {
+      TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
+      renderSegmentTable();
+    }
   }
 
   function handleDeleteCP(idx) {
@@ -942,38 +1044,19 @@
       return;
     }
     state.checkpoints.splice(idx, 1);
-    
-    // Adjust active index
     if (state.activeCPIndex >= state.checkpoints.length) {
       state.activeCPIndex = state.checkpoints.length - 1;
     }
-    
     sortCheckpoints();
     normalizeAllCPs();
     renderCPTable();
-    renderPOITabs();
     loadActiveCPDetails();
     scheduleRender();
+    if (state.trackData) {
+      TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
+      renderSegmentTable();
+    }
     toast(T[state.language].toastDeleted);
-  }
-
-  function iconOptions(selected) {
-    var lang = state.language;
-    var dict = T[lang];
-    var opts = [
-      ['start',      dict.iconStart],
-      ['finish',     dict.iconFinish],
-      ['assisted',   dict.iconAssisted],
-      ['dropbag',    dict.iconDropbag],
-      ['classic',    dict.iconClassic],
-      ['water',      dict.iconWater],
-      ['checkpoint', dict.iconCheckpoint],
-      ['peak',       dict.iconPeak],
-      ['danger',     dict.iconDanger]
-    ];
-    return opts.map(function (o) {
-      return '<option value="' + o[0] + '"' + (o[0] === selected ? ' selected' : '') + '>' + o[1] + '</option>';
-    }).join('');
   }
 
   function esc(str) {
@@ -981,86 +1064,59 @@
     return str.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  // ── Points of Interest Sidebar Panel ───────────────────────────────
+  // ── POI Event Handlers ──────────────────────────────────────────────
   function bindPOIEvents() {
-    // Horizontal Tab scroll (left/right)
-    if (dom.btnPoiTabUp) {
-      dom.btnPoiTabUp.addEventListener('click', function () {
-        dom.poiTabs.scrollLeft -= 80;
-      });
-    }
-    if (dom.btnPoiTabDown) {
-      dom.btnPoiTabDown.addEventListener('click', function () {
-        dom.poiTabs.scrollLeft += 80;
-      });
-    }
-
-    // Bidirectional sync for Right-side CP Details Panel inputs
     if (dom.poiNameDetail) {
       dom.poiNameDetail.addEventListener('input', function () {
-        var activeCP = state.checkpoints[state.activeCPIndex];
-        if (activeCP) {
-          activeCP.name = this.value;
-          renderCPTable(); // Sync to left table
-          scheduleRender(); // Redraw chart
+        var cp = state.checkpoints[state.activeCPIndex];
+        if (cp) {
+          cp.name = this.value;
+          renderCPTable();
+          scheduleRender();
         }
       });
     }
     if (dom.poiTimeDetail) {
       dom.poiTimeDetail.addEventListener('input', function () {
-        var activeCP = state.checkpoints[state.activeCPIndex];
-        if (activeCP) {
-          activeCP.arrivalTime = this.value;
-          renderCPTable(); // Sync to left table
-          scheduleRender(); // Redraw chart
+        var cp = state.checkpoints[state.activeCPIndex];
+        if (cp) {
+          cp.segmentTime = this.value;
+          updateArrivalTimes();
+          renderCPTable();
+          scheduleRender();
         }
       });
     }
     if (dom.poiNotesDetail) {
       dom.poiNotesDetail.addEventListener('input', function () {
-        var activeCP = state.checkpoints[state.activeCPIndex];
-        if (activeCP) {
-          activeCP.notes = this.value;
-          renderCPTable(); // Sync to left table
-          scheduleRender(); // Redraw chart
+        var cp = state.checkpoints[state.activeCPIndex];
+        if (cp) {
+          cp.notes = this.value;
+          renderCPTable();
+          scheduleRender();
         }
       });
     }
 
-    // Bidirectional color picker binding
-    function bindColorPicker(pickerEl, hexEl, updateCallback) {
-      pickerEl.addEventListener('input', function () {
-        hexEl.value = this.value;
-        updateCallback(this.value);
-      });
+    function bindColorPicker(pickerEl, hexEl, cb) {
+      if (!pickerEl || !hexEl) return;
+      pickerEl.addEventListener('input', function () { hexEl.value = this.value; cb(this.value); });
       hexEl.addEventListener('change', function () {
-        var val = this.value;
-        if (/^#[0-9A-F]{6}$/i.test(val)) {
-          pickerEl.value = val;
-          updateCallback(val);
-        }
+        if (/^#[0-9A-F]{6}$/i.test(this.value)) { pickerEl.value = this.value; cb(this.value); }
       });
     }
 
-    // Bind Axis color
     bindColorPicker(dom.poiAxisColor, dom.poiAxisColorHex, function (col) {
-      var activeCP = state.checkpoints[state.activeCPIndex];
-      if (activeCP) {
-        activeCP.axisColor = col;
-        scheduleRender();
-      }
+      var cp = state.checkpoints[state.activeCPIndex];
+      if (cp) { cp.axisColor = col; scheduleRender(); }
     });
 
-    // Bind Text color
     bindColorPicker(dom.poiTextColor, dom.poiTextColorHex, function (col) {
-      var activeCP = state.checkpoints[state.activeCPIndex];
-      if (activeCP) {
-        activeCP.textColor = col;
-        scheduleRender();
-      }
+      var cp = state.checkpoints[state.activeCPIndex];
+      if (cp) { cp.textColor = col; scheduleRender(); }
     });
 
-    // Bind 7 Granular Font Size number inputs (Requested)
+    // Font size inputs
     var fsMap = {
       'fs-title': 'fontSizeTitle',
       'fs-cpname': 'fontSizeCPName',
@@ -1071,129 +1127,71 @@
       'fs-cumuldist': 'fontSizeCumulDist'
     };
     Object.keys(fsMap).forEach(function (id) {
-      var inputEl = document.getElementById(id);
-      if (inputEl) {
-        var handler = function () {
-          state[fsMap[id]] = parseInt(this.value, 10) || 10;
+      var el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', function () {
+          state[fsMap[id]] = parseInt(this.value, 10) || 12;
           scheduleRender();
-        };
-        inputEl.addEventListener('change', handler);
-        inputEl.addEventListener('input', handler);
+        });
       }
     });
 
-    // Form fields changes
     dom.poiIntermediate.addEventListener('change', function () {
-      var activeCP = state.checkpoints[state.activeCPIndex];
-      if (activeCP) {
-        activeCP.useForIntermediateDistances = this.checked;
-        scheduleRender();
-      }
+      var cp = state.checkpoints[state.activeCPIndex];
+      if (cp) { cp.useForIntermediateDistances = this.checked; scheduleRender(); }
     });
 
     dom.poiPosition.addEventListener('change', function () {
-      var activeCP = state.checkpoints[state.activeCPIndex];
-      if (activeCP) {
-        activeCP.distance = parseFloat(this.value) || 0;
+      var cp = state.checkpoints[state.activeCPIndex];
+      if (cp) {
+        cp.distance = parseFloat(this.value) || 0;
         sortCheckpoints();
-        state.activeCPIndex = state.checkpoints.indexOf(activeCP);
+        state.activeCPIndex = state.checkpoints.indexOf(cp);
         renderCPTable();
-        renderPOITabs();
         scheduleRender();
       }
     });
 
-    var handlerIconSize = function () {
-      var activeCP = state.checkpoints[state.activeCPIndex];
-      if (activeCP) {
-        activeCP.iconSize = parseInt(this.value, 10) || 22;
-        scheduleRender();
-      }
-    };
-    if (dom.poiIconSize) {
-      dom.poiIconSize.addEventListener('change', handlerIconSize);
-      dom.poiIconSize.addEventListener('input', handlerIconSize);
-    }
-
-    var handlerIconRotation = function () {
-      var activeCP = state.checkpoints[state.activeCPIndex];
-      if (activeCP) {
-        activeCP.iconRotation = parseInt(this.value, 10) || 0;
-        scheduleRender();
-      }
-    };
-    if (dom.poiIconRotation) {
-      dom.poiIconRotation.addEventListener('change', handlerIconRotation);
-      dom.poiIconRotation.addEventListener('input', handlerIconRotation);
-    }
-
-    // Single icon select binding
     if (dom.poiIconSelect) {
       dom.poiIconSelect.addEventListener('change', function () {
-        var activeCP = state.checkpoints[state.activeCPIndex];
-        if (activeCP) {
-          activeCP.icon = this.value;
-          activeCP.axisColor = getLegacyCPLineColor(this.value);
-          renderCPTable();
-          scheduleRender();
-        }
+        var cp = state.checkpoints[state.activeCPIndex];
+        if (cp) { cp.icon = this.value; scheduleRender(); }
       });
     }
 
-    // Stop duration binding
     if (dom.poiStopDuration) {
-      var handlerStopDuration = function () {
-        var activeCP = state.checkpoints[state.activeCPIndex];
-        if (activeCP) {
-          activeCP.stopDuration = parseInt(this.value, 10) || 0;
+      dom.poiStopDuration.addEventListener('input', function () {
+        var cp = state.checkpoints[state.activeCPIndex];
+        if (cp) {
+          cp.stopDuration = parseInt(this.value, 10) || 0;
           updateArrivalTimes();
           renderCPTable();
           scheduleRender();
         }
-      };
-      dom.poiStopDuration.addEventListener('change', handlerStopDuration);
-      dom.poiStopDuration.addEventListener('input', handlerStopDuration);
-    }
-
-    var handlerAxisThickness = function () {
-      var activeCP = state.checkpoints[state.activeCPIndex];
-      if (activeCP) {
-        activeCP.axisThickness = parseInt(this.value, 10) || 1;
-        scheduleRender();
-      }
-    };
-    dom.poiAxisThickness.addEventListener('change', handlerAxisThickness);
-    dom.poiAxisThickness.addEventListener('input', handlerAxisThickness);
-
-    if (dom.poiAxisBroken) {
-      dom.poiAxisBroken.addEventListener('change', function () {
-        var activeCP = state.checkpoints[state.activeCPIndex];
-        if (activeCP) {
-          activeCP.axisBroken = this.checked;
-          scheduleRender();
-        }
       });
     }
 
-    var handlerTextSize = function () {
-      var activeCP = state.checkpoints[state.activeCPIndex];
-      if (activeCP) {
-        activeCP.textSize = parseInt(this.value, 10) || 18;
-        scheduleRender();
-      }
-    };
-    dom.poiTextSize.addEventListener('change', handlerTextSize);
-    dom.poiTextSize.addEventListener('input', handlerTextSize);
+    if (dom.poiAxisThickness) {
+      dom.poiAxisThickness.addEventListener('input', function () {
+        var cp = state.checkpoints[state.activeCPIndex];
+        if (cp) { cp.axisThickness = parseInt(this.value, 10) || 1; scheduleRender(); }
+      });
+    }
 
-    dom.poiTextOrientation.addEventListener('change', function () {
-      var activeCP = state.checkpoints[state.activeCPIndex];
-      if (activeCP) {
-        activeCP.textOrientation = this.value;
-        scheduleRender();
-      }
-    });
+    if (dom.poiTextSize) {
+      dom.poiTextSize.addEventListener('input', function () {
+        var cp = state.checkpoints[state.activeCPIndex];
+        if (cp) { cp.textSize = parseInt(this.value, 10) || 18; scheduleRender(); }
+      });
+    }
 
-    // Associated texts input bindings
+    if (dom.poiTextOrientation) {
+      dom.poiTextOrientation.addEventListener('change', function () {
+        var cp = state.checkpoints[state.activeCPIndex];
+        if (cp) { cp.textOrientation = this.value; scheduleRender(); }
+      });
+    }
+
     var textMap = {
       'poi-txt-left-bottom': 'leftBottom',
       'poi-txt-left-middle': 'leftMiddle',
@@ -1203,102 +1201,85 @@
       'poi-txt-right-top':   'rightTop'
     };
     Object.keys(textMap).forEach(function (id) {
-      document.getElementById(id).addEventListener('input', function () {
-        var activeCP = state.checkpoints[state.activeCPIndex];
-        if (activeCP) {
-          activeCP.texts[textMap[id]] = this.value;
-          scheduleRender();
-        }
-      });
+      var el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', function () {
+          var cp = state.checkpoints[state.activeCPIndex];
+          if (cp) { cp.texts[textMap[id]] = this.value; scheduleRender(); }
+        });
+      }
     });
 
-    // (Legacy multi-icon bindings removed, using single icon select above)
-
-    // Nutrition inputs bindings
-    if (dom.poiWater) {
-      dom.poiWater.addEventListener('change', function () {
-        var activeCP = state.checkpoints[state.activeCPIndex];
-        if (activeCP) {
-          activeCP.water = parseFloat(this.value) || 0;
-          renderCPTable();
-          scheduleRender();
-        }
-      });
-    }
-    if (dom.poiCarbs) {
-      dom.poiCarbs.addEventListener('change', function () {
-        var activeCP = state.checkpoints[state.activeCPIndex];
-        if (activeCP) {
-          activeCP.carbs = parseFloat(this.value) || 0;
-          renderCPTable();
-          scheduleRender();
-        }
-      });
-    }
-    if (dom.poiSodium) {
-      dom.poiSodium.addEventListener('change', function () {
-        var activeCP = state.checkpoints[state.activeCPIndex];
-        if (activeCP) {
-          activeCP.sodium = parseFloat(this.value) || 0;
-          renderCPTable();
-          scheduleRender();
-        }
-      });
-    }
-    if (dom.poiCaffeine) {
-      dom.poiCaffeine.addEventListener('change', function () {
-        var activeCP = state.checkpoints[state.activeCPIndex];
-        if (activeCP) {
-          activeCP.caffeine = parseFloat(this.value) || 0;
-          renderCPTable();
-          scheduleRender();
-        }
-      });
-    }
-  }
-
-  // Render navigation tabs in POI panel
-  function renderPOITabs() {
-    if (!dom.poiTabs) return;
-    dom.poiTabs.innerHTML = '';
-    var lang = state.language;
-    
-    state.checkpoints.forEach(function (cp, idx) {
-      var isSelected = (idx === state.activeCPIndex);
-      var tab = document.createElement('button');
-      tab.className = 'poi-tab' + (isSelected ? ' active' : '');
-      
-      // Auto Label CP (S / 1 / 2... / F)
-      var seqLabel = (idx === 0) ? 'S' : (idx === state.checkpoints.length - 1 ? 'F' : idx);
-      tab.textContent = seqLabel + ': ' + (cp.distance.toFixed(1)) + 'k';
-      
-      tab.addEventListener('click', function () {
-        state.activeCPIndex = idx;
-        renderCPTable();
-        renderPOITabs();
-        loadActiveCPDetails();
-      });
-      dom.poiTabs.appendChild(tab);
+    ['poi-water', 'poi-carbs', 'poi-sodium', 'poi-caffeine'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) {
+        var prop = id.replace('poi-', '');
+        el.addEventListener('change', function () {
+          var cp = state.checkpoints[state.activeCPIndex];
+          if (cp) {
+            cp[prop] = parseFloat(this.value) || 0;
+            renderCPTable();
+            scheduleRender();
+          }
+        });
+      }
     });
-
-    var addTab = document.createElement('button');
-    addTab.className = 'poi-tab poi-tab-add';
-    addTab.textContent = T[lang].poiTabAdd;
-    addTab.addEventListener('click', handleAddCP);
-    dom.poiTabs.appendChild(addTab);
   }
 
-  // Helper to sync select values and create custom options if needed
+  function loadActiveCPDetails() {
+    var cp = state.checkpoints[state.activeCPIndex];
+    if (!cp) return;
+
+    dom.poiIntermediate.checked = !!cp.useForIntermediateDistances;
+    dom.poiPosition.value = cp.distance;
+    if (dom.poiIconSelect) dom.poiIconSelect.value = cp.icon || 'classic';
+    if (dom.poiStopDuration) {
+      dom.poiStopDuration.value = cp.stopDuration || 0;
+      dom.poiStopDuration.disabled = (state.activeCPIndex === 0);
+    }
+
+    if (dom.poiNameDetail) dom.poiNameDetail.value = cp.name || '';
+    if (dom.poiTimeDetail) {
+      dom.poiTimeDetail.value = cp.segmentTime || '';
+      dom.poiTimeDetail.disabled = (state.activeCPIndex === 0);
+    }
+    if (dom.poiNotesDetail) dom.poiNotesDetail.value = cp.notes || '';
+
+    syncSelectValue(dom.poiWater, cp.water || 0);
+    syncSelectValue(dom.poiCarbs, cp.carbs || 0);
+    syncSelectValue(dom.poiSodium, cp.sodium || 0);
+    syncSelectValue(dom.poiCaffeine, cp.caffeine || 0);
+
+    if (dom.fsTitle) dom.fsTitle.value = state.fontSizeTitle;
+    if (dom.fsCPName) dom.fsCPName.value = state.fontSizeCPName;
+    if (dom.fsCPElev) dom.fsCPElev.value = state.fontSizeCPElev;
+    if (dom.fsCPTime) dom.fsCPTime.value = state.fontSizeCPTime;
+    if (dom.fsCPNotes) dom.fsCPNotes.value = state.fontSizeCPNotes;
+    if (dom.fsSegment) dom.fsSegment.value = state.fontSizeSegment;
+    if (dom.fsCumulDist) dom.fsCumulDist.value = state.fontSizeCumulDist;
+
+    dom.poiAxisColor.value = cp.axisColor || '#4e4e4e';
+    dom.poiAxisColorHex.value = cp.axisColor || '#4e4e4e';
+    dom.poiAxisThickness.value = cp.axisThickness || 1;
+    dom.poiTextColor.value = cp.textColor || '#1e293b';
+    dom.poiTextColorHex.value = cp.textColor || '#1e293b';
+    dom.poiTextSize.value = cp.textSize || 18;
+    dom.poiTextOrientation.value = cp.textOrientation || 'To the right';
+
+    dom.poiTxtLeftBottom.value = cp.texts.leftBottom || '';
+    dom.poiTxtLeftMiddle.value = cp.texts.leftMiddle || '';
+    dom.poiTxtLeftTop.value = cp.texts.leftTop || '';
+    dom.poiTxtRightBottom.value = cp.texts.rightBottom || '';
+    dom.poiTxtRightMiddle.value = cp.texts.rightMiddle || '';
+    dom.poiTxtRightTop.value = cp.texts.rightTop || '';
+  }
+
   function syncSelectValue(selectEl, value) {
     if (!selectEl) return;
     var valStr = String(value);
-    // Check if option exists
     var exists = false;
     for (var i = 0; i < selectEl.options.length; i++) {
-      if (selectEl.options[i].value === valStr) {
-        exists = true;
-        break;
-      }
+      if (selectEl.options[i].value === valStr) { exists = true; break; }
     }
     if (!exists && valStr && valStr !== '0' && valStr !== 'undefined') {
       var opt = document.createElement('option');
@@ -1314,90 +1295,23 @@
     selectEl.value = valStr;
   }
 
-  // Load details of the active CP into form controls
-  function loadActiveCPDetails() {
-    var cp = state.checkpoints[state.activeCPIndex];
-    if (!cp) return;
-
-    dom.poiIntermediate.checked = !!cp.useForIntermediateDistances;
-    dom.poiPosition.value = cp.distance;
-    if (dom.poiIconSize) dom.poiIconSize.value = cp.iconSize;
-    if (dom.poiIconRotation) dom.poiIconRotation.value = cp.iconRotation;
-    if (dom.poiIconSelect) dom.poiIconSelect.value = cp.icon || 'classic';
-    if (dom.poiStopDuration) {
-      dom.poiStopDuration.value = cp.stopDuration || 0;
-      dom.poiStopDuration.disabled = (state.activeCPIndex === 0);
-    }
-
-    // Basic CP details input synchronization
-    if (dom.poiNameDetail) dom.poiNameDetail.value = cp.name || '';
-    if (dom.poiTimeDetail) {
-      dom.poiTimeDetail.value = cp.segmentTime || '';
-      dom.poiTimeDetail.disabled = (state.activeCPIndex === 0);
-    }
-    if (dom.poiNotesDetail) dom.poiNotesDetail.value = cp.notes || '';
-
-    // Nutrition details sync (Sisyf style select dropdowns)
-    syncSelectValue(dom.poiWater, cp.water || 0);
-    syncSelectValue(dom.poiCarbs, cp.carbs || 0);
-    syncSelectValue(dom.poiSodium, cp.sodium || 0);
-    syncSelectValue(dom.poiCaffeine, cp.caffeine || 0);
-
-    // Granular Font Sizes sync (Requested)
-    if (dom.fsTitle) dom.fsTitle.value = state.fontSizeTitle;
-    if (dom.fsCPName) dom.fsCPName.value = state.fontSizeCPName;
-    if (dom.fsCPElev) dom.fsCPElev.value = state.fontSizeCPElev;
-    if (dom.fsCPTime) dom.fsCPTime.value = state.fontSizeCPTime;
-    if (dom.fsCPNotes) dom.fsCPNotes.value = state.fontSizeCPNotes;
-    if (dom.fsSegment) dom.fsSegment.value = state.fontSizeSegment;
-    if (dom.fsCumulDist) dom.fsCumulDist.value = state.fontSizeCumulDist;
-
-    // Axis settings
-    dom.poiAxisColor.value = cp.axisColor || '#4e4e4e';
-    dom.poiAxisColorHex.value = cp.axisColor || '#4e4e4e';
-    dom.poiAxisThickness.value = cp.axisThickness;
-    if (dom.poiAxisBroken) dom.poiAxisBroken.checked = !!cp.axisBroken;
-
-    // Associated texts
-    dom.poiTextColor.value = cp.textColor || '#4e4e4e';
-    dom.poiTextColorHex.value = cp.textColor || '#4e4e4e';
-    dom.poiTextSize.value = cp.textSize;
-    dom.poiTextOrientation.value = cp.textOrientation || 'To the right';
-
-    dom.poiTxtLeftBottom.value  = cp.texts.leftBottom || '';
-    dom.poiTxtLeftMiddle.value  = cp.texts.leftMiddle || '';
-    dom.poiTxtLeftTop.value     = cp.texts.leftTop || '';
-    dom.poiTxtRightBottom.value = cp.texts.rightBottom || '';
-    dom.poiTxtRightMiddle.value = cp.texts.rightMiddle || '';
-    dom.poiTxtRightTop.value    = cp.texts.rightTop || '';
-
-    // Single icon select sync
-    if (dom.poiIconSelect) {
-      dom.poiIconSelect.value = cp.icon || 'classic';
-    }
-  }
-
-  // ── Start Time Parsing & Arrival formatting ───────────────────────────
   function parseStartTime(str) {
     str = (str || '周五 18:00').toLowerCase();
-    var dayOffset = 4; // Default Friday (0 = Mon, 1 = Tue, 2 = Wed, 3 = Thu, 4 = Fri, 5 = Sat, 6 = Sun)
-    
-    if (str.indexOf('mon') !== -1 || str.indexOf('一') !== -1 || str.indexOf('lun') !== -1) dayOffset = 0;
-    else if (str.indexOf('tue') !== -1 || str.indexOf('二') !== -1 || str.indexOf('mar') !== -1) dayOffset = 1;
-    else if (str.indexOf('wed') !== -1 || str.indexOf('三') !== -1 || str.indexOf('mer') !== -1) dayOffset = 2;
-    else if (str.indexOf('thu') !== -1 || str.indexOf('四') !== -1 || str.indexOf('jeu') !== -1) dayOffset = 3;
-    else if (str.indexOf('fri') !== -1 || str.indexOf('五') !== -1 || str.indexOf('ven') !== -1) dayOffset = 4;
-    else if (str.indexOf('sat') !== -1 || str.indexOf('六') !== -1 || str.indexOf('sam') !== -1) dayOffset = 5;
-    else if (str.indexOf('sun') !== -1 || str.indexOf('日') !== -1 || str.indexOf('dim') !== -1) dayOffset = 6;
-    
+    var dayOffset = 4;
+    if (str.indexOf('mon') !== -1 || str.indexOf('一') !== -1) dayOffset = 0;
+    else if (str.indexOf('tue') !== -1 || str.indexOf('二') !== -1) dayOffset = 1;
+    else if (str.indexOf('wed') !== -1 || str.indexOf('三') !== -1) dayOffset = 2;
+    else if (str.indexOf('thu') !== -1 || str.indexOf('四') !== -1) dayOffset = 3;
+    else if (str.indexOf('fri') !== -1 || str.indexOf('五') !== -1) dayOffset = 4;
+    else if (str.indexOf('sat') !== -1 || str.indexOf('六') !== -1) dayOffset = 5;
+    else if (str.indexOf('sun') !== -1 || str.indexOf('日') !== -1) dayOffset = 6;
+
     var timeMatch = str.match(/(\d{1,2})[:：](\d{2})/);
-    var hour = 6; // Default 6:00
-    var min = 0;
+    var hour = 6, min = 0;
     if (timeMatch) {
       hour = parseInt(timeMatch[1], 10);
       min = parseInt(timeMatch[2], 10);
     }
-    
     return { dayOffset: dayOffset, hour: hour, min: min };
   }
 
@@ -1407,45 +1321,27 @@
     var restMins = totalMins % (24 * 60);
     var hour = Math.floor(restMins / 60);
     var min = restMins % 60;
-    
     var daysZH = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
     var daysEN = ['Mon.', 'Tue.', 'Wed.', 'Thu.', 'Fri.', 'Sat.', 'Sun.'];
-    var daysFR = ['lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.']; // Sisyf style french
-    
-    var dayStr = '';
-    if (lang === 'zh') dayStr = daysZH[day];
-    else if (lang === 'fr') dayStr = daysFR[day];
-    else dayStr = daysEN[day];
-    
+    var dayStr = (lang === 'zh') ? daysZH[day] : daysEN[day];
     return dayStr + ' ' + (hour < 10 ? '0' : '') + hour + ':' + (min < 10 ? '0' : '') + min;
   }
 
-  // ── Update Summary Panel and Verification Checklist ───────────────────
   function updateSummaryAndChecks() {
     if (!dom.summaryContent || !dom.checksContent) return;
-    
     var lang = state.language;
     var dict = T[lang];
 
-    // 1. Gather stats
-    var totalDist = 0;
-    var totalDPlus = 0;
-    var totalDMinus = 0;
-
-    if (state.trackpoints && state.trackpoints.length > 0) {
-      var stats = TR.utils.segmentStats(state.trackpoints, 0, state.trackpoints[state.trackpoints.length - 1].distance);
-      totalDist = stats.distance;
-      totalDPlus = stats.dPlus;
-      totalDMinus = stats.dMinus;
-    } else {
-      if (state.checkpoints.length > 0) {
-        totalDist = state.checkpoints[state.checkpoints.length - 1].distance;
-      }
+    var totalDist = 0, totalDPlus = 0, totalDMinus = 0;
+    if (state.trackData) {
+      totalDist = state.trackData.totalDistance;
+      totalDPlus = state.trackData.totalAscent;
+      totalDMinus = state.trackData.totalDescent;
+    } else if (state.checkpoints.length > 0) {
+      totalDist = state.checkpoints[state.checkpoints.length - 1].distance;
     }
 
-    // Target Time (base prediction, including stop durations)
-    var totalTargetMinutes = 0;
-    var totalStopMinutes = 0;
+    var totalTargetMinutes = 0, totalStopMinutes = 0;
     state.checkpoints.forEach(function (cp, idx) {
       if (idx > 0) {
         totalTargetMinutes += TR.utils.parseTime(cp.segmentTime || '');
@@ -1458,40 +1354,20 @@
     var optMins = Math.round(totalTargetMinutes * 0.95);
     var pesMins = Math.round(totalTargetMinutes * 1.08);
 
-    var optTimeStr = TR.utils.formatTime(optMins);
-    var pesTimeStr = TR.utils.formatTime(pesMins);
-
-    // Arrival Day/Times
     var startInfo = parseStartTime(state.startTime);
     var arrivalStr = formatArrivalTime(startInfo, totalTargetMinutes, lang);
     var optArrivalStr = formatArrivalTime(startInfo, optMins, lang);
     var pesArrivalStr = formatArrivalTime(startInfo, pesMins, lang);
 
-    // Hydration and Nutrition
-    var totalWater = 0;
-    var totalCarbs = 0;
-    var totalSodium = 0;
-    var totalCaffeine = 0;
-
+    var totalWater = 0, totalCarbs = 0, totalSodium = 0, totalCaffeine = 0;
     state.checkpoints.forEach(function (cp, idx) {
       if (idx > 0) {
-        var segTimeMins = TR.utils.parseTime(cp.segmentTime || '');
-        var segHours = segTimeMins / 60;
-        
-        var wRate = parseFloat(cp.water) || 0;
-        var cRate = parseFloat(cp.carbs) || 0;
-        var sConc = parseFloat(cp.sodium) || 0;
-        var cafRate = parseFloat(cp.caffeine) || 0;
-        
-        var segWater = wRate * segHours;
-        var segCarbs = cRate * segHours;
-        var segCaff = cafRate;
-        var segSod = segWater * (sConc / 1000);
-        
+        var segHours = TR.utils.parseTime(cp.segmentTime || '') / 60;
+        var segWater = (parseFloat(cp.water) || 0) * segHours;
         totalWater += segWater;
-        totalCarbs += segCarbs;
-        totalCaffeine += segCaff;
-        totalSodium += segSod;
+        totalCarbs += (parseFloat(cp.carbs) || 0) * segHours;
+        totalCaffeine += (parseFloat(cp.caffeine) || 0);
+        totalSodium += segWater * ((parseFloat(cp.sodium) || 0) / 1000);
       }
     });
 
@@ -1499,22 +1375,20 @@
     var avgWater = totalHours > 0 ? Math.round(totalWater / totalHours) : 0;
     var avgCarbs = totalHours > 0 ? (totalCarbs / totalHours).toFixed(1) : '0.0';
     var avgCaffeine = totalHours > 0 ? (totalCaffeine / totalHours).toFixed(1) : '0.0';
-    var avgSodium = totalWater > 0 ? Math.round((totalSodium * 1000) / totalWater) : 0; // mg/L of water
-
+    var avgSodium = totalWater > 0 ? Math.round((totalSodium * 1000) / totalWater) : 0;
     var sugarCubes = Math.round(totalCarbs / 5);
 
-    // Render Summary HTML
-    var summaryHtml = 
+    var summaryHtml =
       '<div class="summary-group">' +
       '  <div class="summary-group-title">' + dict.labelCourse + '</div>' +
       '  <div class="summary-row"><span class="summary-label">Distance</span><span class="summary-val">' + totalDist.toFixed(1) + ' km</span></div>' +
-      '  <div class="summary-row"><span class="summary-label">Gain / Loss</span><span class="summary-val"><span style="color:var(--success)">+' + totalDPlus + 'm</span> / <span style="color:var(--danger)">-' + totalDMinus + 'm</span></span></div>' +
+      '  <div class="summary-row"><span class="summary-label">Gain / Loss</span><span class="summary-val"><span style="color:var(--success)">+' + Math.round(totalDPlus) + 'm</span> / <span style="color:var(--danger)">-' + Math.round(totalDMinus) + 'm</span></span></div>' +
       '</div>' +
       '<div class="summary-group">' +
       '  <div class="summary-group-title">' + dict.labelTemps + '</div>' +
       '  <div class="summary-row"><span class="summary-label">' + dict.labelPlan + '</span><span class="summary-val">' + targetTimeStr + '</span></div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelOptimiste + '</span><span class="summary-val">' + optTimeStr + '</span></div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelPessimiste + '</span><span class="summary-val">' + pesTimeStr + '</span></div>' +
+      '  <div class="summary-row"><span class="summary-label">' + dict.labelOptimiste + '</span><span class="summary-val">' + TR.utils.formatTime(optMins) + '</span></div>' +
+      '  <div class="summary-row"><span class="summary-label">' + dict.labelPessimiste + '</span><span class="summary-val">' + TR.utils.formatTime(pesMins) + '</span></div>' +
       '</div>' +
       '<div class="summary-group">' +
       '  <div class="summary-group-title">' + dict.labelArriveeEstime + '</div>' +
@@ -1523,136 +1397,47 @@
       '  <div class="summary-row"><span class="summary-label">' + dict.labelPessimiste + '</span><span class="summary-val">' + pesArrivalStr + '</span></div>' +
       '</div>' +
       '<div class="summary-group">' +
-      '  <div class="summary-group-title">' + (lang === 'zh' ? '平均补给' : 'Nutrition (Average)') + '</div>' +
+      '  <div class="summary-group-title">' + (lang === 'zh' ? '平均补给' : 'Nutrition (Avg)') + '</div>' +
       '  <div class="summary-row"><span class="summary-label">' + dict.labelWaterAvg + '</span><span class="summary-val">' + avgWater + ' mL/h</span></div>' +
       '  <div class="summary-row"><span class="summary-label">' + dict.labelCarbsAvg + '</span><span class="summary-val">' + avgCarbs + ' g/h</span></div>' +
       '  <div class="summary-row"><span class="summary-label">' + dict.labelSodiumAvg + '</span><span class="summary-val">' + avgSodium + ' mg/L</span></div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelCaffeineAvg + '</span><span class="summary-val">' + avgCaffeine + ' mg/h</span></div>' +
       '</div>' +
       '<div class="summary-group">' +
       '  <div class="summary-group-title">' + (lang === 'zh' ? '累计补给' : 'Nutrition (Total)') + '</div>' +
       '  <div class="summary-row"><span class="summary-label">' + dict.labelWaterTotal + '</span><span class="summary-val">' + (totalWater/1000).toFixed(1) + ' L</span></div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelCarbsTotal + '</span><span class="summary-val">' + Math.round(totalCarbs) + ' g<span class="summary-val-sub">= ' + sugarCubes + ' ' + dict.labelSugarCubeEq + '</span></span></div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelSodiumTotal + '</span><span class="summary-val">' + (totalSodium/1000).toFixed(1) + ' g</span></div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelCaffeineTotal + '</span><span class="summary-val">' + Math.round(totalCaffeine) + ' mg</span></div>' +
+      '  <div class="summary-row"><span class="summary-label">' + dict.labelCarbsTotal + '</span><span class="summary-val">' + Math.round(totalCarbs) + ' g</span></div>' +
       '</div>';
-    
     dom.summaryContent.innerHTML = summaryHtml;
 
-    // 2. Perform Verification Checklist
     var checks = [];
-
-    // Rule 1: Checkpoint distance ordering
     var distOk = true;
     for (var i = 1; i < state.checkpoints.length; i++) {
-      if (state.checkpoints[i].distance < state.checkpoints[i - 1].distance) {
-        distOk = false;
-        break;
-      }
+      if (state.checkpoints[i].distance < state.checkpoints[i - 1].distance) { distOk = false; break; }
     }
-    if (distOk) {
-      checks.push({ status: 'ok', text: dict.checkDistOk });
-    } else {
-      checks.push({ status: 'danger', text: dict.checkDistErr });
-    }
+    checks.push({ status: distOk ? 'ok' : 'danger', text: distOk ? dict.checkDistOk : dict.checkDistErr });
 
-    // Rule 2: Finish distance matches GPX length (if trackpoints loaded)
-    if (state.trackpoints && state.trackpoints.length > 0) {
-      var gpxLen = state.trackpoints[state.trackpoints.length - 1].distance;
+    if (state.trackData) {
       var lastCpDist = state.checkpoints[state.checkpoints.length - 1].distance;
-      if (Math.abs(lastCpDist - gpxLen) < 1.0) {
-        checks.push({ status: 'ok', text: dict.checkFinishOk });
-      } else {
-        checks.push({ status: 'warning', text: dict.checkFinishWarn });
-      }
-    } else {
-      checks.push({ status: 'warning', text: dict.checkGpxMissing });
+      var match = Math.abs(lastCpDist - state.trackData.totalDistance) < 1.0;
+      checks.push({ status: match ? 'ok' : 'warning', text: match ? dict.checkFinishOk : dict.checkFinishWarn });
     }
 
-    // (Rule 3 pace check removed per user request)
+    if (avgWater >= 400 && avgWater <= 800) checks.push({ status: 'ok', text: dict.checkWaterOk });
+    else if (avgWater < 400) checks.push({ status: 'warning', text: dict.checkWaterLow });
+    else checks.push({ status: 'warning', text: dict.checkWaterHigh });
 
-    // Rule 4: Hydration rate target (400-800 mL/h)
-    if (avgWater >= 400 && avgWater <= 800) {
-      checks.push({ status: 'ok', text: dict.checkWaterOk });
-    } else if (avgWater < 400) {
-      if (totalWater > 0 || totalTargetMinutes > 0) {
-        checks.push({ status: 'warning', text: dict.checkWaterLow });
-      } else {
-        checks.push({ status: 'ok', text: dict.checkWaterOk });
-      }
-    } else if (avgWater > 800) {
-      checks.push({ status: 'warning', text: dict.checkWaterHigh });
-    }
+    if (parseFloat(avgCarbs) >= 30 && parseFloat(avgCarbs) <= 100) checks.push({ status: 'ok', text: dict.checkCarbsOk });
+    else if (parseFloat(avgCarbs) < 30) checks.push({ status: 'warning', text: dict.checkCarbsLow });
 
-    // Rule 5: Carbohydrate rate target (30-100 g/h)
-    var carbsNum = parseFloat(avgCarbs);
-    if (carbsNum >= 30 && carbsNum <= 100) {
-      checks.push({ status: 'ok', text: dict.checkCarbsOk });
-    } else if (carbsNum < 30) {
-      if (totalCarbs > 0 || totalTargetMinutes > 0) {
-        checks.push({ status: 'warning', text: dict.checkCarbsLow });
-      } else {
-        checks.push({ status: 'ok', text: dict.checkCarbsOk });
-      }
-    } else if (carbsNum > 100) {
-      checks.push({ status: 'warning', text: dict.checkCarbsHigh });
-    }
-
-    // Rule 6: Sodium concentration target (300-700 mg/L of water)
-    if (totalWater > 0) {
-      if (totalSodium === 0) {
-        checks.push({ status: 'danger', text: dict.checkSodiumZero });
-      } else if (avgSodium >= 300 && avgSodium <= 700) {
-        checks.push({ status: 'ok', text: dict.checkSodiumOk });
-      } else if (avgSodium < 300) {
-        checks.push({ status: 'warning', text: dict.checkSodiumLow });
-      } else {
-        checks.push({ status: 'warning', text: dict.checkSodiumHigh });
-      }
-    } else if (totalSodium > 0) {
-      checks.push({ status: 'warning', text: dict.checkSodiumHigh });
-    } else {
-      // No sodium and no water hydration planned yet
-      if (totalTargetMinutes > 0) {
-        checks.push({ status: 'warning', text: dict.checkSodiumZero });
-      } else {
-        checks.push({ status: 'ok', text: dict.checkSodiumOk });
-      }
-    }
-
-    // Rule 7: Caffeine safety ceiling (<= 400 mg total)
-    if (totalCaffeine <= 400) {
-      checks.push({ status: 'ok', text: dict.checkCaffOk });
-    } else {
-      checks.push({ status: 'danger', text: dict.checkCaffHigh });
-    }
-
-    // Render checks HTML
     var checksHtml = '';
     checks.forEach(function (c) {
-      var icon = '🟢';
-      var textClass = '';
-      if (c.status === 'warning') {
-        icon = '🟡';
-        textClass = ' warning';
-      } else if (c.status === 'danger') {
-        icon = '🔴';
-        textClass = ' danger';
-      }
-      
-      checksHtml += 
-        '<div class="check-item">' +
-        '  <span class="check-icon">' + icon + '</span>' +
-        '  <span class="check-text' + textClass + '">' + c.text + '</span>' +
-        '</div>';
+      var icon = (c.status === 'ok') ? '🟢' : ((c.status === 'warning') ? '🟡' : '🔴');
+      checksHtml += '<div class="check-item"><span class="check-icon">' + icon + '</span><span class="check-text">' + c.text + '</span></div>';
     });
-
     dom.checksContent.innerHTML = checksHtml;
 
-    // 3. Render Ravito Calculator
     if (dom.ravitoCalcContent) {
-      var ravitoHtml = '<table class="ravito-table">' +
-        '<thead><tr>' +
+      var ravitoHtml = '<table class="ravito-table"><thead><tr>' +
         '<th>' + dict.ravitoColName + '</th>' +
         '<th>' + dict.ravitoColTime + '</th>' +
         '<th>' + dict.ravitoColWater + '</th>' +
@@ -1661,15 +1446,12 @@
         '<th>' + dict.ravitoColCaff + '</th>' +
         '</tr></thead><tbody>';
 
-      var rvTotalWater = 0, rvTotalCarbs = 0, rvTotalSodium = 0, rvTotalCaff = 0;
-      var rvTotalTime = 0;
-
+      var rvTotalWater = 0, rvTotalCarbs = 0, rvTotalSodium = 0, rvTotalCaff = 0, rvTotalTime = 0;
       state.checkpoints.forEach(function (cp, idx) {
         if (idx > 0) {
           var segMins = TR.utils.parseTime(cp.segmentTime || '');
           var segH = segMins / 60;
           rvTotalTime += segMins;
-
           var sWater = Math.round((cp.water || 0) * segH);
           var sCarbs = Math.round((cp.carbs || 0) * segH);
           var sSodium = Math.round(sWater * ((cp.sodium || 0) / 1000));
@@ -1698,28 +1480,22 @@
         '<td class="nut-carbs">' + rvTotalCarbs + '</td>' +
         '<td class="nut-sodium">' + rvTotalSodium + '</td>' +
         '<td class="nut-caff">' + rvTotalCaff + '</td>' +
-        '</tr>';
+        '</tr></tbody></table>';
 
-      ravitoHtml += '</tbody></table>';
       dom.ravitoCalcContent.innerHTML = ravitoHtml;
     }
   }
 
-  // ── Profile Rendering Debouncer ────────────────────────────────────
   var renderTimer = null;
-
   function scheduleRender() {
     updateSummaryAndChecks();
     if (renderTimer) clearTimeout(renderTimer);
-    renderTimer = setTimeout(renderProfile, 150);
+    renderTimer = setTimeout(renderProfile, 120);
   }
 
   function renderProfile() {
     if (!state.trackpoints) return;
-
-    if (dom.placeholder) {
-      dom.placeholder.style.display = 'none';
-    }
+    if (dom.placeholder) dom.placeholder.style.display = 'none';
 
     TR.profile.render(
       dom.profileContainer,
@@ -1739,11 +1515,73 @@
     );
   }
 
-  // ── JSON Template Download ──────────────────────────────────────────
+  function handleJsonImport() {
+    var file = dom.inputJson.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        var data = JSON.parse(e.target.result);
+        if (data.raceName) { state.raceName = data.raceName; dom.inputName.value = data.raceName; }
+        if (data.fontSizeTitle) state.fontSizeTitle = parseInt(data.fontSizeTitle, 10);
+        if (data.fontSizeCPName) state.fontSizeCPName = parseInt(data.fontSizeCPName, 10);
+        if (data.fontSizeCPElev) state.fontSizeCPElev = parseInt(data.fontSizeCPElev, 10);
+        if (data.fontSizeCPTime) state.fontSizeCPTime = parseInt(data.fontSizeCPTime, 10);
+        if (data.fontSizeCPNotes) state.fontSizeCPNotes = parseInt(data.fontSizeCPNotes, 10);
+        if (data.fontSizeSegment) state.fontSizeSegment = parseInt(data.fontSizeSegment, 10);
+        if (data.fontSizeCumulDist) state.fontSizeCumulDist = parseInt(data.fontSizeCumulDist, 10);
+        if (data.language) state.language = data.language;
+        if (data.elevationMode) setElevationMode(data.elevationMode);
+        if (data.startTime) {
+          state.startTime = data.startTime;
+          populateStartTimeOptions(data.startTime);
+        }
+        if (Array.isArray(data.checkpoints)) state.checkpoints = data.checkpoints;
+        sortCheckpoints();
+        normalizeAllCPs();
+        state.activeCPIndex = 0;
+        applyLanguage();
+        toast(T[state.language].toastImportSuccess);
+      } catch (err) {
+        toast(T[state.language].toastImportError + err.message);
+      }
+    };
+    reader.readAsText(file);
+    dom.inputJson.value = '';
+  }
+
+  function handleJsonExport() {
+    var data = {
+      raceName: state.raceName,
+      elevationMode: state.elevationMode,
+      fontSizeTitle: state.fontSizeTitle,
+      fontSizeCPName: state.fontSizeCPName,
+      fontSizeCPElev: state.fontSizeCPElev,
+      fontSizeCPTime: state.fontSizeCPTime,
+      fontSizeCPNotes: state.fontSizeCPNotes,
+      fontSizeSegment: state.fontSizeSegment,
+      fontSizeCumulDist: state.fontSizeCumulDist,
+      language: state.language,
+      startTime: state.startTime || '',
+      checkpoints: state.checkpoints
+    };
+    var json = JSON.stringify(data, null, 2);
+    var blob = new Blob([json], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (state.raceName || 'roadbook') + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
+    toast(T[state.language].toastExportSuccess);
+  }
+
   function handleJsonTemplateDownload() {
     var isZH = (state.language === 'zh');
     var template = {
       raceName: isZH ? "Talus 经典越野跑 100K" : "Talus Classic Trail 100K",
+      elevationMode: "smooth",
       fontSizeTitle: 18,
       fontSizeCPName: 12,
       fontSizeCPElev: 11,
@@ -1751,133 +1589,12 @@
       fontSizeCPNotes: 10,
       fontSizeSegment: 11,
       fontSizeCumulDist: 12,
-      imageTheme: "day",
       language: state.language,
       startTime: isZH ? "周五 06:00" : "Fri 06:00",
       checkpoints: [
-        {
-          name: isZH ? "起点 (Couvet)" : "Start (Couvet)",
-          distance: 0.0,
-          arrivalTime: "0:00",
-          segmentTime: "0:00",
-          water: 0,
-          carbs: 0,
-          sodium: 0,
-          caffeine: 0,
-          notes: isZH ? "检查装备 / 起跑" : "Gear Check / Start",
-          useForIntermediateDistances: true,
-          iconSize: 20,
-          iconRotation: 0,
-          icons: [
-            { symbol: "start", color: "#0d5236", iconColor: "White" },
-            { symbol: "", color: "#4e4e4e", iconColor: "White" },
-            { symbol: "", color: "#4e4e4e", iconColor: "White" }
-          ],
-          axisColor: "#0d5236",
-          axisThickness: 1,
-          axisBroken: true,
-          textColor: "#1e293b",
-          textSize: 18,
-          textOrientation: "To the right",
-          texts: {
-            leftBottom: "", leftMiddle: "", leftTop: "",
-            rightBottom: isZH ? "起跑点" : "Start Line",
-            rightMiddle: isZH ? "海拔 727m" : "Elev 727m",
-            rightTop: ""
-          }
-        },
-        {
-          name: "CP1 (Noiraigue)",
-          distance: 12.2,
-          arrivalTime: "1:15",
-          segmentTime: "1:15",
-          water: 500,
-          carbs: 45,
-          sodium: 200,
-          caffeine: 0,
-          notes: isZH ? "提供热食 / 水" : "Hot Food & Water",
-          useForIntermediateDistances: true,
-          iconSize: 20,
-          iconRotation: 0,
-          icons: [
-            { symbol: "food", color: "#d97706", iconColor: "White" },
-            { symbol: "water", color: "#0284c7", iconColor: "White" },
-            { symbol: "", color: "#4e4e4e", iconColor: "White" }
-          ],
-          axisColor: "rgba(100,116,139,0.18)",
-          axisThickness: 1,
-          axisBroken: true,
-          textColor: "#1e293b",
-          textSize: 18,
-          textOrientation: "To the right",
-          texts: {
-            leftBottom: "", leftMiddle: "", leftTop: "",
-            rightBottom: isZH ? "首个补给" : "First Aid",
-            rightMiddle: isZH ? "关门时间 3h" : "Cutoff 3h",
-            rightTop: ""
-          }
-        },
-        {
-          name: "CP2 (Chasseron)",
-          distance: 40.5,
-          arrivalTime: "4:35",
-          segmentTime: "3:20",
-          water: 750,
-          carbs: 60,
-          sodium: 300,
-          caffeine: 50,
-          notes: isZH ? "高海拔山顶 / 强风" : "High Summit & Strong Wind",
-          useForIntermediateDistances: true,
-          iconSize: 20,
-          iconRotation: 0,
-          icons: [
-            { symbol: "peak", color: "#475569", iconColor: "White" },
-            { symbol: "cutoff", color: "#b91c1c", iconColor: "White" },
-            { symbol: "", color: "#4e4e4e", iconColor: "White" }
-          ],
-          axisColor: "#b91c1c",
-          axisThickness: 1,
-          axisBroken: true,
-          textColor: "#b91c1c",
-          textSize: 18,
-          textOrientation: "To the right",
-          texts: {
-            leftBottom: isZH ? "关门点 13:30" : "Cutoff 13:30",
-            leftMiddle: "", leftTop: "",
-            rightBottom: "", rightMiddle: "", rightTop: ""
-          }
-        },
-        {
-          name: isZH ? "终点 (Couvet)" : "Finish (Couvet)",
-          distance: 108.7,
-          arrivalTime: "13:35",
-          segmentTime: "9:00",
-          water: 1200,
-          carbs: 100,
-          sodium: 500,
-          caffeine: 100,
-          notes: isZH ? "完赛包领取" : "Finish Bag Collection",
-          useForIntermediateDistances: true,
-          iconSize: 20,
-          iconRotation: 0,
-          icons: [
-            { symbol: "finish", color: "#b91c1c", iconColor: "White" },
-            { symbol: "", color: "#4e4e4e", iconColor: "White" },
-            { symbol: "", color: "#4e4e4e", iconColor: "White" }
-          ],
-          axisColor: "#b91c1c",
-          axisThickness: 1,
-          axisBroken: true,
-          textColor: "#1e293b",
-          textSize: 18,
-          textOrientation: "To the right",
-          texts: {
-            leftBottom: "", leftMiddle: "", leftTop: "",
-            rightBottom: isZH ? "完赛拱门" : "Finish Arch",
-            rightMiddle: isZH ? "海拔 727m" : "Elev 727m",
-            rightTop: ""
-          }
-        }
+        { name: isZH ? "起点" : "Start", distance: 0.0, arrivalTime: "0:00", segmentTime: "0:00", icon: "start" },
+        { name: "CP1", distance: 15.0, arrivalTime: "1:45", segmentTime: "1:45", icon: "classic", water: 500, carbs: 45 },
+        { name: isZH ? "终点" : "Finish", distance: 100.0, arrivalTime: "14:00", segmentTime: "12:15", icon: "finish" }
       ]
     };
     var json = JSON.stringify(template, null, 2);
@@ -1892,145 +1609,74 @@
     toast(T[state.language].toastTemplateSuccess);
   }
 
-  // ── Toast ───────────────────────────────────────────────────────────
-  var toastTimer = null;
+  function handleImageExport(scale) {
+    if (!state.trackpoints) {
+      toast(T[state.language].toastGpxFirst);
+      return;
+    }
+    var svgEl = dom.profileContainer.querySelector('svg');
+    if (!svgEl) {
+      toast('Error: SVG not found.');
+      return;
+    }
+    var filename = (state.raceName || 'roadbook').replace(/[^a-zA-Z0-9_\-\u4e00-\u9fff]/g, '_');
+    var ratio = dom.exportRatio.value;
+    TR.exporter.exportToPNG(svgEl, scale, filename, ratio);
+    toast(T[state.language].toastExporting + scale + '× PNG (' + ratio + ')…');
+  }
 
+  var toastTimer = null;
   function toast(msg) {
     dom.toast.textContent = msg;
     dom.toast.classList.add('show');
     if (toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () {
-      dom.toast.classList.remove('show');
-    }, 3000);
+    toastTimer = setTimeout(function () { dom.toast.classList.remove('show'); }, 3000);
   }
 
   function populateStartTimeOptions(selectedValue) {
     if (!dom.inputStartTime) return;
-
-    if (selectedValue === undefined) {
-      selectedValue = dom.inputStartTime.value || state.startTime || '周五 18:00';
-    }
-
+    selectedValue = selectedValue || dom.inputStartTime.value || state.startTime || '周五 18:00';
     dom.inputStartTime.innerHTML = '';
-
     var lang = state.language;
     var daysZH = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
     var daysEN = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
     var displayDays = (lang === 'zh') ? daysZH : daysEN;
-    var options = [];
-    var matched = false;
 
     for (var d = 0; d < 7; d++) {
-      var valDay = daysZH[d];
-      var textDay = displayDays[d];
-
       for (var h = 0; h < 24; h++) {
         for (var m = 0; m < 60; m += 30) {
           var timeStr = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
-          var val = valDay + ' ' + timeStr;
-          var label = textDay + ' ' + timeStr;
-          options.push({ val: val, label: label });
-          if (val === selectedValue) {
-            matched = true;
-          }
+          var val = daysZH[d] + ' ' + timeStr;
+          var label = displayDays[d] + ' ' + timeStr;
+          var opt = document.createElement('option');
+          opt.value = val;
+          opt.textContent = label;
+          if (val === selectedValue) opt.selected = true;
+          dom.inputStartTime.appendChild(opt);
         }
       }
     }
-
-    if (!matched && selectedValue) {
-      var parsed = parseStartTime(selectedValue);
-      var normalizedVal = daysZH[parsed.dayOffset] + ' ' + (parsed.hour < 10 ? '0' : '') + parsed.hour + ':' + (parsed.min < 10 ? '0' : '') + parsed.min;
-      var normalizedText = displayDays[parsed.dayOffset] + ' ' + (parsed.hour < 10 ? '0' : '') + parsed.hour + ':' + (parsed.min < 10 ? '0' : '') + parsed.min;
-
-      var alreadyIn = false;
-      for (var i = 0; i < options.length; i++) {
-        if (options[i].val === normalizedVal) {
-          alreadyIn = true;
-          selectedValue = normalizedVal;
-          break;
-        }
-      }
-
-      if (!alreadyIn) {
-        options.unshift({ val: normalizedVal, label: normalizedText });
-        selectedValue = normalizedVal;
-      }
-    }
-
-    options.forEach(function (opt) {
-      var optionEl = document.createElement('option');
-      optionEl.value = opt.val;
-      optionEl.textContent = opt.label;
-      dom.inputStartTime.appendChild(optionEl);
-    });
-
-    dom.inputStartTime.value = selectedValue;
     state.startTime = selectedValue;
   }
 
-  // ── i18n Declarative Dynamic Switcher ──────────────────────────────
   function applyLanguage() {
     var lang = state.language;
     var dict = T[lang];
 
-    // 1. Translate all static elements with data-i18n
     document.querySelectorAll('[data-i18n]').forEach(function (el) {
       var key = el.dataset.i18n;
-      if (dict[key] !== undefined) {
-        el.textContent = dict[key];
-      }
+      if (dict[key] !== undefined) el.textContent = dict[key];
     });
 
-    // 2. Translate placeholders
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
-      var key = el.dataset.i18nPlaceholder;
-      if (dict[key] !== undefined) {
-        el.setAttribute('placeholder', dict[key]);
-      }
-    });
-
-    // 3. Translate titles (tooltips)
-    document.querySelectorAll('[data-i18n-title]').forEach(function (el) {
-      var key = el.dataset.i18nTitle;
-      if (dict[key] !== undefined) {
-        el.setAttribute('title', dict[key]);
-      }
-    });
-
-    // Sync dropdown state
-    if (dom.selectLang) {
-      dom.selectLang.value = lang;
-    }
-
-    // Translate dynamic options in Export Ratio Select
-    if (dom.exportRatio) {
-      dom.exportRatio.options[0].text = dict.ratioAuto;
-      dom.exportRatio.options[1].text = dict.ratio19_5_9;
-      dom.exportRatio.options[2].text = dict.ratio20_9;
-    }
-
-    // Translate Image Resolution options
-    if (dom.exportMenu) {
-      var scaleBtns = dom.exportMenu.querySelectorAll('button');
-      if (scaleBtns.length === 3) {
-        scaleBtns[0].textContent = dict.scale1;
-        scaleBtns[1].textContent = dict.scale2;
-        scaleBtns[2].textContent = dict.scale3;
-      }
-    }
-
-    // Re-populate and translate start time select options
     populateStartTimeOptions(state.startTime);
-
-    // Trigger full layout redraw
     renderCPTable();
-    renderPOITabs();
     loadActiveCPDetails();
-    scheduleRender();
+    if (state.trackData) {
+      renderAllComponents();
+    }
   }
 
-  // ── Boot ────────────────────────────────────────────────────────────
+  // Auto initialize on DOMContentLoaded
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
