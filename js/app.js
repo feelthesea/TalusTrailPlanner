@@ -103,6 +103,10 @@
       poiCol1Pos: "CP位置距离 (公里)",
       poiCol1Intermediate: "用于分段统计点 (划分子赛段)",
       poiCol1FontSizesTitle: "各元素字号大小设置 (像素)",
+      btnFontSizes: "字号设置",
+      btnFontSizesTitle: "配置各元素字号大小",
+      btnReset: "重置默认",
+      toastFontSizesSaved: "各元素字号设置已保存并应用！",
       fsLabelTitle: "比赛名称",
       fsLabelCpName: "CP点名称",
       fsLabelCpElev: "CP海拔",
@@ -255,6 +259,10 @@
       poiCol1Pos: "CP Distance (km)",
       poiCol1Intermediate: "Use for segment split stats",
       poiCol1FontSizesTitle: "Granular Font Sizes (px)",
+      btnFontSizes: "Font Sizes",
+      btnFontSizesTitle: "Configure Granular Font Sizes",
+      btnReset: "Reset Defaults",
+      toastFontSizesSaved: "Font size settings saved and applied!",
       fsLabelTitle: "Race Title",
       fsLabelCpName: "CP Name",
       fsLabelCpElev: "CP Elevation",
@@ -392,9 +400,15 @@
     dom.selectLang        = document.getElementById('select-lang');
     dom.toast             = document.getElementById('toast');
 
-    // Zone 1: Profile & Sidebar
+    // Zone 1: Profile & Font Sizes Modal
     dom.profileContainer  = document.getElementById('profile-container');
     dom.placeholder       = document.getElementById('profile-placeholder');
+    dom.btnOpenFontSizes  = document.getElementById('btn-open-font-sizes');
+    dom.fsModalBackdrop   = document.getElementById('fs-modal-backdrop');
+    dom.btnFsModalClose   = document.getElementById('btn-fs-modal-close');
+    dom.btnFsModalCancel  = document.getElementById('btn-fs-modal-cancel');
+    dom.btnFsModalReset   = document.getElementById('btn-fs-modal-reset');
+    dom.btnFsModalSave    = document.getElementById('btn-fs-modal-save');
     dom.fsTitle           = document.getElementById('fs-title');
     dom.fsCPName          = document.getElementById('fs-cpname');
     dom.fsCPElev          = document.getElementById('fs-cpelev');
@@ -546,25 +560,58 @@
     dom.btnAddCp.addEventListener('click', handleAddCP);
     dom.exportRatio.addEventListener('change', scheduleRender);
 
-    // Font size controls
-    var fsMap = {
-      'fs-title': 'fontSizeTitle',
-      'fs-cpname': 'fontSizeCPName',
-      'fs-cpelev': 'fontSizeCPElev',
-      'fs-cptime': 'fontSizeCPTime',
-      'fs-cpnotes': 'fontSizeCPNotes',
-      'fs-segment': 'fontSizeSegment',
-      'fs-cumuldist': 'fontSizeCumulDist'
-    };
-    Object.keys(fsMap).forEach(function (id) {
-      var el = document.getElementById(id);
-      if (el) {
-        el.addEventListener('input', function () {
-          state[fsMap[id]] = parseInt(this.value, 10) || 12;
-          scheduleRender();
-        });
-      }
-    });
+    // Font Sizes Modal Events
+    if (dom.btnOpenFontSizes) dom.btnOpenFontSizes.addEventListener('click', openFontSizesModal);
+    if (dom.btnFsModalClose) dom.btnFsModalClose.addEventListener('click', closeFontSizesModal);
+    if (dom.btnFsModalCancel) dom.btnFsModalCancel.addEventListener('click', closeFontSizesModal);
+    if (dom.btnFsModalReset) dom.btnFsModalReset.addEventListener('click', resetFontSizesModal);
+    if (dom.btnFsModalSave) dom.btnFsModalSave.addEventListener('click', saveFontSizesModal);
+    if (dom.fsModalBackdrop) {
+      dom.fsModalBackdrop.addEventListener('click', function (e) {
+        if (e.target === dom.fsModalBackdrop) closeFontSizesModal();
+      });
+    }
+  }
+
+  // ── Font Sizes Modal Functions ──────────────────────────────────────
+  function openFontSizesModal() {
+    if (!dom.fsModalBackdrop) return;
+    if (dom.fsTitle) dom.fsTitle.value = state.fontSizeTitle;
+    if (dom.fsCPName) dom.fsCPName.value = state.fontSizeCPName;
+    if (dom.fsCPElev) dom.fsCPElev.value = state.fontSizeCPElev;
+    if (dom.fsCPTime) dom.fsCPTime.value = state.fontSizeCPTime;
+    if (dom.fsCPNotes) dom.fsCPNotes.value = state.fontSizeCPNotes;
+    if (dom.fsSegment) dom.fsSegment.value = state.fontSizeSegment;
+    if (dom.fsCumulDist) dom.fsCumulDist.value = state.fontSizeCumulDist;
+    dom.fsModalBackdrop.classList.add('open');
+  }
+
+  function closeFontSizesModal() {
+    if (dom.fsModalBackdrop) dom.fsModalBackdrop.classList.remove('open');
+  }
+
+  function resetFontSizesModal() {
+    if (dom.fsTitle) dom.fsTitle.value = 18;
+    if (dom.fsCPName) dom.fsCPName.value = 20;
+    if (dom.fsCPElev) dom.fsCPElev.value = 11;
+    if (dom.fsCPTime) dom.fsCPTime.value = 20;
+    if (dom.fsCPNotes) dom.fsCPNotes.value = 22;
+    if (dom.fsSegment) dom.fsSegment.value = 17;
+    if (dom.fsCumulDist) dom.fsCumulDist.value = 17;
+  }
+
+  function saveFontSizesModal() {
+    if (dom.fsTitle) state.fontSizeTitle = parseInt(dom.fsTitle.value, 10) || 18;
+    if (dom.fsCPName) state.fontSizeCPName = parseInt(dom.fsCPName.value, 10) || 20;
+    if (dom.fsCPElev) state.fontSizeCPElev = parseInt(dom.fsCPElev.value, 10) || 11;
+    if (dom.fsCPTime) state.fontSizeCPTime = parseInt(dom.fsCPTime.value, 10) || 20;
+    if (dom.fsCPNotes) state.fontSizeCPNotes = parseInt(dom.fsCPNotes.value, 10) || 22;
+    if (dom.fsSegment) state.fontSizeSegment = parseInt(dom.fsSegment.value, 10) || 17;
+    if (dom.fsCumulDist) state.fontSizeCumulDist = parseInt(dom.fsCumulDist.value, 10) || 17;
+
+    scheduleRender();
+    closeFontSizesModal();
+    toast(T[state.language].toastFontSizesSaved || '各元素字号设置已保存并应用！');
   }
 
   // ── Track Upload (GPX / KML / KMZ) ──────────────────────────────────

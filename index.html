@@ -120,7 +120,12 @@
     <section class="panel-card zone-1-container">
       <div class="panel-card-header">
         <h3><span data-i18n="zone1Title">📈 统一路书高程剖面图 (Unified Roadbook Profile)</span></h3>
-        <span style="font-size:0.75rem; color:var(--text-muted);" data-i18n="zone1Tip">鼠标或手指滑动可实时在地图上追踪位置，分段及文字直接联动</span>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <span style="font-size:0.75rem; color:var(--text-muted);" data-i18n="zone1Tip">鼠标或手指滑动可实时在地图上追踪位置，分段及文字直接联动</span>
+          <button class="btn btn-sm" id="btn-open-font-sizes" title="配置各元素字号大小" data-i18n-title="btnFontSizesTitle">
+            <span class="icon">🔤</span> <span data-i18n="btnFontSizes">字号设置</span>
+          </button>
+        </div>
       </div>
 
       <div class="profile-main-layout">
@@ -132,41 +137,6 @@
             <div style="font-size:0.78rem; color:var(--text-muted);" data-i18n="placeholderTextSub">Upload a GPX/KML/KMZ file to generate the roadbook & map</div>
           </div>
         </div>
-
-        <!-- Font Sizes Sidebar Panel -->
-        <aside class="font-sizes-sidebar" id="font-sizes-sidebar">
-          <h4 data-i18n="poiCol1FontSizesTitle">各元素字号大小设置 (像素)</h4>
-          <div class="poi-font-sizes-grid">
-            <div class="poi-field">
-              <label data-i18n="fsLabelTitle">比赛名称</label>
-              <input type="number" id="fs-title" min="8" max="35" value="18">
-            </div>
-            <div class="poi-field">
-              <label data-i18n="fsLabelCpName">CP点名称</label>
-              <input type="number" id="fs-cpname" min="8" max="35" value="20">
-            </div>
-            <div class="poi-field">
-              <label data-i18n="fsLabelCpElev">CP海拔</label>
-              <input type="number" id="fs-cpelev" min="8" max="35" value="11">
-            </div>
-            <div class="poi-field">
-              <label data-i18n="fsLabelCpTime">预计用时</label>
-              <input type="number" id="fs-cptime" min="8" max="35" value="20">
-            </div>
-            <div class="poi-field">
-              <label data-i18n="fsLabelCpNotes">备注信息</label>
-              <input type="number" id="fs-cpnotes" min="8" max="35" value="22">
-            </div>
-            <div class="poi-field">
-              <label data-i18n="fsLabelSegment">区间分段</label>
-              <input type="number" id="fs-segment" min="8" max="35" value="17">
-            </div>
-            <div class="poi-field" style="grid-column: span 2;">
-              <label data-i18n="fsLabelCumulDist">底部累计距离</label>
-              <input type="number" id="fs-cumuldist" min="8" max="35" value="17">
-            </div>
-          </div>
-        </aside>
       </div>
     </section>
 
@@ -429,6 +399,55 @@
       <div class="modal-footer">
         <button class="btn" id="btn-modal-cancel" data-i18n="btnCancel">取消</button>
         <button class="btn btn-primary" id="btn-modal-save" data-i18n="btnSaveApply">✓ 保存并应用</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Font Sizes Modal ═══ -->
+  <div class="modal-backdrop" id="fs-modal-backdrop">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 data-i18n="poiCol1FontSizesTitle">🔤 各元素字号大小设置 (像素)</h3>
+        <button class="modal-close-btn" id="btn-fs-modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-section">
+          <div class="poi-font-sizes-grid">
+            <div class="poi-field">
+              <label data-i18n="fsLabelTitle">比赛名称</label>
+              <input type="number" id="fs-title" class="input-field" min="8" max="35" value="18">
+            </div>
+            <div class="poi-field">
+              <label data-i18n="fsLabelCpName">CP点名称</label>
+              <input type="number" id="fs-cpname" class="input-field" min="8" max="35" value="20">
+            </div>
+            <div class="poi-field">
+              <label data-i18n="fsLabelCpElev">CP海拔</label>
+              <input type="number" id="fs-cpelev" class="input-field" min="8" max="35" value="11">
+            </div>
+            <div class="poi-field">
+              <label data-i18n="fsLabelCpTime">预计用时</label>
+              <input type="number" id="fs-cptime" class="input-field" min="8" max="35" value="20">
+            </div>
+            <div class="poi-field">
+              <label data-i18n="fsLabelCpNotes">备注信息</label>
+              <input type="number" id="fs-cpnotes" class="input-field" min="8" max="35" value="22">
+            </div>
+            <div class="poi-field">
+              <label data-i18n="fsLabelSegment">区间分段</label>
+              <input type="number" id="fs-segment" class="input-field" min="8" max="35" value="17">
+            </div>
+            <div class="poi-field" style="grid-column: span 2;">
+              <label data-i18n="fsLabelCumulDist">底部累计距离</label>
+              <input type="number" id="fs-cumuldist" class="input-field" min="8" max="35" value="17">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="btn-fs-modal-reset" data-i18n="btnReset">重置默认</button>
+        <button class="btn" id="btn-fs-modal-cancel" data-i18n="btnCancel">取消</button>
+        <button class="btn btn-primary" id="btn-fs-modal-save" data-i18n="btnSaveApply">✓ 保存并应用</button>
       </div>
     </div>
   </div>

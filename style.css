@@ -414,30 +414,10 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
   opacity: 0.6;
 }
 
-/* Right: Font Sizes Sidebar */
-.font-sizes-sidebar {
-  width: 220px;
-  min-width: 220px;
-  background: var(--bg-card);
-  border-left: 1px solid var(--border-subtle);
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.font-sizes-sidebar h4 {
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-primary);
-  margin-bottom: 2px;
-}
 .poi-font-sizes-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 12px;
 }
 .poi-field {
   display: flex;
@@ -1125,8 +1105,6 @@ table.cp-table {
 
 /* ── Responsive Media Queries ─────────────────────────────────── */
 @media (max-width: 1100px) {
-  .profile-main-layout { flex-direction: column; }
-  .font-sizes-sidebar { width: 100%; border-left: none; border-top: 1px solid var(--border-subtle); }
   .zone-2-grid { grid-template-columns: 1fr; }
   .zone-3-grid { grid-template-columns: 1fr; }
   .trail-stat-cards { grid-template-columns: repeat(2, 1fr); }
