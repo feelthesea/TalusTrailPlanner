@@ -733,8 +733,12 @@
         '</div>';
     }
 
-    var upTitle = isZH ? '🟢 上坡坡度分级 (Uphill)' : '🟢 Uphill Grade Breakdown';
-    var downTitle = isZH ? '🔵 下坡坡度分级 (Downhill)' : '🔵 Downhill Grade Breakdown';
+    var upTitle = isZH
+      ? '<span class="gradient-section-dot" style="background:var(--success);"></span> 上坡坡度分级 (Uphill)'
+      : '<span class="gradient-section-dot" style="background:var(--success);"></span> Uphill Grade Breakdown';
+    var downTitle = isZH
+      ? '<span class="gradient-section-dot" style="background:var(--trail-blue);"></span> 下坡坡度分级 (Downhill)'
+      : '<span class="gradient-section-dot" style="background:var(--trail-blue);"></span> Downhill Grade Breakdown';
 
     dom.gradientDistContent.innerHTML =
       buildSection(upTitle, dist.uphill) +

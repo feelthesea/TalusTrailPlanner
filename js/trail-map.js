@@ -249,10 +249,10 @@
     var endPos = displayLatLng(points[points.length - 1]);
 
     var sm = L.marker(startPos, { icon: startIcon, zIndexOffset: 500 })
-      .bindTooltip(isZH ? '🟢 起点 (Start)' : '🟢 Start', { permanent: false })
+      .bindTooltip(isZH ? '起点 (Start)' : 'Start', { permanent: false })
       .addTo(leafletMap);
     var em = L.marker(endPos, { icon: endIcon, zIndexOffset: 500 })
-      .bindTooltip(isZH ? '🏁 终点 (Finish)' : '🏁 Finish', { permanent: false })
+      .bindTooltip(isZH ? '终点 (Finish)' : 'Finish', { permanent: false })
       .addTo(leafletMap);
     trackLayers.push(sm);
     trackLayers.push(em);
