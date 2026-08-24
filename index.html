@@ -15,94 +15,91 @@
 
   <!-- ═══ Page Header ═══ -->
   <header class="page-header">
-    <h1 data-i18n="pageTitle">🏔️ Talus - Trail Roadbook Generator</h1>
-    <div style="margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
-      <span class="subtitle" data-i18n="headerSubtitle" style="margin: 0; font-size: 0.78rem; color: var(--text-muted);">越野跑路书与轨迹分析</span>
-      <span style="font-size: 0.68rem; color: var(--text-secondary); font-weight: 500;"><span data-i18n="vibeCodedBy">Vibe coded by</span> <strong style="color: var(--accent);">Laurent L</strong></span>
+    <div class="header-brand">
+      <h1 data-i18n="pageTitle">🏔️ Talus - Trail Roadbook Generator</h1>
+      <span class="subtitle" data-i18n="headerSubtitle">越野跑路书与轨迹分析</span>
+    </div>
+    <div class="header-right">
+      <div class="header-lang-group">
+        <label class="header-label" for="select-lang" data-i18n="languageLabel">🌐 语言</label>
+        <select id="select-lang" class="header-select">
+          <option value="zh">中文</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+      <span class="header-credit"><span data-i18n="vibeCodedBy">Vibe coded by</span> <strong style="color: var(--accent);">Laurent L</strong></span>
     </div>
   </header>
 
   <!-- ═══ Toolbar ═══ -->
   <div class="toolbar" id="toolbar">
-    <!-- GPX / KML / KMZ upload -->
-    <div class="group">
-      <button class="btn btn-primary" id="btn-gpx" title="Upload GPX / KML / KMZ file" data-i18n-title="uploadTrackTitle">
+    <!-- Cluster 1: Track Upload & Event -->
+    <div class="toolbar-cluster cluster-track">
+      <button class="btn btn-primary btn-upload" id="btn-gpx" title="Upload GPX / KML / KMZ file" data-i18n-title="uploadTrackTitle">
         <span class="icon">📂</span> <span data-i18n="uploadTrack">上传轨迹 (GPX/KML/KMZ)</span>
       </button>
       <input type="file" id="input-gpx" accept=".gpx,.kml,.kmz" class="hidden">
-    </div>
 
-    <!-- Race name -->
-    <div class="group">
-      <label class="field-label" for="input-name" data-i18n="raceNameLabel">比赛名称</label>
-      <input type="text" id="input-name" class="input-field" placeholder="e.g. UTMB 2026" style="width:135px">
-    </div>
+      <div class="toolbar-item">
+        <label class="field-label" for="input-name" data-i18n="raceNameLabel">比赛名称</label>
+        <input type="text" id="input-name" class="input-field" placeholder="e.g. UTMB 2026" style="width:130px">
+      </div>
 
-    <!-- Race start date/time (International standard datetime-local picker) -->
-    <div class="group">
-      <label class="field-label" for="input-start-time" data-i18n="raceStartLabel">出发时间</label>
-      <input type="datetime-local" id="input-start-time" class="input-field" style="width: 175px; height: 32px; font-size: 0.78rem;">
-    </div>
-
-    <!-- Elevation Calculation Mode Switch (Raw vs Smooth 4m) -->
-    <div class="group">
-      <label class="field-label" data-i18n="elevCalcModeLabel">⚡ 爬升计算</label>
-      <div class="unit-toggle-group">
-        <button class="unit-toggle-btn" id="btn-elev-raw" data-i18n="elevModeRaw">原始数据</button>
-        <button class="unit-toggle-btn active" id="btn-elev-smooth" data-i18n="elevModeSmooth">平滑 (4m)</button>
+      <div class="toolbar-item">
+        <label class="field-label" for="input-start-time" data-i18n="raceStartLabel">出发时间</label>
+        <input type="datetime-local" id="input-start-time" class="input-field input-datetime" style="width: 175px;">
       </div>
     </div>
 
-    <!-- Color Mode Switch -->
-    <div class="group">
-      <label class="field-label" for="select-color-mode" data-i18n="colorModeLabel">🎨 剖面着色</label>
-      <select id="select-color-mode" class="input-field" style="width: 145px; height: 32px; padding: 4px 8px; font-size: 0.78rem;">
-        <option value="classic" data-i18n="colorModeClassic">经典路书柱条</option>
-        <option value="gradient" data-i18n="colorModeGradient">按坡度渐变</option>
-        <option value="elevation" data-i18n="colorModeElevation">按海拔渐变</option>
-      </select>
+    <!-- Cluster 2: Profile Mode & Color -->
+    <div class="toolbar-cluster cluster-profile">
+      <div class="toolbar-item">
+        <label class="field-label" data-i18n="elevCalcModeLabel">⚡ 爬升计算</label>
+        <div class="unit-toggle-group">
+          <button class="unit-toggle-btn" id="btn-elev-raw" data-i18n="elevModeRaw">原始数据</button>
+          <button class="unit-toggle-btn active" id="btn-elev-smooth" data-i18n="elevModeSmooth">平滑 (4m)</button>
+        </div>
+      </div>
+
+      <div class="toolbar-item">
+        <label class="field-label" for="select-color-mode" data-i18n="colorModeLabel">🎨 剖面着色</label>
+        <select id="select-color-mode" class="input-field select-color" style="width: 140px;">
+          <option value="classic" data-i18n="colorModeClassic">经典路书柱条</option>
+          <option value="gradient" data-i18n="colorModeGradient">按坡度渐变</option>
+          <option value="elevation" data-i18n="colorModeElevation">按海拔渐变</option>
+        </select>
+      </div>
     </div>
 
-    <div class="sep"></div>
-
-    <!-- JSON import / export -->
-    <div class="group">
-      <button class="btn" id="btn-import" title="Import checkpoint data from JSON" data-i18n-title="importJsonTitle">
-        <span class="icon">📥</span> <span data-i18n="importJson">导入 JSON</span>
-      </button>
-      <input type="file" id="input-json" accept=".json" class="hidden">
-      <button class="btn" id="btn-template-json" title="Download JSON configuration template" data-i18n-title="downloadTemplateTitle">
-        <span class="icon">📋</span> <span data-i18n="downloadTemplate">下载模板</span>
-      </button>
-      <button class="btn" id="btn-export-json" title="Export checkpoint data as JSON" data-i18n-title="exportJsonTitle">
-        <span class="icon">📤</span> <span data-i18n="exportJson">导出 JSON</span>
-      </button>
+    <!-- Cluster 3: JSON Config Management -->
+    <div class="toolbar-cluster cluster-json">
+      <div class="btn-group-segmented">
+        <button class="btn btn-sm" id="btn-import" title="Import checkpoint data from JSON" data-i18n-title="importJsonTitle">
+          <span class="icon">📥</span> <span data-i18n="importJson">导入 JSON</span>
+        </button>
+        <input type="file" id="input-json" accept=".json" class="hidden">
+        <button class="btn btn-sm" id="btn-template-json" title="Download JSON configuration template" data-i18n-title="downloadTemplateTitle">
+          <span class="icon">📋</span> <span data-i18n="downloadTemplate">下载模板</span>
+        </button>
+        <button class="btn btn-sm" id="btn-export-json" title="Export checkpoint data as JSON" data-i18n-title="exportJsonTitle">
+          <span class="icon">📤</span> <span data-i18n="exportJson">导出 JSON</span>
+        </button>
+      </div>
     </div>
 
-    <div class="sep"></div>
+    <!-- Cluster 4: Export & Download -->
+    <div class="toolbar-cluster cluster-export">
+      <div class="toolbar-item">
+        <label class="field-label" for="export-ratio" data-i18n="exportRatioLabel">导出比例</label>
+        <select id="export-ratio" class="input-field select-ratio" style="width:190px;">
+          <option value="auto" data-i18n="ratioAuto">默认自适应 (无白边)</option>
+          <option value="19.5-9" data-i18n="ratio19_5_9">19.5:9横屏（iPhone 17/16）</option>
+          <option value="20-9" data-i18n="ratio20_9" selected>20:9（小米、华为、安卓）</option>
+        </select>
+      </div>
 
-    <!-- Language Selector -->
-    <div class="group">
-      <label class="field-label" for="select-lang" data-i18n="languageLabel">🌐 语言</label>
-      <select id="select-lang" class="input-field" style="width:85px; height: 32px; padding: 4px 8px; font-size: 0.78rem;">
-        <option value="zh">中文</option>
-        <option value="en">English</option>
-      </select>
-    </div>
-
-    <!-- Image export -->
-    <div class="group">
-      <label class="field-label" for="export-ratio" data-i18n="exportRatioLabel">导出比例</label>
-      <select id="export-ratio" class="input-field" style="width:205px; height: 32px; padding: 4px 8px; font-size: 0.78rem;">
-        <option value="auto" data-i18n="ratioAuto">默认自适应 (无白边)</option>
-        <option value="19.5-9" data-i18n="ratio19_5_9">19.5:9横屏（iPhone 17/16）</option>
-        <option value="20-9" data-i18n="ratio20_9" selected>20:9（小米、华为、安卓）</option>
-      </select>
-    </div>
-
-    <div class="group">
       <div class="dropdown" id="export-dropdown">
-        <button class="btn btn-primary" id="btn-export-img">
+        <button class="btn btn-primary btn-download" id="btn-export-img">
           <span class="icon">🖼️</span> <span data-i18n="downloadPng">下载图片 ▾</span>
         </button>
         <div class="dropdown-menu" id="export-menu">
