@@ -1,13 +1,14 @@
 /**
- * Talus - Trail Roadbook Generator & TrailScope — Unified SVG Profile Renderer (v7.2)
+ * Talus - Trail Roadbook Generator & TrailScope — Unified SVG Profile Renderer (v7.4)
  *
  * Draws a complete interactive roadbook elevation profile including:
+ *   - Professional Vertical CP Labels (rotated -90°) aligned along vertical guide lines
+ *   - Crisp Vector Badges for Start (S) / Finish (F) / Cutlery (Food/Aid) / Water / CP (1,2,3...)
+ *   - Hollow track contour checkpoint circles & intelligent slope-aware altitude labels
  *   - Multiple Color Modes: Classic Sisyf Gradient Bars / Continuous Slope / Elevation
  *   - Real-time Hover Crosshair & Synced Map Tracking
  *   - Active Segment Highlighting
- *   - Crisp Vector Badges for Start (S) / Finish (F) / CP (1,2,3...) / Emojis
- *   - Segment climb, arrival & interval times, notes
- *   - 3-line hexagonal/rectangular segment statistics boxes
+ *   - 3-line hexagonal/rectangular segment statistics boxes (Distance, +Ascent, -Descent)
  *   - Global & granular font size adjustments
  *   - Associated text annotations
  *   - Ultra-HD multi-ratio PNG image export
@@ -24,17 +25,12 @@
   var NS = 'http://www.w3.org/2000/svg';
 
   function yAnchors(name, chartH) {
-    chartH = chartH || 260;
+    chartH = chartH || 280;
     var y = {}, cur = 0;
-    var titleH = name ? 24 : 0;
+    var titleH = name ? 28 : 8;
 
-    y.titleBase   = cur + titleH - 6;                 cur += titleH;
-    y.iconCY      = cur + 14;                          cur += 28;
-    y.nameAnchor  = cur;                                cur += 42;
-    y.elevBase    = cur + 16;                           cur += 22;
-    y.timeBase    = cur + 16;                           cur += 36;
-    y.notesBase   = cur + 14;                           cur += 38;
-    cur += 4;
+    y.titleBase   = cur + titleH - 8;                  cur += titleH;
+    y.iconCY      = cur + 14;                          cur += 30;
     y.chartTop    = cur;
     y.chartBot    = cur + chartH;                      cur += chartH;
     cur += 4;
@@ -42,8 +38,8 @@
     y.segLine1    = cur + 18;
     y.segLine2    = cur + 37;
     y.segLine3    = cur + 56;
-                                                         cur += 70;
-    y.cumulBase   = cur + 17;                           cur += 28;
+                                                       cur += 68;
+    y.cumulBase   = cur + 16;                          cur += 26;
     cur += 10;
     y.totalH      = cur;
     return y;
@@ -62,7 +58,7 @@
     elevLine:      '#0d5236',
     elevFill:      'rgba(13,82,54,0.05)',
     gradBar:       'rgba(245,158,11,0.28)',
-    cpLine:        'rgba(100,116,139,0.22)',
+    cpLine:        'rgba(100,116,139,0.35)',
     cpLineStart:   '#0d5236',
     cpLineFinish:  '#b91c1c',
     cpName:        '#1e293b',
@@ -74,7 +70,7 @@
     segInfoBorder: '#e2e8f0',
     segInfoText:   '#1e293b',
     cumulText:     '#1e1b4b',
-    gridLine:      'rgba(148,163,184,0.12)',
+    gridLine:      'rgba(148,163,184,0.15)',
     axisText:      '#64748b',
     peakLabel:     '#64748b',
   };
@@ -83,12 +79,12 @@
     switch (type) {
       case 'start':  return C.cpLineStart;
       case 'finish': return C.cpLineFinish;
-      default:       return C.cpLine;
+      default:       return '#475569';
     }
   }
 
   function makeMapper(totalDist, minE, maxE, Y, chartH) {
-    chartH = chartH || 260;
+    chartH = chartH || 280;
     var chartW = Math.max(totalDist * 14, 800);
     var ePad   = (maxE - minE) * 0.08 || 50;
     var eMin   = minE - ePad;
@@ -117,11 +113,11 @@
     fontSizes = fontSizes || {};
     var fsTitle     = fontSizes.title || 16;
     var fsCPName    = fontSizes.cpName || 14;
-    var fsCPElev    = fontSizes.cpElev || 14;
-    var fsCPTime    = fontSizes.cpTime || 20;
-    var fsCPNotes   = fontSizes.cpNotes || 18;
-    var fsSegment   = fontSizes.segment || 16;
-    var fsCumulDist = fontSizes.cumulDist || 16;
+    var fsCPElev    = fontSizes.cpElev || 12;
+    var fsCPTime    = fontSizes.cpTime || 14;
+    var fsCPNotes   = fontSizes.cpNotes || 12;
+    var fsSegment   = fontSizes.segment || 12;
+    var fsCumulDist = fontSizes.cumulDist || 12;
 
     cps = (cps || []).slice().sort(function (a, b) { return a.distance - b.distance; });
 
@@ -144,10 +140,10 @@
     var chartW = Math.max(totalDist * 14, 800);
     var svgW = 70 + chartW + 55;
 
-    var chartH = 260;
+    var chartH = 280;
     var margin = 12;
-    var titleH = name ? 24 : 0;
-    var constantH = titleH + 28 + 42 + 22 + 36 + 38 + 4 + 4 + 70 + 28 + 10;
+    var titleH = name ? 28 : 8;
+    var constantH = titleH + 30 + 4 + 68 + 26 + 10;
 
     if (ratio && ratio !== 'auto') {
       var ratioVal = 1.0;
@@ -155,34 +151,15 @@
       else if (ratio === '20-9') ratioVal = 20.0 / 9.0;
 
       var svgW_outer = 70 + chartW + 55 + 2 * margin;
-      chartH = Math.max(150, Math.round(svgW_outer / ratioVal - constantH - 2 * margin));
+      chartH = Math.max(180, Math.round(svgW_outer / ratioVal - constantH - 2 * margin));
 
       var totalAvailH = svgW_outer / ratioVal - 2 * margin;
-      var maxChartH = Math.round(totalAvailH * 0.40);
-      if (chartH > maxChartH) chartH = Math.max(150, maxChartH);
+      var maxChartH = Math.round(totalAvailH * 0.65);
+      if (chartH > maxChartH) chartH = Math.max(180, maxChartH);
     }
 
     var Y = yAnchors(name, chartH);
     var m = makeMapper(totalDist, minE, maxE, Y, chartH);
-
-    var xs = cps.map(function (cp) { return m.distToX(cp.distance); });
-    var staggerLevels = [];
-    var maxStaggerLevel = 0;
-    for (var i = 0; i < cps.length; i++) {
-      var level = 0;
-      while (true) {
-        var collides = false;
-        for (var j = i - 1; j >= 0; j--) {
-          if (xs[i] - xs[j] >= 55) break;
-          if (staggerLevels[j] === level) { collides = true; break; }
-        }
-        if (collides) level++; else break;
-      }
-      staggerLevels.push(level);
-      if (level > maxStaggerLevel) maxStaggerLevel = level;
-    }
-
-    Y.totalH += maxStaggerLevel * 45;
 
     container.innerHTML = '';
     var outerW = svgW + 2 * margin;
@@ -216,14 +193,14 @@
     }
 
     renderElevationCurve(g, pts, m, Y);
-    renderCPLines(g, cps, pts, m, Y, staggerLevels);
+    renderCPLines(g, cps, pts, m, Y);
     renderCPIcons(g, cps, seqLabels, m, Y);
-    renderCPNames(g, cps, m, Y, fsCPName, staggerLevels);
-    renderElevLabels(g, cps, pts, m, Y, fsCPElev, staggerLevels);
-    renderTimeLabels(g, cps, cumulTimes, m, Y, fsCPTime, staggerLevels);
-    renderNotes(g, cps, m, Y, fsCPNotes, staggerLevels);
-    renderSegmentInfo(g, cps, pts, m, Y, fsSegment);
-    renderCumulDist(g, cps, m, Y, fsCumulDist, staggerLevels);
+    renderCPNames(g, cps, pts, m, Y, fsCPName);
+    renderElevLabels(g, cps, pts, m, Y, fsCPElev);
+    renderTimeLabels(g, cps, cumulTimes, m, Y, fsCPTime);
+    renderNotes(g, cps, m, Y, fsCPNotes);
+    renderSegmentInfo(g, cps, pts, m, Y, fsSegment, cumulTimes);
+    renderCumulDist(g, cps, m, Y, fsCumulDist);
     renderPeakLabels(g, pts, cps, m, Y, fsCPElev);
     renderAssociatedTexts(g, cps, m, Y);
 
@@ -399,7 +376,7 @@
       }));
       svg.appendChild(el('text', {
         x: 70 - 8, y: yy + 4,
-        'text-anchor': 'end', 'font-size': String(fontSize - 2), fill: C.axisText,
+        'text-anchor': 'end', 'font-size': String(fontSize - 1), fill: C.axisText,
         style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
       }, Math.round(e) + 'm'));
     }
@@ -476,39 +453,35 @@
     }));
   }
 
-  function renderCPLines(svg, cps, pts, m, Y, staggerLevels) {
-    cps.forEach(function (cp) {
+  // ── Vertical CP Guide Lines & Contour Checkpoint Rings ──────────────
+  function renderCPLines(svg, cps, pts, m, Y) {
+    cps.forEach(function (cp, idx) {
       var x = m.distToX(cp.distance);
-      var col = cp.axisColor || cpLineColor(cp.icon || 'cp');
-      var thk = cp.axisThickness || 1;
-      var isBroken = true;
-      var lineTop = Y.chartTop;
+      var col = cp.axisColor || (idx === 0 ? C.cpLineStart : idx === cps.length - 1 ? C.cpLineFinish : '#475569');
+      var thk = cp.axisThickness || 1.4;
+      var elev = u().interpolateElevation(pts, cp.distance);
+      var elevY = m.eleToY(elev);
+      var lineTop = Y.iconCY + 12.5;
 
-      if (isBroken) {
-        var elev = u().interpolateElevation(pts, cp.distance);
-        var elevY = m.eleToY(elev);
-
-        var topEnd = elevY - 10;
-        if (topEnd > lineTop) {
-          svg.appendChild(el('line', {
-            x1: x, y1: lineTop, x2: x, y2: topEnd,
-            stroke: col, 'stroke-width': thk
-          }));
-        }
-
-        var botStart = elevY + 10;
-        if (botStart < Y.chartBot) {
-          svg.appendChild(el('line', {
-            x1: x, y1: botStart, x2: x, y2: Y.chartBot,
-            stroke: col, 'stroke-width': thk
-          }));
-        }
-      } else {
+      // Solid vertical guide line connecting top icon down to elevation track
+      if (elevY > lineTop) {
         svg.appendChild(el('line', {
-          x1: x, y1: lineTop, x2: x, y2: Y.chartBot,
-          stroke: col, 'stroke-width': thk
+          x1: x, y1: lineTop,
+          x2: x, y2: elevY,
+          stroke: col,
+          'stroke-width': thk,
+          'stroke-linecap': 'round'
         }));
       }
+
+      // Hollow marker circle at CP track location
+      svg.appendChild(el('circle', {
+        cx: x, cy: elevY,
+        r: 4.5,
+        fill: '#ffffff',
+        stroke: col,
+        'stroke-width': 2
+      }));
     });
   }
 
@@ -526,17 +499,19 @@
     }
   }
 
+  // ── Top Icon Badges ─────────────────────────────────────────────────
   function renderCPIcons(svg, cps, seqLabels, m, Y) {
     cps.forEach(function (cp, idx) {
       var x  = m.distToX(cp.distance);
       var cy = Y.iconCY;
+      var r  = 12.5;
 
       var symbol = cp.icon || (cp.icons && cp.icons[0] ? cp.icons[0].symbol : '') || '';
 
       if (idx === 0 || symbol === 'start') {
         var grpS = el('g', {});
         grpS.appendChild(el('circle', {
-          cx: x, cy: cy, r: 12,
+          cx: x, cy: cy, r: r,
           fill: '#0d5236', stroke: '#ffffff', 'stroke-width': '2'
         }));
         grpS.appendChild(el('text', {
@@ -551,7 +526,7 @@
       if (idx === cps.length - 1 || symbol === 'finish') {
         var grpF = el('g', {});
         grpF.appendChild(el('circle', {
-          cx: x, cy: cy, r: 12,
+          cx: x, cy: cy, r: r,
           fill: '#b91c1c', stroke: '#ffffff', 'stroke-width': '2'
         }));
         grpF.appendChild(el('text', {
@@ -563,131 +538,180 @@
         return;
       }
 
+      // Crisp vector cutlery for food / aid stations (matches user reference image)
+      if (symbol === 'food' || symbol === 'classic' || symbol === 'assisted') {
+        var grpFood = el('g', {});
+        grpFood.appendChild(el('circle', {
+          cx: x, cy: cy, r: r,
+          fill: cp.axisColor || '#3f3f46', stroke: '#ffffff', 'stroke-width': '2'
+        }));
+        // Fork
+        grpFood.appendChild(el('path', {
+          d: 'M' + (x - 4.5) + ',' + (cy + 4.5) + ' L' + (x + 1) + ',' + (cy - 1) + ' M' + x + ',' + (cy - 2) + ' L' + (x + 4) + ',' + (cy - 6) + ' M' + (x + 1.2) + ',' + (cy - 3.2) + ' L' + (x + 5.2) + ',' + (cy - 1.2) + ' M' + (x + 2.5) + ',' + (cy - 0.5) + ' L' + (x + 6) + ',' + (cy - 4),
+          stroke: '#ffffff', 'stroke-width': '1.2', 'stroke-linecap': 'round', fill: 'none'
+        }));
+        // Knife
+        grpFood.appendChild(el('path', {
+          d: 'M' + (x + 4.5) + ',' + (cy + 4.5) + ' L' + (x - 1) + ',' + (cy - 1) + ' M' + (x - 1) + ',' + (cy - 1) + ' C' + (x - 5.5) + ',' + (cy - 3.5) + ' ' + (x - 4.5) + ',' + (cy - 6) + ' ' + (x - 2) + ',' + (cy - 2),
+          stroke: '#ffffff', 'stroke-width': '1.3', 'stroke-linecap': 'round', fill: '#ffffff'
+        }));
+        svg.appendChild(grpFood);
+        return;
+      }
+
+      if (symbol === 'water') {
+        var grpW = el('g', {});
+        grpW.appendChild(el('circle', {
+          cx: x, cy: cy, r: r,
+          fill: cp.axisColor || '#0284c7', stroke: '#ffffff', 'stroke-width': '2'
+        }));
+        grpW.appendChild(el('path', {
+          d: 'M ' + x + ' ' + (cy - 5.5) + ' C ' + (x - 4.5) + ' ' + (cy + 0.5) + ' ' + (x - 4.5) + ' ' + (cy + 4.5) + ' ' + x + ' ' + (cy + 4.5) + ' C ' + (x + 4.5) + ' ' + (cy + 4.5) + ' ' + (x + 4.5) + ' ' + (cy + 0.5) + ' ' + x + ' ' + (cy - 5.5) + ' Z',
+          fill: '#ffffff'
+        }));
+        svg.appendChild(grpW);
+        return;
+      }
+
       var emoji = getIconEmoji(symbol);
-      if (emoji) {
-        svg.appendChild(el('text', {
-          x: x, y: cy + 7,
-          'text-anchor': 'middle', 'font-size': '18',
+      if (emoji && symbol !== 'food' && symbol !== 'classic' && symbol !== 'assisted' && symbol !== 'water') {
+        var grpE = el('g', {});
+        grpE.appendChild(el('circle', {
+          cx: x, cy: cy, r: r,
+          fill: cp.axisColor || '#3f3f46', stroke: '#ffffff', 'stroke-width': '2'
+        }));
+        grpE.appendChild(el('text', {
+          x: x, y: cy + 4.5,
+          'text-anchor': 'middle', 'font-size': '12',
           style: 'font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;'
         }, emoji));
+        svg.appendChild(grpE);
       } else {
-        var r = 11;
-        var col = cp.axisColor || '#d97706';
-        var grp = el('g', {});
-        grp.appendChild(el('circle', {
+        var col = cp.axisColor || '#3f3f46';
+        var grpN = el('g', {});
+        grpN.appendChild(el('circle', {
           cx: x, cy: cy, r: r,
           fill: col, stroke: '#ffffff', 'stroke-width': '2'
         }));
-        grp.appendChild(el('text', {
+        grpN.appendChild(el('text', {
           x: x, y: cy + 4,
           'text-anchor': 'middle', 'font-size': '11', 'font-weight': '700', fill: '#ffffff',
           style: "font-family: var(--font-display), 'Barlow Condensed', sans-serif"
         }, seqLabels[idx]));
-        svg.appendChild(grp);
+        svg.appendChild(grpN);
       }
     });
   }
 
-  function renderCPNames(svg, cps, m, Y, fontSize, staggerLevels) {
-    cps.forEach(function (cp, idx) {
-      var x  = m.distToX(cp.distance);
-      var level = staggerLevels[idx] || 0;
-      var name = cp.name || '';
-
-      var words = name.split(' ');
-      var line1 = '', line2 = '';
-      if (words.length === 1) {
-        line1 = words[0];
-      } else {
-        var mid = Math.ceil(words.length / 2);
-        line1 = words.slice(0, mid).join(' ');
-        line2 = words.slice(mid).join(' ');
-      }
-
-      var y1 = Y.nameAnchor + 16 + level * 45;
-      var y2 = Y.nameAnchor + 30 + level * 45;
-
-      svg.appendChild(el('text', {
-        x: x, y: y1,
-        'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '700',
-        fill: C.cpName
-      }, line1));
-
-      if (line2) {
-        svg.appendChild(el('text', {
-          x: x, y: y2,
-          'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '700',
-          fill: C.cpName
-        }, line2));
-      }
-    });
-  }
-
-  function renderElevLabels(svg, cps, pts, m, Y, fontSize, staggerLevels) {
+  // ── Vertical CP Names (Rotated -90°, Left of Guide Axis) ────────────
+  function renderCPNames(svg, cps, pts, m, Y, fontSize) {
     cps.forEach(function (cp, idx) {
       var x = m.distToX(cp.distance);
-      var level = staggerLevels[idx] || 0;
-      var label = '+0m';
-      if (idx > 0) {
-        var stats = u().segmentStats(pts, cps[idx - 1].distance, cp.distance, window.TrailRoadbook.elevationMode);
-        label = '+' + Math.round(stats.dPlus || 0) + 'm';
+      var yTop = Y.iconCY + 18;
+      var name = (cp.name || '').trim();
+      if (!name) {
+        name = (idx === 0 ? 'Start' : idx === cps.length - 1 ? 'Finish' : 'CP' + idx);
       }
+
+      var textX = x - 5.5;
+
+      var txtEl = el('text', {
+        x: textX,
+        y: yTop,
+        'text-anchor': 'end',
+        'font-size': String(fontSize),
+        'font-weight': '700',
+        fill: C.cpName,
+        'letter-spacing': '0.5',
+        transform: 'rotate(-90, ' + textX + ', ' + yTop + ')',
+        style: "font-family: var(--font-sans), 'Segoe UI', system-ui, -apple-system, sans-serif; paint-order: stroke fill; stroke: " + C.bg + "; stroke-width: 3.5px; stroke-linejoin: round; stroke-linecap: round;"
+      }, name);
+
+      svg.appendChild(txtEl);
+    });
+  }
+
+  // ── Intelligent Slope-Aware CP Altitude Labels ──────────────────────
+  function renderElevLabels(svg, cps, pts, m, Y, fontSize) {
+    cps.forEach(function (cp) {
+      var x = m.distToX(cp.distance);
+      var elev = u().interpolateElevation(pts, cp.distance);
+      var elevY = m.eleToY(elev);
+      var grad = u().gradientAtDistance(pts, cp.distance, 0.2);
+
+      // Smart placement: downhill terrain -> right side; uphill terrain -> left side
+      var isDownhill = (grad < 0);
+      var textX = isDownhill ? (x + 8) : (x - 8);
+      var anchor = isDownhill ? 'start' : 'end';
+
+      if (x < 85) { textX = x + 8; anchor = 'start'; }
+      else if (x > 70 + m.chartW - 25) { textX = x - 8; anchor = 'end'; }
+
       svg.appendChild(el('text', {
-        x: x, y: Y.elevBase + level * 45,
-        'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '700',
+        x: textX,
+        y: elevY - 4,
+        'text-anchor': anchor,
+        'font-size': String(fontSize),
+        'font-weight': '700',
         fill: C.elevLabel,
-        style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
-      }, label));
+        style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace; paint-order: stroke fill; stroke: " + C.bg + "; stroke-width: 3px; stroke-linejoin: round; stroke-linecap: round;"
+      }, Math.round(elev) + 'm'));
     });
   }
 
-  function renderTimeLabels(svg, cps, times, m, Y, fontSize, staggerLevels) {
+  // ── CP Arrival Time Labels ──────────────────────────────────────────
+  function renderTimeLabels(svg, cps, times, m, Y, fontSize) {
     cps.forEach(function (cp, idx) {
+      if (idx === 0 && !cp.arrivalTime) return;
+      if (!cp.arrivalTime) return;
       var x = m.distToX(cp.distance);
-      var level = staggerLevels[idx] || 0;
-      var cumulVal = times[idx].cumul;
+      var yTop = Y.iconCY + 18;
+      var timeStr = u().formatTime(times[idx].cumul);
+      if (!timeStr) return;
 
-      svg.appendChild(el('text', {
-        x: x, y: Y.timeBase + level * 45,
-        'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '700',
+      var timeX = (x + 8);
+      var timeEl = el('text', {
+        x: timeX,
+        y: yTop,
+        'text-anchor': 'start',
+        'font-size': String(Math.max(fontSize - 4, 10)),
+        'font-weight': '700',
         fill: C.timeLabel,
-        style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
-      }, u().formatTime(cumulVal)));
-
-      var segVal = times[idx].segment;
-      if (idx > 0) {
-        var xPrev = m.distToX(cps[idx - 1].distance);
-        var xMid = (xPrev + x) / 2;
-        var prevLevel = staggerLevels[idx - 1] || 0;
-        var maxLevel = Math.max(level, prevLevel);
-        svg.appendChild(el('text', {
-          x: xMid, y: Y.timeBase + 14 + maxLevel * 45,
-          'text-anchor': 'middle', 'font-size': String(fontSize - 2), 'font-weight': '600',
-          fill: C.segTimeLabel,
-          style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
-        }, '(' + u().formatTime(segVal) + ')'));
-      }
+        transform: 'rotate(-90, ' + timeX + ', ' + yTop + ')',
+        style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace; paint-order: stroke fill; stroke: " + C.bg + "; stroke-width: 3px; stroke-linejoin: round;"
+      }, timeStr);
+      svg.appendChild(timeEl);
     });
   }
 
-  function renderNotes(svg, cps, m, Y, fontSize, staggerLevels) {
-    cps.forEach(function (cp, idx) {
+  // ── Parallel Vertical Notes ─────────────────────────────────────────
+  function renderNotes(svg, cps, m, Y, fontSize) {
+    cps.forEach(function (cp) {
       if (!cp.notes) return;
       var x = m.distToX(cp.distance);
-      var level = staggerLevels[idx] || 0;
-      var lines = cp.notes.split('\n');
+      var yTop = Y.iconCY + 18;
+      var lines = cp.notes.split('\n').filter(function (l) { return l.trim(); });
+
       lines.forEach(function (line, li) {
-        if (!line.trim()) return;
-        svg.appendChild(el('text', {
-          x: x, y: Y.notesBase + level * 45 + li * 14,
-          'text-anchor': 'middle', 'font-size': String(fontSize - 2), 'font-weight': '600',
-          fill: C.notesText, 'font-style': 'italic'
-        }, line.trim()));
+        var noteX = (x - 5.5) - (fontSize + 3) * (li + 1);
+        var noteEl = el('text', {
+          x: noteX,
+          y: yTop,
+          'text-anchor': 'end',
+          'font-size': String(Math.max(fontSize - 3, 9)),
+          'font-weight': '600',
+          'font-style': 'italic',
+          fill: C.notesText,
+          transform: 'rotate(-90, ' + noteX + ', ' + yTop + ')',
+          style: "font-family: var(--font-sans), 'Segoe UI', system-ui, -apple-system, sans-serif; paint-order: stroke fill; stroke: " + C.bg + "; stroke-width: 3px; stroke-linejoin: round; stroke-linecap: round;"
+        }, line.trim());
+        svg.appendChild(noteEl);
       });
     });
   }
 
-  function renderSegmentInfo(svg, cps, pts, m, Y, fontSize) {
+  // ── 3-Line Hexagonal / Rectangular Segment Statistics Boxes ────────
+  function renderSegmentInfo(svg, cps, pts, m, Y, fontSize, times) {
     var splitCps = cps.filter(function (cp, idx) {
       return cp.useForIntermediateDistances || idx === 0 || idx === cps.length - 1;
     });
@@ -749,12 +773,12 @@
     }
   }
 
-  function renderCumulDist(svg, cps, m, Y, fontSize, staggerLevels) {
-    cps.forEach(function (cp, idx) {
+  // ── Bottom Cumulative Distance ──────────────────────────────────────
+  function renderCumulDist(svg, cps, m, Y, fontSize) {
+    cps.forEach(function (cp) {
       var x = m.distToX(cp.distance);
-      var level = staggerLevels[idx] || 0;
       svg.appendChild(el('text', {
-        x: x, y: Y.cumulBase + level * 25,
+        x: x, y: Y.cumulBase,
         'text-anchor': 'middle', 'font-size': String(fontSize + 1), 'font-weight': '700',
         fill: C.cumulText,
         style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
@@ -762,6 +786,7 @@
     });
   }
 
+  // ── Peak Elevation Annotations ──────────────────────────────────────
   function renderPeakLabels(svg, pts, cps, m, Y, fontSize) {
     var peaks = findPeaks(pts, 100);
     peaks.forEach(function (pk) {
@@ -773,9 +798,9 @@
       if (tooClose) return;
       svg.appendChild(el('text', {
         x: x, y: yy - 8,
-        'text-anchor': 'middle', 'font-size': String(fontSize - 3), 'font-style': 'italic',
+        'text-anchor': 'middle', 'font-size': String(fontSize - 2), 'font-style': 'italic',
         fill: C.peakLabel,
-        style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
+        style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace; paint-order: stroke fill; stroke: " + C.bg + "; stroke-width: 3px; stroke-linejoin: round;"
       }, Math.round(pk.elevation) + 'm'));
     });
   }
@@ -792,6 +817,7 @@
     return peaks;
   }
 
+  // ── Chart Inside Custom Annotations ─────────────────────────────────
   function renderAssociatedTexts(svg, cps, m, Y) {
     cps.forEach(function (cp) {
       if (!cp.texts) return;
