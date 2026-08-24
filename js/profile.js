@@ -30,7 +30,9 @@
     var titleH = name ? 28 : 8;
 
     y.titleBase   = cur + titleH - 8;                  cur += titleH;
-    y.iconCY      = cur + 14;                          cur += 30;
+    y.timeBase    = cur + 14;                          cur += 22;
+    y.iconCY      = cur + 14;                          cur += 28;
+    y.notesBase   = cur + 12;                          cur += 18;
     y.chartTop    = cur;
     y.chartBot    = cur + chartH;                      cur += chartH;
     cur += 4;
@@ -143,7 +145,7 @@
     var chartH = 280;
     var margin = 12;
     var titleH = name ? 28 : 8;
-    var constantH = titleH + 30 + 4 + 68 + 26 + 10;
+    var constantH = titleH + 22 + 28 + 18 + 4 + 68 + 26 + 10;
 
     if (ratio && ratio !== 'auto') {
       var ratioVal = 1.0;
@@ -603,11 +605,11 @@
     });
   }
 
-  // ── Vertical CP Names (Rotated -90°, Left of Guide Axis) ────────────
+  // ── Vertical CP Names (ONLY CP Names are rotated -90°) ───────────────
   function renderCPNames(svg, cps, pts, m, Y, fontSize) {
     cps.forEach(function (cp, idx) {
       var x = m.distToX(cp.distance);
-      var yTop = Y.iconCY + 18;
+      var yTop = Y.chartTop + 6;
       var name = (cp.name || '').trim();
       if (!name) {
         name = (idx === 0 ? 'Start' : idx === cps.length - 1 ? 'Finish' : 'CP' + idx);
@@ -659,53 +661,60 @@
     });
   }
 
-  // ── CP Arrival Time Labels ──────────────────────────────────────────
+  // ── Horizontal CP Arrival Time & Interval Labels ────────────────────
   function renderTimeLabels(svg, cps, times, m, Y, fontSize) {
     cps.forEach(function (cp, idx) {
-      if (idx === 0 && !cp.arrivalTime) return;
-      if (!cp.arrivalTime) return;
       var x = m.distToX(cp.distance);
-      var yTop = Y.iconCY + 18;
-      var timeStr = u().formatTime(times[idx].cumul);
-      if (!timeStr) return;
+      var cumulVal = times[idx].cumul;
+      var formattedCumul = u().formatTime(cumulVal);
 
-      var timeX = (x + 8);
-      var timeEl = el('text', {
-        x: timeX,
-        y: yTop,
-        'text-anchor': 'start',
-        'font-size': String(Math.max(fontSize - 4, 10)),
-        'font-weight': '700',
-        fill: C.timeLabel,
-        transform: 'rotate(-90, ' + timeX + ', ' + yTop + ')',
-        style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace; paint-order: stroke fill; stroke: " + C.bg + "; stroke-width: 3px; stroke-linejoin: round;"
-      }, timeStr);
-      svg.appendChild(timeEl);
+      if (formattedCumul && (idx > 0 || cp.arrivalTime)) {
+        svg.appendChild(el('text', {
+          x: x,
+          y: Y.timeBase,
+          'text-anchor': 'middle',
+          'font-size': String(fontSize),
+          'font-weight': '700',
+          fill: C.timeLabel,
+          style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
+        }, formattedCumul));
+      }
+
+      var segVal = times[idx].segment;
+      if (idx > 0 && segVal > 0) {
+        var xPrev = m.distToX(cps[idx - 1].distance);
+        var xMid = (xPrev + x) / 2;
+        svg.appendChild(el('text', {
+          x: xMid,
+          y: Y.timeBase - 1,
+          'text-anchor': 'middle',
+          'font-size': String(Math.max(fontSize - 3, 9)),
+          'font-weight': '600',
+          fill: C.segTimeLabel,
+          style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
+        }, '(' + u().formatTime(segVal) + ')'));
+      }
     });
   }
 
-  // ── Parallel Vertical Notes ─────────────────────────────────────────
+  // ── Horizontal Notes ────────────────────────────────────────────────
   function renderNotes(svg, cps, m, Y, fontSize) {
     cps.forEach(function (cp) {
       if (!cp.notes) return;
       var x = m.distToX(cp.distance);
-      var yTop = Y.iconCY + 18;
       var lines = cp.notes.split('\n').filter(function (l) { return l.trim(); });
 
       lines.forEach(function (line, li) {
-        var noteX = (x - 5.5) - (fontSize + 3) * (li + 1);
-        var noteEl = el('text', {
-          x: noteX,
-          y: yTop,
-          'text-anchor': 'end',
-          'font-size': String(Math.max(fontSize - 3, 9)),
+        svg.appendChild(el('text', {
+          x: x,
+          y: Y.notesBase + li * 12,
+          'text-anchor': 'middle',
+          'font-size': String(fontSize),
           'font-weight': '600',
           'font-style': 'italic',
           fill: C.notesText,
-          transform: 'rotate(-90, ' + noteX + ', ' + yTop + ')',
-          style: "font-family: var(--font-sans), 'Segoe UI', system-ui, -apple-system, sans-serif; paint-order: stroke fill; stroke: " + C.bg + "; stroke-width: 3px; stroke-linejoin: round; stroke-linecap: round;"
-        }, line.trim());
-        svg.appendChild(noteEl);
+          style: "font-family: var(--font-sans), 'Segoe UI', system-ui, -apple-system, sans-serif"
+        }, line.trim()));
       });
     });
   }
