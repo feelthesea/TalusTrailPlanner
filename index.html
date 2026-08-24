@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Talus - Trail Roadbook Generator & TrailScope — 越野跑路书与轨迹分析</title>
-  <meta name="description" content="Upload GPX/KML/KMZ tracks and create a beautiful trail roadbook with interactive maps, elevation profile, gradient distribution, and segment statistics.">
+  <title>Talus - Trail Roadbook Generator & Trail Analytics — 越野跑路书与轨迹分析</title>
+  <meta name="description" content="Upload GPX/KML/KMZ tracks and create a beautiful interactive trail roadbook with synchronized map, gradient distribution, and segment statistics.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/leaflet.css">
-  <link rel="stylesheet" href="style.css?v=7.1">
+  <link rel="stylesheet" href="style.css?v=7.2">
 </head>
 <body>
 
@@ -35,13 +35,13 @@
     <!-- Race name -->
     <div class="group">
       <label class="field-label" for="input-name" data-i18n="raceNameLabel">比赛名称</label>
-      <input type="text" id="input-name" class="input-field" placeholder="e.g. UTMB 2026" style="width:140px">
+      <input type="text" id="input-name" class="input-field" placeholder="e.g. UTMB 2026" style="width:135px">
     </div>
 
     <!-- Race start date/time -->
     <div class="group">
       <label class="field-label" for="input-start-time" data-i18n="raceStartLabel">出发时间</label>
-      <select id="input-start-time" class="input-field" style="width:130px"></select>
+      <select id="input-start-time" class="input-field" style="width:125px"></select>
     </div>
 
     <!-- Elevation Calculation Mode Switch (Raw vs Smooth 4m) -->
@@ -51,6 +51,16 @@
         <button class="unit-toggle-btn" id="btn-elev-raw" data-i18n="elevModeRaw">原始数据</button>
         <button class="unit-toggle-btn active" id="btn-elev-smooth" data-i18n="elevModeSmooth">平滑 (4m)</button>
       </div>
+    </div>
+
+    <!-- Color Mode Switch -->
+    <div class="group">
+      <label class="field-label" for="select-color-mode" data-i18n="colorModeLabel">🎨 剖面着色</label>
+      <select id="select-color-mode" class="input-field" style="width: 145px; height: 32px; padding: 4px 8px; font-size: 0.78rem;">
+        <option value="classic" data-i18n="colorModeClassic">经典路书柱条</option>
+        <option value="gradient" data-i18n="colorModeGradient">按坡度渐变</option>
+        <option value="elevation" data-i18n="colorModeElevation">按海拔渐变</option>
+      </select>
     </div>
 
     <div class="sep"></div>
@@ -73,8 +83,8 @@
 
     <!-- Language Selector -->
     <div class="group">
-      <label class="field-label" for="select-lang" data-i18n="languageLabel">🌐 语言 / Language</label>
-      <select id="select-lang" class="input-field" style="width:90px; height: 32px; padding: 4px 8px; font-size: 0.78rem;">
+      <label class="field-label" for="select-lang" data-i18n="languageLabel">🌐 语言</label>
+      <select id="select-lang" class="input-field" style="width:85px; height: 32px; padding: 4px 8px; font-size: 0.78rem;">
         <option value="zh">中文</option>
         <option value="en">English</option>
       </select>
@@ -83,10 +93,10 @@
     <!-- Image export -->
     <div class="group">
       <label class="field-label" for="export-ratio" data-i18n="exportRatioLabel">导出比例</label>
-      <select id="export-ratio" class="input-field" style="width:230px; height: 32px; padding: 4px 8px; font-size: 0.78rem;">
+      <select id="export-ratio" class="input-field" style="width:205px; height: 32px; padding: 4px 8px; font-size: 0.78rem;">
         <option value="auto" data-i18n="ratioAuto">默认自适应 (无白边)</option>
         <option value="19.5-9" data-i18n="ratio19_5_9">19.5:9横屏（iPhone 17/16）</option>
-        <option value="20-9" data-i18n="ratio20_9" selected>20:9（小米、华为 Pura、主流安卓）</option>
+        <option value="20-9" data-i18n="ratio20_9" selected>20:9（小米、华为、安卓）</option>
       </select>
     </div>
 
@@ -104,12 +114,20 @@
     </div>
   </div>
 
-  <!-- ═══ Main Full-Width Stack Layout ═══ -->
+  <!-- ═══ Main 3-Zone Stack Layout ═══ -->
   <div class="main-layout">
-    <!-- ═══ 1. Profile Viewer (SVG Roadbook) & Font Sizes Panel ═══ -->
-    <section class="profile-section">
+    
+    <!-- ═════════════════════════════════════════════════════════════════════
+         区域 1（核心主视区）：统一的路书高程剖面图 (全宽展示)
+         ═════════════════════════════════════════════════════════════════════ -->
+    <section class="panel-card zone-1-container">
+      <div class="panel-card-header">
+        <h3><span data-i18n="zone1Title">📈 统一路书高程剖面图 (Unified Roadbook Profile)</span></h3>
+        <span style="font-size:0.75rem; color:var(--text-muted);" data-i18n="zone1Tip">鼠标或手指滑动可实时在地图上追踪位置，分段及文字直接联动</span>
+      </div>
+
       <div class="profile-main-layout">
-        <!-- Left: Elevation Profile SVG -->
+        <!-- SVG Roadbook Profile Container -->
         <div class="profile-wrapper" id="profile-container">
           <div class="profile-placeholder" id="profile-placeholder">
             <div class="big-icon">🗻</div>
@@ -118,7 +136,7 @@
           </div>
         </div>
 
-        <!-- Right: Font Sizes Sidebar Panel -->
+        <!-- Font Sizes Sidebar Panel -->
         <aside class="font-sizes-sidebar" id="font-sizes-sidebar">
           <h4 data-i18n="poiCol1FontSizesTitle">各元素字号大小设置 (像素)</h4>
           <div class="poi-font-sizes-grid">
@@ -155,77 +173,93 @@
       </div>
     </section>
 
-    <!-- ═══ 2. Section 2: Interactive Map & Elevation Profile Explorer ═══ -->
-    <section class="panel-card map-explorer-container" id="map-explorer-section">
-      <div class="panel-card-header">
-        <h3><span data-i18n="mapExplorerTitle">🗺️ 交互式轨迹地图与高程剖面</span></h3>
-        <div class="map-controls-group">
-          <label class="field-label" for="select-map-source" data-i18n="mapSourceLabel">底图图层</label>
-          <select id="select-map-source" class="input-field" style="height: 30px; font-size: 0.76rem; padding: 2px 8px;">
-            <option value="tiandituluwang">天地图路网 (推荐)</option>
-            <option value="tiandituweixing">天地图卫星</option>
-            <option value="tianditudixing">天地图地形</option>
-            <option value="gaode_hybrid">高德混合图</option>
-            <option value="amaproad">高德路网图</option>
-            <option value="osm">OpenStreetMap</option>
-            <option value="opentopomap">OpenTopoMap</option>
-            <option value="cyclosm">CyclOSM</option>
-          </select>
+    <!-- ═════════════════════════════════════════════════════════════════════
+         区域 2（区域1下方，左右分栏）：左侧交互式地图 | 右侧坡度分布与技术要点
+         ═════════════════════════════════════════════════════════════════════ -->
+    <section class="zone-2-grid">
+      <!-- Zone 2 Left: Interactive Map -->
+      <div class="panel-card map-panel-card">
+        <div class="panel-card-header">
+          <h3><span data-i18n="mapExplorerTitle">🗺️ 交互式轨迹地图</span></h3>
+          <div class="map-controls-group">
+            <label class="field-label" for="select-map-source" data-i18n="mapSourceLabel">底图图层</label>
+            <select id="select-map-source" class="input-field" style="height: 30px; font-size: 0.76rem; padding: 2px 8px;">
+              <option value="tiandituluwang">天地图路网 (推荐)</option>
+              <option value="tiandituweixing">天地图卫星</option>
+              <option value="tianditudixing">天地图地形</option>
+              <option value="gaode_hybrid">高德混合图</option>
+              <option value="amaproad">高德路网图</option>
+              <option value="osm">OpenStreetMap</option>
+              <option value="opentopomap">OpenTopoMap</option>
+              <option value="cyclosm">CyclOSM</option>
+            </select>
 
-          <label class="field-label" for="select-color-mode" data-i18n="colorModeLabel">着色模式</label>
-          <select id="select-color-mode" class="input-field" style="height: 30px; font-size: 0.76rem; padding: 2px 8px;">
-            <option value="gradient" data-i18n="colorModeGradient">按坡度着色 (Grade)</option>
-            <option value="elevation" data-i18n="colorModeElevation">按海拔着色 (Elevation)</option>
-          </select>
-
-          <button class="btn" id="btn-fit-map" title="适应全图" style="height: 30px; padding: 4px 10px; font-size: 0.76rem;">
-            <span>🎯</span> <span data-i18n="btnFitMap">居中全景</span>
-          </button>
+            <button class="btn" id="btn-fit-map" title="适应全图" style="height: 30px; padding: 4px 10px; font-size: 0.76rem;">
+              <span>🎯</span> <span data-i18n="btnFitMap">居中全景</span>
+            </button>
+          </div>
+        </div>
+        <div class="map-container-wrap">
+          <div id="leafletMap"></div>
         </div>
       </div>
 
-      <div class="map-layout-split">
-        <!-- Leaflet Map -->
-        <div class="map-pane">
-          <div id="leafletMap"></div>
+      <!-- Zone 2 Right: 8 Summary Metrics + Slope Gradient Distribution & Practical Tips -->
+      <div class="panel-card gradient-panel-card">
+        <div class="panel-card-header">
+          <h3><span data-i18n="statsGradientTitle">📐 坡度分布与实战技术要点</span></h3>
         </div>
-        <!-- Interactive Elevation Chart -->
-        <div class="chart-pane">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary);" data-i18n="interactiveChartTitle">📈 实时高程与坡度交互剖面</span>
-            <span style="font-size: 0.72rem; color: var(--text-muted);" data-i18n="interactiveChartTip">滑动悬停可实时联动地图当前点</span>
+        <div class="gradient-panel-body">
+          <!-- 8 Trail Summary Metric Tiles -->
+          <div class="trail-stat-cards" id="trail-stat-cards">
+            <!-- Injected dynamically -->
           </div>
-          <div class="chart-canvas-wrapper" id="chartCanvasWrapper">
-            <canvas id="interactiveElevationChart"></canvas>
-            <canvas id="interactiveChartOverlay"></canvas>
-            <div class="chart-tooltip" id="chartTooltip"></div>
+
+          <!-- 6-Level Gradient Distribution & Tech Tips -->
+          <div class="gradient-distribution-wrap" id="gradient-distribution-content">
+            <!-- Injected dynamically -->
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ═══ 3. Section 3: Trail Statistics, Slope & Segments Grid ═══ -->
-    <section class="stats-and-segments-grid">
-      <!-- Left Column: Comprehensive Stats & Slope Gradient Distribution + Tech Tips -->
-      <div class="panel-card" style="padding: 16px;">
-        <div class="panel-card-header" style="margin: -16px -16px 14px -16px;">
-          <h3><span data-i18n="statsGradientTitle">📐 坡度分布与实战技术要点</span></h3>
+    <!-- ═════════════════════════════════════════════════════════════════════
+         区域 3（最下方，左右分栏）：左侧CP点列表 | 右侧多模式分段统计
+         ═════════════════════════════════════════════════════════════════════ -->
+    <section class="zone-3-grid">
+      <!-- Zone 3 Left: CP Table & Checkpoint List -->
+      <div class="panel-card cp-list-panel-card">
+        <div class="panel-card-header">
+          <h3><span data-i18n="cpTableTitle">📍 CP 点 / 补给站 列表</span></h3>
+          <span style="font-size:0.72rem; color:var(--text-muted);" data-i18n="cpTableTip">点击「⚙️」打开详细视觉配置浮窗</span>
         </div>
 
-        <!-- 8 Trail Summary Metric Tiles -->
-        <div class="trail-stat-cards" id="trail-stat-cards">
-          <!-- Dynamically populated -->
-        </div>
-
-        <!-- Gradient Distribution Bars & Technical Tips -->
-        <div class="gradient-distribution-wrap" id="gradient-distribution-content">
-          <!-- Dynamically populated -->
+        <div class="cp-table-wrap">
+          <table class="cp-table" id="cp-table">
+            <thead>
+              <tr>
+                <th class="col-num" data-i18n="colNum">#</th>
+                <th class="col-name" data-i18n="colName">名称</th>
+                <th class="col-dist" data-i18n="colDist">距起点 (km)</th>
+                <th class="col-time" data-i18n="colTime">抵达cp点总用时</th>
+                <th class="col-action"></th>
+              </tr>
+            </thead>
+            <tbody id="cp-tbody">
+              <!-- Injected dynamically -->
+            </tbody>
+          </table>
+          <div class="add-row-bar">
+            <button class="btn" id="btn-add-cp">
+              <span class="icon">＋</span> <span data-i18n="addCpBtn">添加 CP 点</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Right Column: Multi-Mode Segment Statistics Table -->
-      <div class="panel-card" style="padding: 16px;">
-        <div class="panel-card-header" style="margin: -16px -16px 14px -16px;">
+      <!-- Zone 3 Right: Multi-Mode Segment Statistics -->
+      <div class="panel-card segment-stats-panel-card">
+        <div class="panel-card-header">
           <h3><span data-i18n="segmentStatsTitle">📋 多模式分段统计</span></h3>
           <div class="seg-mode-bar">
             <button class="seg-mode-btn active" data-mode="waypoint" data-i18n="segModeWaypoint">📍 检查点</button>
@@ -248,175 +282,162 @@
               </tr>
             </thead>
             <tbody id="segment-tbody">
-              <!-- Dynamically populated -->
+              <!-- Injected dynamically -->
             </tbody>
           </table>
         </div>
       </div>
     </section>
+  </div>
 
-    <!-- ═══ 4. Section 4: Two-Column Editor Section (CP List Table + Details Panel) ═══ -->
-    <div class="editor-container">
-      <!-- Left Column: CP List Table -->
-      <section class="editor-left">
-        <h2><span data-i18n="cpTableTitle">📍 CP 点 / 补给站 列表</span></h2>
-        <div class="cp-table-wrap">
-          <table class="cp-table" id="cp-table">
-            <thead>
-              <tr>
-                <th class="col-num" data-i18n="colNum">#</th>
-                <th class="col-name" data-i18n="colName">名称</th>
-                <th class="col-dist" data-i18n="colDist">距起点 (km)</th>
-                <th class="col-time" data-i18n="colTime">抵达cp点总用时</th>
-                <th class="col-action"></th>
-              </tr>
-            </thead>
-            <tbody id="cp-tbody">
-              <!-- rows injected by app.js -->
-            </tbody>
-          </table>
-          <div class="add-row-bar">
-            <button class="btn" id="btn-add-cp">
-              <span class="icon">＋</span> <span data-i18n="addCpBtn">添加 CP 点</span>
-            </button>
-          </div>
-        </div>
-      </section>
+  <!-- ═════════════════════════════════════════════════════════════════════
+       浮动式检查点详细视觉配置模态弹窗 (Floating Modal)
+       ═════════════════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="cp-modal-backdrop">
+    <div class="modal-card" id="cp-modal-card">
+      <div class="modal-header">
+        <h3 id="modal-cp-title">📍 检查点详细视觉配置</h3>
+        <button class="modal-close-btn" id="btn-modal-close" title="关闭">✕</button>
+      </div>
 
-      <!-- Right Column: CP Details Customization Panel -->
-      <aside class="editor-right poi-panel" id="poi-panel">
-        <div class="poi-panel-header-tabs">
-          <h3 data-i18n="poiPanelTitle">📍 检查点详细视觉配置</h3>
-        </div>
-
-        <div class="poi-content">
-          <!-- COLUMN 1: Basic Information -->
-          <div class="poi-form-grid-horizontal">
-            <h4 data-i18n="poiCol1Title">基本信息</h4>
-            
-            <div class="poi-field" style="margin-bottom: 6px;">
+      <div class="modal-body">
+        <!-- COLUMN 1: Basic Information -->
+        <div class="modal-section">
+          <h4 data-i18n="poiCol1Title">基本信息</h4>
+          <div class="modal-form-grid">
+            <div class="poi-field">
               <label for="poi-name-detail" data-i18n="colName">名称</label>
               <input type="text" id="poi-name-detail" class="input-field" placeholder="CP点名称">
             </div>
 
-            <div class="poi-field" style="margin-bottom: 6px;">
+            <div class="poi-field">
               <label for="poi-position" data-i18n="poiCol1Pos">CP位置距离 (公里)</label>
-              <input type="number" id="poi-position" step="0.1" min="0" value="0">
+              <input type="number" id="poi-position" class="input-field" step="0.1" min="0" value="0">
             </div>
 
-            <div class="poi-field" style="margin-bottom: 6px;">
+            <div class="poi-field">
               <label for="poi-time-detail" data-i18n="colTime">抵达cp点总用时</label>
-              <input type="text" id="poi-time-detail" class="input-field" placeholder="抵达用时 H:MM">
+              <input type="text" id="poi-time-detail" class="input-field" placeholder="用时 H:MM">
             </div>
 
-            <div class="poi-field" style="margin-bottom: 6px;">
-              <label for="poi-notes-detail" data-i18n="colNotes">备注 (支持回车多行)</label>
-              <textarea id="poi-notes-detail" class="input-field" placeholder="备注信息" style="height: 56px; resize: vertical;"></textarea>
-            </div>
-            
-            <div class="poi-field" style="margin-bottom: 6px;">
+            <div class="poi-field">
               <label for="poi-stop-duration" data-i18n="labelStopDuration">⏸️ 停留时间 (分钟)</label>
-              <input type="number" id="poi-stop-duration" min="0" max="120" value="0" step="1">
+              <input type="number" id="poi-stop-duration" class="input-field" min="0" max="120" value="0" step="1">
             </div>
 
-            <div class="poi-form-row inline" style="margin: 6px 0;">
+            <div class="poi-field" style="grid-column: span 2;">
+              <label for="poi-notes-detail" data-i18n="colNotes">备注 (支持回车多行)</label>
+              <textarea id="poi-notes-detail" class="input-field" placeholder="备注信息" style="height: 52px; resize: vertical;"></textarea>
+            </div>
+
+            <div class="poi-form-row inline" style="grid-column: span 2; margin: 4px 0;">
               <input type="checkbox" id="poi-intermediate" class="chk-box">
               <label for="poi-intermediate" data-i18n="poiCol1Intermediate">用于分段统计点 (划分子赛段)</label>
             </div>
           </div>
+        </div>
 
-          <!-- COLUMN 2: CP Type / Icon -->
-          <div class="poi-form-grid-horizontal">
-            <h4 data-i18n="poiCol2Title">补给站类型</h4>
-            <div class="poi-field">
-              <label for="poi-icon-select" data-i18n="poiLabelSymbol">类型图标</label>
-              <select id="poi-icon-select" class="input-field" style="height: 32px; font-size: 0.82rem;">
-                <option value="start" data-i18n="iconStart">🟢 起点</option>
-                <option value="finish" data-i18n="iconFinish">🏁 终点</option>
-                <option value="assisted" data-i18n="iconAssisted">🤝 有人协助补给站</option>
-                <option value="dropbag" data-i18n="iconDropbag">🛍️ 寄存包补给站</option>
-                <option value="classic" data-i18n="iconClassic">🍉 普通补给站</option>
-                <option value="water" data-i18n="iconWater">💧 水源点</option>
-                <option value="checkpoint" data-i18n="iconCheckpoint">🚩 打卡点</option>
-                <option value="peak" data-i18n="iconPeak">🏔️ 山峰</option>
-                <option value="danger" data-i18n="iconDanger">⚡ 危险</option>
-              </select>
-            </div>
+        <!-- COLUMN 2: CP Type & Icon -->
+        <div class="modal-section">
+          <h4 data-i18n="poiCol2Title">补给站类型</h4>
+          <div class="poi-field">
+            <label for="poi-icon-select" data-i18n="poiLabelSymbol">类型图标</label>
+            <select id="poi-icon-select" class="input-field" style="height: 34px; font-size: 0.85rem;">
+              <option value="start" data-i18n="iconStart">🟢 起点</option>
+              <option value="finish" data-i18n="iconFinish">🏁 终点</option>
+              <option value="assisted" data-i18n="iconAssisted">🤝 有人协助补给站</option>
+              <option value="dropbag" data-i18n="iconDropbag">🛍️ 寄存包补给站</option>
+              <option value="classic" data-i18n="iconClassic">🍉 普通补给站</option>
+              <option value="water" data-i18n="iconWater">💧 水源点</option>
+              <option value="checkpoint" data-i18n="iconCheckpoint">🚩 打卡点</option>
+              <option value="peak" data-i18n="iconPeak">🏔️ 山峰</option>
+              <option value="danger" data-i18n="iconDanger">⚡ 危险</option>
+            </select>
           </div>
+        </div>
 
-          <!-- COLUMN 3: Axis Configuration -->
-          <div class="poi-form-grid-horizontal">
-            <h4 data-i18n="poiCol3Title">垂直指示辅助线</h4>
-            <div class="poi-field" style="margin-bottom: 6px;">
+        <!-- COLUMN 3: Axis Configuration -->
+        <div class="modal-section">
+          <h4 data-i18n="poiCol3Title">垂直指示辅助线</h4>
+          <div class="modal-form-grid">
+            <div class="poi-field">
               <label data-i18n="poiCol3Color">指示线颜色</label>
-              <div class="color-picker-wrapper" style="width: 100%;">
+              <div class="color-picker-wrapper">
                 <input type="text" id="poi-axis-color-hex" value="#4e4e4e">
                 <input type="color" id="poi-axis-color" value="#4e4e4e">
               </div>
             </div>
             <div class="poi-field">
               <label data-i18n="poiCol3Thickness">指示线粗细 (px)</label>
-              <input type="number" id="poi-axis-thickness" value="1" min="1" max="10">
-            </div>
-          </div>
-
-          <!-- COLUMN 4: Associated Text Annotations -->
-          <div class="poi-form-grid-horizontal">
-            <h4 data-i18n="poiCol4Title">图表内嵌自定义标注</h4>
-            <div class="poi-texts-settings-row" style="grid-template-columns: 1fr 60px 1.2fr; gap: 8px;">
-              <div class="poi-field">
-                <label data-i18n="poiCol4Color">标注颜色</label>
-                <div class="color-picker-wrapper" style="width: 100%;">
-                  <input type="text" id="poi-text-color-hex" value="#4e4e4e">
-                  <input type="color" id="poi-text-color" value="#4e4e4e">
-                </div>
-              </div>
-              <div class="poi-field">
-                <label data-i18n="poiCol4Size">字号 (px)</label>
-                <input type="number" id="poi-text-size" value="18" min="6" max="24">
-              </div>
-              <div class="poi-field">
-                <label for="poi-text-orientation" data-i18n="poiCol4Orient">排列方向</label>
-                <select id="poi-text-orientation" style="height: 29px; padding: 2px 6px; font-size: 0.74rem;">
-                  <option value="To the right" data-i18n="orientRight">靠右横排 (To Right)</option>
-                  <option value="To the left" data-i18n="orientLeft">靠左横排 (To Left)</option>
-                  <option value="Rotated -90°" data-i18n="orientRotMinus90">靠右竖排 (Rotated -90°)</option>
-                  <option value="Rotated 90°" data-i18n="orientRot90">靠左竖排 (Rotated 90°)</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="poi-texts-grid-horizontal">
-              <div class="poi-field">
-                <label data-i18n="labelLeftBottom">左侧 - 下</label>
-                <input type="text" id="poi-txt-left-bottom" data-i18n-placeholder="placeholderTextNone" placeholder="无">
-              </div>
-              <div class="poi-field">
-                <label data-i18n="labelLeftMiddle">左侧 - 中</label>
-                <input type="text" id="poi-txt-left-middle" data-i18n-placeholder="placeholderTextNone" placeholder="无">
-              </div>
-              <div class="poi-field">
-                <label data-i18n="labelLeftTop">左侧 - 上</label>
-                <input type="text" id="poi-txt-left-top" data-i18n-placeholder="placeholderTextNone" placeholder="无">
-              </div>
-              <div class="poi-field">
-                <label data-i18n="labelRightBottom">右侧 - 下</label>
-                <input type="text" id="poi-txt-right-bottom" data-i18n-placeholder="placeholderTextNone" placeholder="无">
-              </div>
-              <div class="poi-field">
-                <label data-i18n="labelRightMiddle">右侧 - 中</label>
-                <input type="text" id="poi-txt-right-middle" data-i18n-placeholder="placeholderTextNone" placeholder="无">
-              </div>
-              <div class="poi-field">
-                <label data-i18n="labelRightTop">右侧 - 上</label>
-                <input type="text" id="poi-txt-right-top" data-i18n-placeholder="placeholderTextNone" placeholder="无">
-              </div>
+              <input type="number" id="poi-axis-thickness" class="input-field" value="1" min="1" max="10">
             </div>
           </div>
         </div>
-      </aside>
+
+        <!-- COLUMN 4: Associated Text Annotations -->
+        <div class="modal-section">
+          <h4 data-i18n="poiCol4Title">图表内嵌自定义标注</h4>
+          <div class="poi-texts-settings-row" style="margin-bottom: 8px;">
+            <div class="poi-field">
+              <label data-i18n="poiCol4Color">标注颜色</label>
+              <div class="color-picker-wrapper">
+                <input type="text" id="poi-text-color-hex" value="#4e4e4e">
+                <input type="color" id="poi-text-color" value="#4e4e4e">
+              </div>
+            </div>
+            <div class="poi-field">
+              <label data-i18n="poiCol4Size">字号 (px)</label>
+              <input type="number" id="poi-text-size" class="input-field" value="18" min="6" max="24">
+            </div>
+            <div class="poi-field">
+              <label for="poi-text-orientation" data-i18n="poiCol4Orient">排列方向</label>
+              <select id="poi-text-orientation" class="input-field" style="height: 30px; font-size: 0.74rem;">
+                <option value="To the right" data-i18n="orientRight">靠右横排 (To Right)</option>
+                <option value="To the left" data-i18n="orientLeft">靠左横排 (To Left)</option>
+                <option value="Rotated -90°" data-i18n="orientRotMinus90">靠右竖排 (Rotated -90°)</option>
+                <option value="Rotated 90°" data-i18n="orientRot90">靠左竖排 (Rotated 90°)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="poi-texts-grid-horizontal">
+            <div class="poi-field">
+              <label data-i18n="labelLeftBottom">左侧 - 下</label>
+              <input type="text" id="poi-txt-left-bottom" placeholder="无">
+            </div>
+            <div class="poi-field">
+              <label data-i18n="labelLeftMiddle">左侧 - 中</label>
+              <input type="text" id="poi-txt-left-middle" placeholder="无">
+            </div>
+            <div class="poi-field">
+              <label data-i18n="labelLeftTop">左侧 - 上</label>
+              <input type="text" id="poi-txt-left-top" placeholder="无">
+            </div>
+            <div class="poi-field">
+              <label data-i18n="labelRightBottom">右侧 - 下</label>
+              <input type="text" id="poi-txt-right-bottom" placeholder="无">
+            </div>
+            <div class="poi-field">
+              <label data-i18n="labelRightMiddle">右侧 - 中</label>
+              <input type="text" id="poi-txt-right-middle" placeholder="无">
+            </div>
+            <div class="poi-field">
+              <label data-i18n="labelRightTop">右侧 - 上</label>
+              <input type="text" id="poi-txt-right-top" placeholder="无">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn" id="btn-modal-cancel">取消</button>
+        <button class="btn btn-primary" id="btn-modal-save">✓ 保存并应用</button>
+      </div>
     </div>
   </div>
+
+  <!-- ═══ Tooltip ═══ -->
+  <div class="chart-tooltip" id="chartTooltip"></div>
 
   <!-- ═══ Toast ═══ -->
   <div class="toast" id="toast"></div>
@@ -424,14 +445,13 @@
   <!-- ═══ Scripts ═══ -->
   <script src="js/leaflet.js"></script>
   <script src="js/leaflet-custom-headers.js"></script>
-  <script src="js/utils.js?v=7.1"></script>
-  <script src="js/trail-math.js?v=7.1"></script>
-  <script src="js/gpx-parser.js?v=7.1"></script>
-  <script src="js/trail-analysis.js?v=7.1"></script>
-  <script src="js/trail-map.js?v=7.1"></script>
-  <script src="js/interactive-chart.js?v=7.1"></script>
-  <script src="js/profile.js?v=7.1"></script>
-  <script src="js/export.js?v=7.1"></script>
-  <script src="js/app.js?v=7.1"></script>
+  <script src="js/utils.js?v=7.2"></script>
+  <script src="js/trail-math.js?v=7.2"></script>
+  <script src="js/gpx-parser.js?v=7.2"></script>
+  <script src="js/trail-analysis.js?v=7.2"></script>
+  <script src="js/trail-map.js?v=7.2"></script>
+  <script src="js/profile.js?v=7.2"></script>
+  <script src="js/export.js?v=7.2"></script>
+  <script src="js/app.js?v=7.2"></script>
 </body>
 </html>

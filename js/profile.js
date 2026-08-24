@@ -1,54 +1,55 @@
 /**
- * Talus - Trail Roadbook Generator — SVG Profile Renderer (v5)
+ * Talus - Trail Roadbook Generator & TrailScope — Unified SVG Profile Renderer (v7.1)
  *
- * Draws a complete roadbook elevation profile including:
- *   - Slope steepness gradient bars
- *   - Elevation curve with fill
- *   - Custom guide vertical lines (Shortened: only running through the chart, solving Issue 5)
+ * Draws a complete interactive roadbook elevation profile including:
+ *   - Multiple Color Modes: Classic Sisyf Gradient Bars / Continuous Slope / Elevation
+ *   - Real-time Hover Crosshair & Synced Map Tracking
+ *   - Active Segment Highlighting
+ *   - Multi-icon stacking (up to 3 icons) & 12 vector symbols
+ *   - Segment climb, arrival & interval times, notes
+ *   - 3-line hexagonal/rectangular segment statistics boxes
  *   - Broken axis gap support
- *   - Multi-icon stacking (up to 3 icons)
- *   - Global font size adjustment (Requested)
- *   - Dual-palette day/night color themes for outdoors readability (Requested)
- *   - Custom inside-chart text annotations
- *   - Chinese localized segment info boxes
+ *   - Global & granular font size adjustments
+ *   - Associated text annotations
+ *   - Ultra-HD multi-ratio PNG image export
  */
 (function () {
   'use strict';
 
   window.TrailRoadbook = window.TrailRoadbook || {};
-  var U;
+  var U = null;
+  var TM = null;
   function u() { if (!U) U = window.TrailRoadbook.utils; return U; }
+  function tm() { if (!TM) TM = window.TrailRoadbook.trailMath; return TM; }
 
   var NS = 'http://www.w3.org/2000/svg';
 
-  // Dynamic Y Anchors with compressed margins and dynamic chartHeight support (Solving aspect ratio fits)
   function yAnchors(name, chartH) {
     chartH = chartH || 260;
     var y = {}, cur = 0;
-    var titleH = name ? 24 : 0; // Space only allocated when name is present
+    var titleH = name ? 24 : 0;
 
     y.titleBase   = cur + titleH - 6;                 cur += titleH;
-    y.iconCY      = cur + 14;                          cur += 28; // Icon row
-    y.nameAnchor  = cur;                                cur += 42; // CP names (expanded from 34)
-    y.elevBase    = cur + 16;                           cur += 22; // Segment climb (expanded from 16)
-    y.timeBase    = cur + 16;                           cur += 36; // Times (expanded from 28)
-    y.notesBase   = cur + 14;                           cur += 38; // Notes (expanded from 28)
-    cur += 4; // gapAbove
+    y.iconCY      = cur + 14;                          cur += 28;
+    y.nameAnchor  = cur;                                cur += 42;
+    y.elevBase    = cur + 16;                           cur += 22;
+    y.timeBase    = cur + 16;                           cur += 36;
+    y.notesBase   = cur + 14;                           cur += 38;
+    cur += 4;
     y.chartTop    = cur;
-    y.chartBot    = cur + chartH;                      cur += chartH; // Chart height
-    cur += 4; // gapBelow
+    y.chartBot    = cur + chartH;                      cur += chartH;
+    cur += 4;
     y.segTop      = cur;
     y.segLine1    = cur + 18;
     y.segLine2    = cur + 37;
     y.segLine3    = cur + 56;
-                                                         cur += 70; // Segment statistics (expanded from 60)
-    y.cumulBase   = cur + 17;                           cur += 28; // Cumulative distance (expanded from 24)
-    cur += 10; // padB
+                                                         cur += 70;
+    y.cumulBase   = cur + 17;                           cur += 28;
+    cur += 10;
     y.totalH      = cur;
     return y;
   }
 
-  // ── SVG element helper ──────────────────────────────────────────────
   function el(tag, attrs, text) {
     var e = document.createElementNS(NS, tag);
     if (attrs) Object.keys(attrs).forEach(function (k) { e.setAttribute(k, attrs[k]); });
@@ -56,79 +57,37 @@
     return e;
   }
 
-  // ── Vector path definitions for 12 symbols (Grid size: -5 to +5) ─────
-  function getSymbolPath(symbol) {
-    switch (symbol) {
-      case 'start':
-        return 'M -2,-3.5 L 3.5,0 L -2,3.5 Z';
-      case 'finish':
-        return 'M -3.5,-3.5 h 3.5 v 3.5 h -3.5 z M 0,0 h 3.5 v 3.5 h -3.5 z';
-      case 'water':
-        return 'M 0,-4.5 C -2.2,-1 -3.2,0.8 -3.2,2 C -3.2,3.8 -1.8,4.8 0,4.8 C 1.8,4.8 3.2,3.8 3.2,2 C 3.2,0.8 2.2,-1 0,-4.5 Z';
-      case 'food':
-        return 'M -3,-4.5 v 3.5 h 0.8 v -3.5 h 0.8 v 3.5 h 0.8 v -3.5 h 0.8 v 3.5 c 0,1.2 -0.8,2 -2,2 v 4 h -0.8 v -4 c -1.2,0 -2,-0.8 -2,-2 v -3.5 z M 2,-4.5 c 1.2,0 2.2,1.2 2.2,2.8 c 0,1.6 -1,2.8 -2.2,2.8 v 4.5 h -0.8 v -4.5 c -1.2,0 -2.2,-1.2 -2.2,-2.8 c 0,-1.6 1,-2.8 2.2,-2.8 z';
-      case 'cutoff':
-        return 'M 0,-3.5 A 3.5,3.5 0 1 0 0.01,-3.5 Z M 0,-2 V 0 H 1.5';
-      case 'cp':
-        return 'M -2.5,-4.5 v 9 M -2.5,-4.5 L 3.5,-2 L -2.5,0.5 Z';
-      case 'chapel':
-        return 'M 0,-4.5 V -3 M -0.8,-3.8 H 0.8 M -4,-0.5 L 0,-3 L 4,-0.5 Z M -3,-0.5 v 4 h 6 v -4 Z M -1,3.5 v -1.8 h 2 v 1.8 Z';
-      case 'danger':
-        return 'M 0,-4.2 L 4,3 H -4 Z M 0,-1.8 v 2 M 0,1.2 v 0.6';
-      case 'peak':
-        return 'M -4,3 L -1.5,-2 L 0.5,1.5 L 2,-0.5 L 4,3 Z';
-      case 'medical':
-        return 'M -1,-3 H 1 V -1 H 3 V 1 H 1 V 3 H -1 V 1 H -3 V -1 H -1 Z';
-      case 'toilet':
-        return 'M -3.5,-2.5 L -2.5,1.5 L -1.5,-0.5 L -0.5,1.5 L 0.5,-2.5 M 1.5,-2.5 H 3.5 M 1.5,1.5 H 3.5 M 1.5,-2.5 V 1.5';
-      case 'info':
-        return 'M 0,-2.8 A 0.7,0.7 0 1 0 0.01,-2.8 Z M -0.8,-0.8 H 0 V 2.2 H 0.8 M -1,2.2 H 1';
-      default:
-        return '';
-    }
-  }
-
-  // ── Color palettes ──────────────────────────────────────────────────
-  var C; // Dynamic module-scoped pointer
-
-  // Universal Premium High-Contrast Palette (Legible under bright sun and comfortable at night)
-  var C_universal = {
-    bg:            '#fcfaf5',               // Topographic sand/cream backdrop for professional outdoor aesthetics
-    titleText:     '#1e293b',               // Sophisticated dark slate for title
-    elevLine:      '#0d5236',               // Bold deep pine forest green for high contrast elevation tracking
-    elevFill:      'rgba(13,82,54,0.05)',   // Soft mossy pine green curve fill
-    gradBar:       'rgba(245,158,11,0.28)', // Soft warm amber/gold slope steepness density bars
-    cpLine:        'rgba(100,116,139,0.18)', // Subtle guide lines in the chart area
-    cpLineStart:   '#0d5236',               // Pine green start line
-    cpLineFinish:  '#b91c1c',               // Crimson red finish line
-    iconDefault:   '#475569',               // Neutral slate gray
-    iconStart:     '#0d5236',               // Pine green
-    iconFinish:    '#b91c1c',               // Crimson red
-    iconWater:     '#0284c7',               // Water blue
-    iconFood:      '#d97706',               // Food orange
-    iconCutoff:    '#b91c1c',               // Cutoff red
-    cpName:        '#1e293b',               // Sophisticated charcoal slate for CP text
+  var C = {
+    bg:            '#fcfaf5',
+    titleText:     '#1e293b',
+    elevLine:      '#0d5236',
+    elevFill:      'rgba(13,82,54,0.05)',
+    gradBar:       'rgba(245,158,11,0.28)',
+    cpLine:        'rgba(100,116,139,0.22)',
+    cpLineStart:   '#0d5236',
+    cpLineFinish:  '#b91c1c',
+    cpName:        '#1e293b',
     elevLabel:     '#1e293b',
-    timeLabel:     '#1e1b4b',               // Deep navy/indigo for arrival times
-    segTimeLabel:  '#1e1b4b',               // Indigo for segment times
-    notesText:     '#9a3412',               // Sophisticated Burnt Sienna so notes are highly readable
-    segInfoBg:     '#ffffff',               // Pure white statistics backdrop for maximum legibility
-    segInfoBorder: '#e2e8f0',               // Light slate border
-    segInfoText:   '#1e293b',               // Dark slate for stats
-    cumulText:     '#1e1b4b',               // Deep navy
-    gridLine:      'rgba(148,163,184,0.10)', // Minimal grid line distraction
-    axisText:      '#64748b',               // Neutral gray for axis values
+    timeLabel:     '#1e1b4b',
+    segTimeLabel:  '#1e1b4b',
+    notesText:     '#9a3412',
+    segInfoBg:     '#ffffff',
+    segInfoBorder: '#e2e8f0',
+    segInfoText:   '#1e293b',
+    cumulText:     '#1e1b4b',
+    gridLine:      'rgba(148,163,184,0.12)',
+    axisText:      '#64748b',
     peakLabel:     '#64748b',
   };
 
   function iconColor(type) {
     switch (type) {
-      case 'start':   return '#0d5236'; // Pine Green
-      case 'finish':  return '#b91c1c'; // Crimson Red
-      case 'water':   return '#0284c7'; // Water Blue
-      case 'food':    return '#d97706'; // Amber/Orange
-      case 'peak':    return '#475569'; // Slate Gray
-      default:        return '#475569'; // Slate Gray
+      case 'start':   return '#0d5236';
+      case 'finish':  return '#b91c1c';
+      case 'water':   return '#0284c7';
+      case 'food':    return '#d97706';
+      case 'peak':    return '#475569';
+      default:        return '#475569';
     }
   }
 
@@ -140,10 +99,9 @@
     }
   }
 
-  // ── Coordinate mapping ──────────────────────────────────────────────
   function makeMapper(totalDist, minE, maxE, Y, chartH) {
     chartH = chartH || 260;
-    var chartW = Math.max(totalDist * 14, 800); // 14px per km, min 800
+    var chartW = Math.max(totalDist * 14, 800);
     var ePad   = (maxE - minE) * 0.08 || 50;
     var eMin   = minE - ePad;
     var eMax   = maxE + ePad;
@@ -152,15 +110,22 @@
       chartW: chartW,
       eMin: eMin,
       eMax: eMax,
-      distToX: function (d) { return 70 + (d / totalDist) * chartW; }, // 70px left padding
-      eleToY:  function (e) { return Y.chartBot - ((e - eMin) / eRange) * chartH; } // Dynamic chart height mapping
+      distToX: function (d) { return 70 + (d / totalDist) * chartW; },
+      eleToY:  function (e) { return Y.chartBot - ((e - eMin) / eRange) * chartH; }
     };
   }
 
   // ══════════════════════════════════════════════════════════════════════
   //  PUBLIC: render()
   // ══════════════════════════════════════════════════════════════════════
-  function render(container, pts, cps, name, fontSizes, ratio) {
+  function render(container, pts, cps, name, fontSizes, ratio, options) {
+    if (!container || !pts || pts.length === 0) return null;
+
+    options = options || {};
+    var colorMode = options.colorMode || 'classic'; // 'classic' | 'gradient' | 'elevation'
+    var activeSegment = options.activeSegment || null;
+    var onHoverCallback = options.onHover || null;
+
     fontSizes = fontSizes || {};
     var fsTitle     = fontSizes.title || 16;
     var fsCPName    = fontSizes.cpName || 14;
@@ -170,13 +135,8 @@
     var fsSegment   = fontSizes.segment || 16;
     var fsCumulDist = fontSizes.cumulDist || 16;
 
-    // Use the single premium universal high-contrast color palette
-    C = C_universal;
-
-    // Sort CPs by distance
     cps = (cps || []).slice().sort(function (a, b) { return a.distance - b.distance; });
 
-    // Pre-compute sequence labels: S / 1 / 2... / F
     var seqLabels = cps.map(function (cp, idx) {
       if (idx === 0) return 'S';
       if (idx === cps.length - 1) return 'F';
@@ -194,13 +154,11 @@
     });
 
     var chartW = Math.max(totalDist * 14, 800);
-    var svgW = 70 + chartW + 55; // 70px padL, 55px padR
+    var svgW = 70 + chartW + 55;
 
-    // Calculate chart height dynamically to fit target aspect ratio exactly! (Requested)
     var chartH = 260;
     var margin = 12;
     var titleH = name ? 24 : 0;
-    // Updated constantH to match expanded yAnchors: title + icon(28) + name(42) + elev(22) + time(36) + notes(38) + gapAbove(4) + gapBelow(4) + seg(70) + cumul(28) + padB(10)
     var constantH = titleH + 28 + 42 + 22 + 36 + 38 + 4 + 4 + 70 + 28 + 10;
 
     if (ratio && ratio !== 'auto') {
@@ -211,7 +169,6 @@
       var svgW_outer = 70 + chartW + 55 + 2 * margin;
       chartH = Math.max(150, Math.round(svgW_outer / ratioVal - constantH - 2 * margin));
 
-      // Cap chart height at 40% of total available height to ensure text areas get enough space
       var totalAvailH = svgW_outer / ratioVal - 2 * margin;
       var maxChartH = Math.round(totalAvailH * 0.40);
       if (chartH > maxChartH) chartH = Math.max(150, maxChartH);
@@ -220,7 +177,6 @@
     var Y = yAnchors(name, chartH);
     var m = makeMapper(totalDist, minE, maxE, Y, chartH);
 
-    // Compute horizontal positions & stagger levels to prevent overlapping text for close CPs
     var xs = cps.map(function (cp) { return m.distToX(cp.distance); });
     var staggerLevels = [];
     var maxStaggerLevel = 0;
@@ -229,28 +185,17 @@
       while (true) {
         var collides = false;
         for (var j = i - 1; j >= 0; j--) {
-          if (xs[i] - xs[j] >= 55) {
-            break;
-          }
-          if (staggerLevels[j] === level) {
-            collides = true;
-            break;
-          }
+          if (xs[i] - xs[j] >= 55) break;
+          if (staggerLevels[j] === level) { collides = true; break; }
         }
-        if (collides) {
-          level++;
-        } else {
-          break;
-        }
+        if (collides) level++; else break;
       }
       staggerLevels.push(level);
       if (level > maxStaggerLevel) maxStaggerLevel = level;
     }
 
-    // Add extra space to the bottom of the SVG for cumulative distance staggering
     Y.totalH += maxStaggerLevel * 45;
 
-    // ── Create SVG ───────────────────────────────────────────────────
     container.innerHTML = '';
     var outerW = svgW + 2 * margin;
     var outerH = Y.totalH + 2 * margin;
@@ -259,24 +204,30 @@
       viewBox: '0 0 ' + outerW + ' ' + outerH,
       width: outerW,
       height: outerH,
+      id: 'roadbookSvg',
       style: "font-family: var(--font-sans), 'Segoe UI', system-ui, -apple-system, sans-serif"
     });
 
-    // Background rect dynamically colored based on C.bg (covers the whole outer dimensions)
     svg.appendChild(el('rect', { x: 0, y: 0, width: outerW, height: outerH, fill: C.bg }));
 
-    // Create a group element that translates all drawing by the margin to add white borders
-    var g = el('g', {
-      transform: 'translate(' + margin + ', ' + margin + ')'
-    });
+    var g = el('g', { transform: 'translate(' + margin + ', ' + margin + ')' });
     svg.appendChild(g);
 
-    // ── Render layers (drawing elements are appended to group g) ─────
+    // Active Segment Highlight
+    if (activeSegment) {
+      renderSegmentHighlight(g, pts, m, Y, activeSegment);
+    }
+
     renderTitle(g, name, svgW, Y, fsTitle);
     renderYAxis(g, m, Y, fsCPElev);
-    renderGradientBars(g, smoothPts, m, Y);
+
+    if (colorMode === 'classic') {
+      renderGradientBars(g, smoothPts, m, Y);
+    } else {
+      renderContinuousGradientFill(g, pts, m, Y, colorMode, minE, maxE);
+    }
+
     renderElevationCurve(g, pts, m, Y);
-    // renderLegend(g, m, Y, fsCPElev); // Render Sisyf slope legend (hidden per user request)
     renderCPLines(g, cps, pts, m, Y, staggerLevels);
     renderCPIcons(g, cps, seqLabels, m, Y);
     renderCPNames(g, cps, m, Y, fsCPName, staggerLevels);
@@ -288,19 +239,146 @@
     renderPeakLabels(g, pts, cps, m, Y, fsCPElev);
     renderAssociatedTexts(g, cps, m, Y);
 
+    // Crosshair Group
+    var crosshairG = el('g', { id: 'profile-crosshair', style: 'pointer-events:none; display:none;' });
+    var crosshairLine = el('line', { x1: 0, y1: Y.chartTop, x2: 0, y2: Y.chartBot, stroke: '#e8a830', 'stroke-width': '1.5', 'stroke-dasharray': '3,3' });
+    var crosshairDot = el('circle', { cx: 0, cy: 0, r: 5, fill: '#e8a830', stroke: '#fff', 'stroke-width': '2' });
+    crosshairG.appendChild(crosshairLine);
+    crosshairG.appendChild(crosshairDot);
+    g.appendChild(crosshairG);
+
     container.appendChild(svg);
+
+    // ── Interactive Hover & Touch Event Layer ────────────────────────
+    bindInteractiveEvents(svg, g, crosshairG, crosshairLine, crosshairDot, pts, m, Y, margin, onHoverCallback);
+
     return svg;
   }
 
-  // ── Cumulative time computation ─────────────────────────────────────
+  function bindInteractiveEvents(svg, g, crosshairG, crosshairLine, crosshairDot, pts, m, Y, margin, onHoverCallback) {
+    var tooltipEl = document.getElementById('chartTooltip');
+    var totalDist = pts[pts.length - 1].distance;
+
+    function handlePointer(e) {
+      var rect = svg.getBoundingClientRect();
+      var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      var svgX = ((clientX - rect.left) / rect.width) * svg.viewBox.baseVal.width - margin;
+      var svgY = ((clientY - rect.top) / rect.height) * svg.viewBox.baseVal.height - margin;
+
+      if (svgX < 70 || svgX > 70 + m.chartW || svgY < Y.chartTop - 10 || svgY > Y.chartBot + 10) {
+        hideCursor();
+        return;
+      }
+
+      var distRatio = (svgX - 70) / m.chartW;
+      var targetDist = distRatio * totalDist;
+      var ptIdx = tm().findNearestPointIndexByDistance(pts, targetDist);
+      var pt = pts[ptIdx] || pts[0];
+
+      var ptX = m.distToX(pt.distance);
+      var ptY = m.eleToY(pt.elevation);
+
+      crosshairG.style.display = 'block';
+      crosshairLine.setAttribute('x1', ptX);
+      crosshairLine.setAttribute('x2', ptX);
+      crosshairDot.setAttribute('cx', ptX);
+      crosshairDot.setAttribute('cy', ptY);
+
+      if (tooltipEl) {
+        var grad = pt.smoothedGradient !== undefined ? pt.smoothedGradient : (pt.gradient || 0);
+        var gradLabel = tm().getGradientLabel(grad, window.TrailRoadbook.state ? window.TrailRoadbook.state.language : 'zh');
+        var gradSign = grad > 0 ? '+' : '';
+        var gradColor = tm().getGradientColor(grad);
+
+        tooltipEl.innerHTML =
+          '<div style="font-weight:700; margin-bottom:2px;">' + pt.distance.toFixed(2) + ' km</div>' +
+          '<div>海拔: <strong>' + Math.round(pt.elevation) + ' m</strong></div>' +
+          '<div>坡度: <strong style="color:' + gradColor + '">' + gradSign + grad.toFixed(1) + '% (' + gradLabel + ')</strong></div>';
+        tooltipEl.classList.add('visible');
+
+        var tipLeft = clientX + 15;
+        var tipTop = clientY - 35;
+        if (tipLeft + 150 > window.innerWidth) tipLeft = clientX - 160;
+        tooltipEl.style.left = tipLeft + 'px';
+        tooltipEl.style.top = tipTop + 'px';
+      }
+
+      if (onHoverCallback) onHoverCallback(ptIdx, pt);
+    }
+
+    function hideCursor() {
+      crosshairG.style.display = 'none';
+      if (tooltipEl) tooltipEl.classList.remove('visible');
+      if (onHoverCallback) onHoverCallback(-1);
+    }
+
+    svg.addEventListener('mousemove', handlePointer);
+    svg.addEventListener('mouseleave', hideCursor);
+    svg.addEventListener('touchstart', handlePointer, { passive: true });
+    svg.addEventListener('touchmove', handlePointer, { passive: true });
+    svg.addEventListener('touchend', hideCursor);
+  }
+
+  // ── Segment Highlight ───────────────────────────────────────────────
+  function renderSegmentHighlight(svg, pts, m, Y, activeSegment) {
+    var startDist = (activeSegment.startDist !== undefined) ? activeSegment.startDist : (pts[activeSegment.startIdx] ? pts[activeSegment.startIdx].distance : 0);
+    var endDist = (activeSegment.endDist !== undefined) ? activeSegment.endDist : (pts[activeSegment.endIdx] ? pts[activeSegment.endIdx].distance : pts[pts.length - 1].distance);
+
+    var x1 = m.distToX(startDist);
+    var x2 = m.distToX(endDist);
+    var w = Math.max(2, x2 - x1);
+
+    svg.appendChild(el('rect', {
+      x: x1,
+      y: Y.chartTop,
+      width: w,
+      height: Y.chartBot - Y.chartTop,
+      fill: 'rgba(232, 168, 48, 0.16)',
+      stroke: '#e8a830',
+      'stroke-width': '1.5',
+      'stroke-dasharray': '4,3'
+    }));
+  }
+
+  // ── Continuous Gradient Fill (Grade or Elevation) ───────────────────
+  function renderContinuousGradientFill(svg, pts, m, Y, colorMode, minE, maxE) {
+    var totalDist = pts[pts.length - 1].distance;
+    var paths = new Map();
+
+    for (var x = 70; x <= 70 + m.chartW; x += 2) {
+      var dist = ((x - 70) / m.chartW) * totalDist;
+      var elev = u().interpolateElevation(pts, dist);
+      var grad = u().gradientAtDistance(pts, dist, 0.2);
+      var val = (colorMode === 'elevation') ? elev : grad;
+
+      var colorInfo = tm().getTrackRenderColor(colorMode, val, minE, maxE);
+      var yTop = Math.max(m.eleToY(elev), Y.chartTop);
+
+      if (!paths.has(colorInfo.color)) {
+        paths.set(colorInfo.color, '');
+      }
+      paths.set(colorInfo.color, paths.get(colorInfo.color) + ' M' + x + ',' + yTop + 'V' + Y.chartBot);
+    }
+
+    paths.forEach(function (d, color) {
+      svg.appendChild(el('path', {
+        d: d,
+        stroke: color,
+        'stroke-width': '2.2',
+        fill: 'none',
+        opacity: '0.85'
+      }));
+    });
+  }
+
   function computeCumulTimes(cps) {
     var times = [];
     var prevCumul = 0;
     for (var i = 0; i < cps.length; i++) {
       var cumul = u().parseTime(cps[i].arrivalTime || '');
-      if (i === 0 && !cps[i].arrivalTime) {
-        cumul = 0; // Default start CP arrival time to 0
-      }
+      if (i === 0 && !cps[i].arrivalTime) cumul = 0;
       var seg = Math.max(0, cumul - prevCumul);
       times.push({ segment: seg, cumul: cumul });
       prevCumul = cumul;
@@ -308,7 +386,6 @@
     return times;
   }
 
-  // ── Title ───────────────────────────────────────────────────────────
   function renderTitle(svg, name, w, Y, fontSize) {
     if (!name) return;
     svg.appendChild(el('text', {
@@ -320,7 +397,6 @@
     }, name.toUpperCase()));
   }
 
-  // ── Y-Axis & horizontal grid ───────────────────────────────────────
   function renderYAxis(svg, m, Y, fontSize) {
     var range = m.eMax - m.eMin;
     var step = niceStep(range / 5);
@@ -349,45 +425,34 @@
     return 10 * mag;
   }
 
-  // ── Gradient density bars colored by slope category (Sisyf style) ──
   function renderGradientBars(svg, pts, m, Y) {
     var totalDist = pts[pts.length - 1].distance;
-    
-    // Sisyf-style slope steepness colors
     var colors = {
-      flat: '#8cb878',       // <5% (soft green)
-      moderate: '#ecc65a',   // 5-10% (soft yellow/gold)
-      steep: '#e09953',      // 10-15% (orange)
-      verySteep: '#cb5353',  // 15-20% (red)
-      extreme: '#8f3a38'     // >20% (dark red/brown)
+      flat: '#8cb878',
+      moderate: '#ecc65a',
+      steep: '#e09953',
+      verySteep: '#cb5353',
+      extreme: '#8f3a38'
     };
 
-    // Grouping path drawing commands by color bucket to keep DOM overhead low (only 5 elements created)
-    var paths = {
-      flat: '',
-      moderate: '',
-      steep: '',
-      verySteep: '',
-      extreme: ''
-    };
-    
+    var paths = { flat: '', moderate: '', steep: '', verySteep: '', extreme: '' };
+
     for (var x = 70; x <= 70 + m.chartW; x += 1) {
       var dist = ((x - 70) / m.chartW) * totalDist;
-      var grad = u().gradientAtDistance(pts, dist, 0.2); // Slope gradient in %
+      var grad = u().gradientAtDistance(pts, dist, 0.2);
       var elev = u().interpolateElevation(pts, dist);
       var yTop = Math.max(m.eleToY(elev), Y.chartTop);
-      
+
       var absSlope = Math.abs(grad);
       var bucket = 'flat';
       if (absSlope >= 20) bucket = 'extreme';
       else if (absSlope >= 15) bucket = 'verySteep';
       else if (absSlope >= 10) bucket = 'steep';
       else if (absSlope >= 5) bucket = 'moderate';
-      
+
       paths[bucket] += ' M' + x + ',' + yTop + 'V' + Y.chartBot;
     }
-    
-    // Append aggregated path bucket to SVG
+
     Object.keys(paths).forEach(function (key) {
       var d = paths[key];
       if (d) {
@@ -401,67 +466,6 @@
     });
   }
 
-  // ── Legend renderer for slope steepness values ─────────────────────
-  function renderLegend(svg, m, Y, fontSize) {
-    var xEnd = 70 + m.chartW;
-    var y = Y.chartTop - 10;
-    
-    var colors = {
-      flat: '#8cb878',
-      moderate: '#ecc65a',
-      steep: '#e09953',
-      verySteep: '#cb5353',
-      extreme: '#8f3a38'
-    };
-    
-    var items = [
-      { label: '>20%', color: colors.extreme },
-      { label: '15-20%', color: colors.verySteep },
-      { label: '10-15%', color: colors.steep },
-      { label: '5-10%', color: colors.moderate },
-      { label: '<5%', color: colors.flat }
-    ];
-    
-    var curX = xEnd;
-    items.forEach(function (item) {
-      // Label text
-      var labelNode = el('text', {
-        x: curX, y: y,
-        'text-anchor': 'end',
-        'font-size': '10px',
-        'font-family': 'monospace',
-        fill: '#64748b'
-      }, item.label);
-      svg.appendChild(labelNode);
-      
-      // Adjust alignment width (approx 5.5px per character)
-      var textW = item.label.length * 5.5;
-      curX -= (textW + 6);
-      
-      // Color indicator dot
-      var dot = el('circle', {
-        cx: curX, cy: y - 3,
-        r: 3.5,
-        fill: item.color,
-        stroke: 'none'
-      });
-      svg.appendChild(dot);
-      curX -= 14;
-    });
-    
-    // Draw "PENTE" tag
-    var labelText = el('text', {
-      x: curX, y: y,
-      'text-anchor': 'end',
-      'font-size': '10px',
-      'font-weight': '700',
-      fill: '#64748b',
-      'letter-spacing': '0.5'
-    }, 'PENTE');
-    svg.appendChild(labelText);
-  }
-
-  // ── Elevation curve ─────────────────────────────────────────────────
   function renderElevationCurve(svg, pts, m, Y) {
     var totalDist = pts[pts.length - 1].distance;
     var linePoints = [], fillPoints = [];
@@ -483,15 +487,13 @@
     }));
   }
 
-  // ── CP vertical lines (Confined strictly inside elevation chart area) ─────
   function renderCPLines(svg, cps, pts, m, Y, staggerLevels) {
-    cps.forEach(function (cp, idx) {
+    cps.forEach(function (cp) {
       var x = m.distToX(cp.distance);
       var col = cp.axisColor || cpLineColor(cp.icon || 'cp');
-      var thk = cp.axisThickness || 1; // Default axis thickness to 1
-      var isBroken = true; // Set to default broken gap
-
-      var lineTop = Y.chartTop; // Confine axis to chart area, stopping perfectly below notes
+      var thk = cp.axisThickness || 1;
+      var isBroken = true;
+      var lineTop = Y.chartTop;
 
       if (isBroken) {
         var elev = u().interpolateElevation(pts, cp.distance);
@@ -538,7 +540,6 @@
     }
   }
 
-  // ── CP Icons (single icon per CP) ──
   function renderCPIcons(svg, cps, seqLabels, m, Y) {
     cps.forEach(function (cp, idx) {
       var x  = m.distToX(cp.distance);
@@ -571,14 +572,12 @@
     });
   }
 
-  // ── CP names (Horizontal two-line layout Stacked under the icon, preventing overlap) ──
   function renderCPNames(svg, cps, m, Y, fontSize, staggerLevels) {
     cps.forEach(function (cp, idx) {
       var x  = m.distToX(cp.distance);
       var level = staggerLevels[idx] || 0;
       var name = cp.name || '';
 
-      // Split name into two lines at space
       var words = name.split(' ');
       var line1 = '', line2 = '';
       if (words.length === 1) {
@@ -608,14 +607,13 @@
     });
   }
 
-  // ── Elevation value at each CP ─────────────────────────────────────
   function renderElevLabels(svg, cps, pts, m, Y, fontSize, staggerLevels) {
     cps.forEach(function (cp, idx) {
       var x = m.distToX(cp.distance);
       var level = staggerLevels[idx] || 0;
       var label = '+0m';
       if (idx > 0) {
-        var stats = u().segmentStats(pts, cps[idx - 1].distance, cp.distance);
+        var stats = u().segmentStats(pts, cps[idx - 1].distance, cp.distance, window.TrailRoadbook.elevationMode);
         label = '+' + Math.round(stats.dPlus || 0) + 'm';
       }
       svg.appendChild(el('text', {
@@ -627,14 +625,12 @@
     });
   }
 
-  // ── Time labels (Total arrival time and Interval segment time split into two rows under CPs) ──
   function renderTimeLabels(svg, cps, times, m, Y, fontSize, staggerLevels) {
     cps.forEach(function (cp, idx) {
       var x = m.distToX(cp.distance);
       var level = staggerLevels[idx] || 0;
       var cumulVal = times[idx].cumul;
-      
-      // Line 1: Total Arrival Time
+
       svg.appendChild(el('text', {
         x: x, y: Y.timeBase + level * 45,
         'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '700',
@@ -642,7 +638,6 @@
         style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
       }, u().formatTime(cumulVal)));
 
-      // Line 2: Interval Segment Time (midpoint of this and previous CP)
       var segVal = times[idx].segment;
       if (idx > 0) {
         var xPrev = m.distToX(cps[idx - 1].distance);
@@ -659,7 +654,6 @@
     });
   }
 
-  // ── Notes (Supports Multi-line splitting) ───────────────────────────
   function renderNotes(svg, cps, m, Y, fontSize, staggerLevels) {
     cps.forEach(function (cp, idx) {
       if (!cp.notes) return;
@@ -677,7 +671,6 @@
     });
   }
 
-  // ── Segment info boxes (Hexagonal pointed banners with 2-line stats, matching sample) ──
   function renderSegmentInfo(svg, cps, pts, m, Y, fontSize) {
     var splitCps = cps.filter(function (cp, idx) {
       return cp.useForIntermediateDistances || idx === 0 || idx === cps.length - 1;
@@ -688,13 +681,12 @@
       var x2 = m.distToX(splitCps[i + 1].distance);
       var w  = x2 - x1;
       var mx = (x1 + x2) / 2;
-      var stats = u().segmentStats(pts, splitCps[i].distance, splitCps[i + 1].distance);
+      var stats = u().segmentStats(pts, splitCps[i].distance, splitCps[i + 1].distance, window.TrailRoadbook.elevationMode);
 
-      var pad = 2; // Left-right padding from vertical guide lines
-      var dx = 6;  // Arrow tip indentation horizontal width
+      var pad = 2;
+      var dx = 6;
       var y_mid = Y.segTop + 28;
 
-      // Draw a premium double-pointed banner if segment width allows, otherwise fallback to simple rect
       if (w > 2 * (pad + dx)) {
         var pointsStr = [
           (x1 + pad) + ',' + y_mid,
@@ -704,7 +696,7 @@
           (x2 - pad - dx) + ',' + (Y.segTop + 56),
           (x1 + pad + dx) + ',' + (Y.segTop + 56)
         ].join(' ');
-        
+
         svg.appendChild(el('polygon', {
           points: pointsStr,
           fill: C.segInfoBg, stroke: C.segInfoBorder, 'stroke-width': '0.75'
@@ -718,7 +710,6 @@
         }));
       }
 
-      // Line 1: Segment Distance (Bold and crisp)
       svg.appendChild(el('text', {
         x: mx, y: Y.segLine1,
         'text-anchor': 'middle', 'font-size': String(fontSize + 1), 'font-weight': '800',
@@ -726,7 +717,6 @@
         style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
       }, stats.distance + ' km'));
 
-      // Line 2: Segment Climb (Emerald Green)
       svg.appendChild(el('text', {
         x: mx, y: Y.segLine2,
         'text-anchor': 'middle', 'font-size': String(fontSize - 1), 'font-weight': '700',
@@ -734,7 +724,6 @@
         style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
       }, '▲ ' + stats.dPlus + 'm'));
 
-      // Line 3: Segment Descent (Vivid Red)
       svg.appendChild(el('text', {
         x: mx, y: Y.segLine3,
         'text-anchor': 'middle', 'font-size': String(fontSize - 1), 'font-weight': '700',
@@ -744,7 +733,6 @@
     }
   }
 
-  // ── Cumulative distance ─────────────────────────────────────────────
   function renderCumulDist(svg, cps, m, Y, fontSize, staggerLevels) {
     cps.forEach(function (cp, idx) {
       var x = m.distToX(cp.distance);
@@ -758,7 +746,6 @@
     });
   }
 
-  // ── Peak labels ─────────────────────────────────────────────────────
   function renderPeakLabels(svg, pts, cps, m, Y, fontSize) {
     var peaks = findPeaks(pts, 100);
     peaks.forEach(function (pk) {
@@ -789,7 +776,6 @@
     return peaks;
   }
 
-  // ── Render Associated Texts inside Elevation Chart ──────────────────
   function renderAssociatedTexts(svg, cps, m, Y) {
     cps.forEach(function (cp) {
       if (!cp.texts) return;
@@ -838,6 +824,5 @@
     });
   }
 
-  // ── Public API ──────────────────────────────────────────────────────
   window.TrailRoadbook.profile = { render: render };
 })();

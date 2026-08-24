@@ -1,15 +1,13 @@
 /**
- * Talus - Trail Roadbook Generator & TrailScope — Main Application (v7.1)
+ * Talus - Trail Roadbook Generator & TrailScope — Main Application (v7.2)
  *
- * Wires together:
- *  - GPX / KML / KMZ Multi-format Parser
- *  - Cumulative Elevation Calculation Modes (Raw vs Smooth 4m Hysteresis)
- *  - Interactive Leaflet Map with Multiple Tile Sources & GCJ-02 Support
- *  - Interactive Canvas Elevation Profile with LOD & Real-time Map Cursor Sync
- *  - Slope Gradient Distribution & Practical Technical Tips for Trail Running & Hiking
- *  - Multi-mode Segment Statistics Table (Waypoints / Auto Slope / 1km / 5km)
- *  - SVG Roadbook Profile Generator & Multi-Ratio High-Res Image Exporter
- *  - Checkpoint List Editor & Details Visual Customization
+ * Full Bi-directional Linkage across:
+ *  - GPX / KML / KMZ Parsing & Elevation Smoothing Modes
+ *  - Zone 1: Unified Roadbook Elevation Profile (SVG + Hover Sync + Multi-Color Modes)
+ *  - Zone 2: Interactive Leaflet Map + 8-Metric Stats + 6-Level Slope Breakdown
+ *  - Zone 3: CP Table + Multi-Mode Segment Statistics Table
+ *  - Floating Modal: Checkpoint Visual Configuration & Custom Annotations
+ *  - Multi-Scale (1x/2x/3x) & Multi-Ratio (20:9/19.5:9/Auto) PNG Export
  *  - Dynamic Chinese / English i18n Localization
  */
 (function () {
@@ -29,14 +27,18 @@
       elevCalcModeLabel: "⚡ 爬升计算",
       elevModeRaw: "原始数据",
       elevModeSmooth: "平滑 (4m)",
+      colorModeLabel: "🎨 剖面着色",
+      colorModeClassic: "经典路书柱条",
+      colorModeGradient: "按坡度渐变",
+      colorModeElevation: "按海拔渐变",
       importJson: "导入 JSON",
       downloadTemplate: "下载模板",
       exportJson: "导出 JSON",
-      languageLabel: "🌐 语言 / Language",
+      languageLabel: "🌐 语言",
       exportRatioLabel: "导出比例",
       ratioAuto: "默认自适应 (无白边)",
       ratio19_5_9: "19.5:9横屏（iPhone 17/16）",
-      ratio20_9: "20:9（小米、华为 Pura、主流安卓）",
+      ratio20_9: "20:9（小米、华为、安卓）",
       downloadPng: "下载图片 ▾",
       scale1: "1× 标准分辨率",
       scale2: "2× 高清 (推荐)",
@@ -44,17 +46,12 @@
       placeholderText: "上传 GPX / KML / KMZ 文件以生成高程剖面路书",
       placeholderTextSub: "Upload a GPX/KML/KMZ file to generate the roadbook & map",
 
-      // Map & Chart Explorer
-      mapExplorerTitle: "🗺️ 交互式轨迹地图与高程剖面",
+      zone1Title: "📈 统一路书高程剖面图 (Unified Roadbook Profile)",
+      zone1Tip: "鼠标或手指滑动可实时在地图上追踪位置，分段及文字直接联动",
+      mapExplorerTitle: "🗺️ 交互式轨迹地图",
       mapSourceLabel: "底图图层",
-      colorModeLabel: "着色模式",
-      colorModeGradient: "按坡度着色 (Grade)",
-      colorModeElevation: "按海拔着色 (Elevation)",
       btnFitMap: "居中全景",
-      interactiveChartTitle: "📈 实时高程与坡度交互剖面",
-      interactiveChartTip: "滑动悬停可实时联动地图当前点",
 
-      // Stats & Gradient Distribution & Segments
       statsGradientTitle: "📐 坡度分布与实战技术要点",
       segmentStatsTitle: "📋 多模式分段统计",
       segModeWaypoint: "📍 检查点",
@@ -68,7 +65,6 @@
       segColAvgGrad: "平均坡度",
       segColMaxGrad: "最大坡度",
 
-      // Stats Metric Labels
       statTotalDistance: "总里程",
       statTotalAscent: "累计爬升 (D+)",
       statTotalDescent: "累计下降 (D-)",
@@ -80,17 +76,15 @@
       statUphillDist: "上坡距离",
       statDownhillDist: "下坡距离",
 
-      // Checkpoints & Editor
       cpTableTitle: "📍 CP 点 / 补给站 列表",
+      cpTableTip: "点击「⚙️」打开详细视觉配置浮窗",
       colNum: "#",
       colName: "名称",
       colDist: "距起点 (km)",
-      colIcon: "首选图标",
       colTime: "分段用时",
       colNotes: "备注 (支持回车多行)",
       addCpBtn: "添加 CP 点",
       poiPanelTitle: "📍 检查点详细视觉配置",
-      poiTabAdd: "+ 添加",
       poiCol1Title: "基本信息",
       poiCol1Pos: "CP位置距离 (公里)",
       poiCol1Intermediate: "用于分段统计点 (划分子赛段)",
@@ -148,9 +142,9 @@
       toastTemplateSuccess: "模板 JSON 下载成功 ✓",
       newCpName: "新检查点",
       deleteCpTitle: "删除此CP",
+      settingsCpTitle: "配置此CP视觉属性",
       placeholderCpNameInput: "CP名称",
       placeholderTimeInput: "用时 H:MM",
-      placeholderTextNone: "无",
 
       labelStopDuration: "⏸️ 停留时间 (分钟)",
       labelPassage: "通过"
@@ -165,14 +159,18 @@
       elevCalcModeLabel: "⚡ Elevation Calc",
       elevModeRaw: "Raw Data",
       elevModeSmooth: "Smooth (4m)",
+      colorModeLabel: "🎨 Profile Color",
+      colorModeClassic: "Classic Sisyf Bars",
+      colorModeGradient: "By Grade Gradient",
+      colorModeElevation: "By Elevation Gradient",
       importJson: "Import JSON",
       downloadTemplate: "Template",
       exportJson: "Export JSON",
-      languageLabel: "🌐 语言 / Language",
+      languageLabel: "🌐 Language",
       exportRatioLabel: "Aspect Ratio",
       ratioAuto: "Auto-fit (No Padding)",
       ratio19_5_9: "19.5:9 Landscape (iPhone 17/16)",
-      ratio20_9: "20:9 Landscape (Xiaomi/Huawei/Android)",
+      ratio20_9: "20:9 Landscape (Android/Xiaomi)",
       downloadPng: "Download PNG ▾",
       scale1: "1× Standard",
       scale2: "2× HD (Recommended)",
@@ -180,17 +178,12 @@
       placeholderText: "Upload GPX / KML / KMZ file to generate the roadbook",
       placeholderTextSub: "Upload a GPX/KML/KMZ file to generate the roadbook & map",
 
-      // Map & Chart Explorer
-      mapExplorerTitle: "🗺️ Interactive Trail Map & Elevation Profile",
+      zone1Title: "📈 Unified Roadbook Elevation Profile",
+      zone1Tip: "Hover/touch to track real-time position on map, all segments & text linked",
+      mapExplorerTitle: "🗺️ Interactive Trail Map",
       mapSourceLabel: "Base Map",
-      colorModeLabel: "Color Mode",
-      colorModeGradient: "By Grade",
-      colorModeElevation: "By Elevation",
       btnFitMap: "Center Map",
-      interactiveChartTitle: "📈 Real-Time Elevation & Grade Profile",
-      interactiveChartTip: "Hover or drag to sync live location cursor with map",
 
-      // Stats & Gradient Distribution & Segments
       statsGradientTitle: "📐 Grade Distribution & Technical Tips",
       segmentStatsTitle: "📋 Segment Statistics",
       segModeWaypoint: "📍 Checkpoints",
@@ -204,7 +197,6 @@
       segColAvgGrad: "Avg Grade",
       segColMaxGrad: "Max Grade",
 
-      // Stats Metric Labels
       statTotalDistance: "Total Distance",
       statTotalAscent: "Elevation Gain (D+)",
       statTotalDescent: "Elevation Loss (D-)",
@@ -216,17 +208,15 @@
       statUphillDist: "Uphill Dist",
       statDownhillDist: "Downhill Dist",
 
-      // Checkpoints & Editor
       cpTableTitle: "📍 Checkpoint / CP List",
+      cpTableTip: "Click「⚙️」to open visual settings popup",
       colNum: "#",
       colName: "Name",
       colDist: "Distance (km)",
-      colIcon: "Primary Icon",
       colTime: "Segment Duration",
       colNotes: "Notes (supports Enter)",
       addCpBtn: "Add Checkpoint",
       poiPanelTitle: "📍 Checkpoint Visual Settings",
-      poiTabAdd: "+ Add",
       poiCol1Title: "Basic Info",
       poiCol1Pos: "CP Distance (km)",
       poiCol1Intermediate: "Use for segment split stats",
@@ -284,9 +274,9 @@
       toastTemplateSuccess: "Template JSON downloaded successfully ✓",
       newCpName: "New Checkpoint",
       deleteCpTitle: "Delete Checkpoint",
+      settingsCpTitle: "Configure Checkpoint Visuals",
       placeholderCpNameInput: "CP Name",
       placeholderTimeInput: "Duration H:MM",
-      placeholderTextNone: "None",
 
       labelStopDuration: "⏸️ Stop Duration (min)",
       labelPassage: "Passage"
@@ -300,7 +290,7 @@
     return 'en';
   }
 
-  // ── Global State ────────────────────────────────────────────────────
+  // ── Global Application State ────────────────────────────────────────
   var state = {
     trackData: null,
     trackpoints: null,
@@ -309,32 +299,35 @@
     startTime: '周五 18:00',
     activeCPIndex: 0,
     elevationMode: 'smooth',  // 'smooth' | 'raw'
-    colorMode: 'gradient',    // 'gradient' | 'elevation'
+    colorMode: 'classic',     // 'classic' | 'gradient' | 'elevation'
     segmentMode: 'waypoint',  // 'waypoint' | 'auto' | '1000' | '5000'
     activeSegmentIdx: -1,
-    fontSizeTitle: 16,
+    fontSizeTitle: 18,
     fontSizeCPName: 14,
-    fontSizeCPElev: 14,
+    fontSizeCPElev: 11,
     fontSizeCPTime: 20,
     fontSizeCPNotes: 18,
-    fontSizeSegment: 16,
-    fontSizeCumulDist: 16,
+    fontSizeSegment: 11,
+    fontSizeCumulDist: 12,
     language: 'zh',
     checkpoints: []
   };
 
   TR.state = state;
+  TR.elevationMode = state.elevationMode;
 
   // ── DOM References ──────────────────────────────────────────────────
   var dom = {};
 
   function init() {
+    // Toolbar Elements
     dom.btnGpx            = document.getElementById('btn-gpx');
     dom.inputGpx          = document.getElementById('input-gpx');
     dom.inputName         = document.getElementById('input-name');
     dom.inputStartTime    = document.getElementById('input-start-time');
     dom.btnElevRaw        = document.getElementById('btn-elev-raw');
     dom.btnElevSmooth     = document.getElementById('btn-elev-smooth');
+    dom.selectColorMode   = document.getElementById('select-color-mode');
     dom.btnImport         = document.getElementById('btn-import');
     dom.inputJson         = document.getElementById('input-json');
     dom.btnTemplateJson   = document.getElementById('btn-template-json');
@@ -343,33 +336,11 @@
     dom.exportMenu        = document.getElementById('export-menu');
     dom.exportRatio       = document.getElementById('export-ratio');
     dom.selectLang        = document.getElementById('select-lang');
-    dom.profileContainer  = document.getElementById('profile-container');
-    dom.placeholder       = document.getElementById('profile-placeholder');
-    dom.cpTbody           = document.getElementById('cp-tbody');
-    dom.btnAddCp          = document.getElementById('btn-add-cp');
     dom.toast             = document.getElementById('toast');
 
-    // Map & Chart Controls
-    dom.selectMapSource   = document.getElementById('select-map-source');
-    dom.selectColorMode   = document.getElementById('select-color-mode');
-    dom.btnFitMap         = document.getElementById('btn-fit-map');
-
-    // Stats & Segments Containers
-    dom.trailStatCards    = document.getElementById('trail-stat-cards');
-    dom.gradientDistContent = document.getElementById('gradient-distribution-content');
-    dom.segmentTbody      = document.getElementById('segment-tbody');
-
-    // POI references
-    dom.poiPanel          = document.getElementById('poi-panel');
-    dom.poiIntermediate   = document.getElementById('poi-intermediate');
-    dom.poiPosition       = document.getElementById('poi-position');
-    dom.poiIconSelect     = document.getElementById('poi-icon-select');
-    dom.poiStopDuration   = document.getElementById('poi-stop-duration');
-    dom.poiNameDetail     = document.getElementById('poi-name-detail');
-    dom.poiTimeDetail     = document.getElementById('poi-time-detail');
-    dom.poiNotesDetail    = document.getElementById('poi-notes-detail');
-
-    // Font Sizes
+    // Zone 1: Profile & Sidebar
+    dom.profileContainer  = document.getElementById('profile-container');
+    dom.placeholder       = document.getElementById('profile-placeholder');
     dom.fsTitle           = document.getElementById('fs-title');
     dom.fsCPName          = document.getElementById('fs-cpname');
     dom.fsCPElev          = document.getElementById('fs-cpelev');
@@ -377,6 +348,32 @@
     dom.fsCPNotes         = document.getElementById('fs-cpnotes');
     dom.fsSegment         = document.getElementById('fs-segment');
     dom.fsCumulDist       = document.getElementById('fs-cumuldist');
+
+    // Zone 2: Map & Gradient Distribution
+    dom.selectMapSource   = document.getElementById('select-map-source');
+    dom.btnFitMap         = document.getElementById('btn-fit-map');
+    dom.trailStatCards    = document.getElementById('trail-stat-cards');
+    dom.gradientDistContent = document.getElementById('gradient-distribution-content');
+
+    // Zone 3: CP Table & Segment Statistics
+    dom.cpTbody           = document.getElementById('cp-tbody');
+    dom.btnAddCp          = document.getElementById('btn-add-cp');
+    dom.segmentTbody      = document.getElementById('segment-tbody');
+
+    // Floating Modal Elements
+    dom.modalBackdrop     = document.getElementById('cp-modal-backdrop');
+    dom.modalCpTitle      = document.getElementById('modal-cp-title');
+    dom.btnModalClose     = document.getElementById('btn-modal-close');
+    dom.btnModalCancel    = document.getElementById('btn-modal-cancel');
+    dom.btnModalSave      = document.getElementById('btn-modal-save');
+
+    dom.poiNameDetail     = document.getElementById('poi-name-detail');
+    dom.poiPosition       = document.getElementById('poi-position');
+    dom.poiTimeDetail     = document.getElementById('poi-time-detail');
+    dom.poiStopDuration   = document.getElementById('poi-stop-duration');
+    dom.poiNotesDetail    = document.getElementById('poi-notes-detail');
+    dom.poiIntermediate   = document.getElementById('poi-intermediate');
+    dom.poiIconSelect     = document.getElementById('poi-icon-select');
 
     dom.poiAxisColor      = document.getElementById('poi-axis-color');
     dom.poiAxisColorHex   = document.getElementById('poi-axis-color-hex');
@@ -393,11 +390,8 @@
     dom.poiTxtRightMiddle = document.getElementById('poi-txt-right-middle');
     dom.poiTxtRightTop    = document.getElementById('poi-txt-right-top');
 
-    // Initialize Map and Interactive Chart
+    // Initialize Map
     TR.trailMap.initMap('leafletMap');
-    TR.interactiveChart.init('interactiveElevationChart', 'interactiveChartOverlay', 'chartTooltip', function (ptIdx) {
-      TR.trailMap.updateMapCurrentPoint(ptIdx);
-    });
 
     state.language = detectLanguage();
     if (dom.selectLang) dom.selectLang.value = state.language;
@@ -413,7 +407,7 @@
     populateStartTimeOptions('周五 18:00');
     normalizeAllCPs();
     bindEvents();
-    bindPOIEvents();
+    bindModalEvents();
     applyLanguage();
   }
 
@@ -437,20 +431,19 @@
     dom.btnElevRaw.addEventListener('click', function () { setElevationMode('raw'); });
     dom.btnElevSmooth.addEventListener('click', function () { setElevationMode('smooth'); });
 
+    if (dom.selectColorMode) {
+      dom.selectColorMode.addEventListener('change', function () {
+        state.colorMode = this.value;
+        renderAllComponents();
+      });
+    }
+
     if (dom.selectMapSource) {
       dom.selectMapSource.addEventListener('change', function () {
         TR.trailMap.changeMapSource(this.value);
       });
     }
-    if (dom.selectColorMode) {
-      dom.selectColorMode.addEventListener('change', function () {
-        state.colorMode = this.value;
-        if (state.trackData) {
-          TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
-          TR.interactiveChart.drawChart(state.trackData, state.colorMode, state.checkpoints);
-        }
-      });
-    }
+
     if (dom.btnFitMap) {
       dom.btnFitMap.addEventListener('click', function () {
         TR.trailMap.fitMapToTrack();
@@ -462,7 +455,9 @@
         document.querySelectorAll('.seg-mode-btn').forEach(function (b) { b.classList.remove('active'); });
         this.classList.add('active');
         state.segmentMode = this.dataset.mode;
+        state.activeSegmentIdx = -1;
         renderSegmentTable();
+        scheduleRender();
       });
     });
 
@@ -492,6 +487,26 @@
 
     dom.btnAddCp.addEventListener('click', handleAddCP);
     dom.exportRatio.addEventListener('change', scheduleRender);
+
+    // Font size controls
+    var fsMap = {
+      'fs-title': 'fontSizeTitle',
+      'fs-cpname': 'fontSizeCPName',
+      'fs-cpelev': 'fontSizeCPElev',
+      'fs-cptime': 'fontSizeCPTime',
+      'fs-cpnotes': 'fontSizeCPNotes',
+      'fs-segment': 'fontSizeSegment',
+      'fs-cumuldist': 'fontSizeCumulDist'
+    };
+    Object.keys(fsMap).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', function () {
+          state[fsMap[id]] = parseInt(this.value, 10) || 12;
+          scheduleRender();
+        });
+      }
+    });
   }
 
   // ── Track Upload (GPX / KML / KMZ) ──────────────────────────────────
@@ -530,7 +545,6 @@
       sortCheckpoints();
       normalizeAllCPs();
       renderCPTable();
-      loadActiveCPDetails();
       renderAllComponents();
 
       toast(T[state.language].toastTrackSuccess + totalDist.toFixed(1) + T[state.language].toastTrackSuccessMid + Math.round(trackData.totalAscent) + T[state.language].toastTrackSuccessTail);
@@ -559,18 +573,62 @@
     }
   }
 
-  // ── Rendering All Visual Components ─────────────────────────────────
+  // ── Rendering All Visual Components (Full Reactive Sync) ───────────
   function renderAllComponents() {
     if (!state.trackData) return;
     renderProfile();
     TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints);
-    TR.interactiveChart.drawChart(state.trackData, state.colorMode, state.checkpoints);
     renderTrailSummaryStats();
     renderGradientDistribution();
     renderSegmentTable();
   }
 
-  // ── 1. Trail Summary Stats Cards ────────────────────────────────────
+  // ── 1. Zone 1: Unified Profile Rendering ────────────────────────────
+  var renderTimer = null;
+  function scheduleRender() {
+    if (renderTimer) clearTimeout(renderTimer);
+    renderTimer = setTimeout(renderProfile, 80);
+  }
+
+  function renderProfile() {
+    if (!state.trackpoints) return;
+    if (dom.placeholder) dom.placeholder.style.display = 'none';
+
+    var segments = TR.trailAnalysis.analyzeSegments(
+      state.trackData,
+      state.segmentMode,
+      state.checkpoints,
+      state.elevationMode,
+      state.language
+    );
+    var activeSeg = (state.activeSegmentIdx >= 0 && segments[state.activeSegmentIdx]) ? segments[state.activeSegmentIdx] : null;
+
+    TR.profile.render(
+      dom.profileContainer,
+      state.trackpoints,
+      state.checkpoints,
+      state.raceName,
+      {
+        title: state.fontSizeTitle,
+        cpName: state.fontSizeCPName,
+        cpElev: state.fontSizeCPElev,
+        cpTime: state.fontSizeCPTime,
+        cpNotes: state.fontSizeCPNotes,
+        segment: state.fontSizeSegment,
+        cumulDist: state.fontSizeCumulDist
+      },
+      dom.exportRatio.value,
+      {
+        colorMode: state.colorMode,
+        activeSegment: activeSeg,
+        onHover: function (ptIdx) {
+          TR.trailMap.updateMapCurrentPoint(ptIdx);
+        }
+      }
+    );
+  }
+
+  // ── 2. Zone 2: Trail Summary Stats Cards ────────────────────────────
   function renderTrailSummaryStats() {
     if (!dom.trailStatCards || !state.trackData) return;
     var td = state.trackData;
@@ -597,7 +655,7 @@
     dom.trailStatCards.innerHTML = html;
   }
 
-  // ── 2. Slope Gradient Distribution & Technical Tips ─────────────────
+  // ── 2. Zone 2: Slope Gradient Distribution & Practical Tips ─────────
   function renderGradientDistribution() {
     if (!dom.gradientDistContent || !state.trackData) return;
     var dist = TR.trailAnalysis.calculateGradientDistribution(state.trackData, state.language);
@@ -641,7 +699,7 @@
       buildSection(downTitle, dist.downhill);
   }
 
-  // ── 3. Multi-Mode Segment Table ─────────────────────────────────────
+  // ── 3. Zone 3: Multi-Mode Segment Statistics Table ───────────────────
   function renderSegmentTable() {
     if (!dom.segmentTbody || !state.trackData) return;
     var segments = TR.trailAnalysis.analyzeSegments(
@@ -672,6 +730,14 @@
     dom.segmentTbody.querySelectorAll('.segment-row').forEach(function (tr) {
       tr.addEventListener('click', function () {
         var idx = parseInt(this.dataset.idx, 10);
+        if (state.activeSegmentIdx === idx) {
+          state.activeSegmentIdx = -1;
+          dom.segmentTbody.querySelectorAll('.segment-row').forEach(function (r) { r.classList.remove('active-seg-row'); });
+          TR.trailMap.clearSegmentHighlight();
+          scheduleRender();
+          return;
+        }
+
         state.activeSegmentIdx = idx;
         dom.segmentTbody.querySelectorAll('.segment-row').forEach(function (r) { r.classList.remove('active-seg-row'); });
         this.classList.add('active-seg-row');
@@ -679,13 +745,305 @@
         var seg = segments[idx];
         if (seg) {
           TR.trailMap.highlightSegment(seg.startIdx, seg.endIdx);
-          TR.interactiveChart.drawChart(state.trackData, state.colorMode, state.checkpoints, seg);
+          scheduleRender();
         }
       });
     });
   }
 
-  // ── CP Normalization & Ordering ─────────────────────────────────────
+  // ── 3. Zone 3: CP Table Rendering & Direct In-place Editing ─────────
+  function renderCPTable() {
+    dom.cpTbody.innerHTML = '';
+    var sortedCps = state.checkpoints.slice();
+    var lang = state.language;
+
+    sortedCps.forEach(function (cp, idx) {
+      var globalIdx = state.checkpoints.indexOf(cp);
+      var isSelected = (globalIdx === state.activeCPIndex);
+      var tr = document.createElement('tr');
+      if (isSelected) tr.classList.add('selected-row');
+
+      var seqLabel = (idx === 0) ? 'S' : (idx === sortedCps.length - 1 ? 'F' : idx);
+      var detailsHtml = '';
+
+      if (idx > 0) {
+        var cpPrev = sortedCps[idx - 1];
+        var cpCurr = cp;
+        var segDist = cpCurr.distance - cpPrev.distance;
+        var segDPlus = 0, segDMinus = 0;
+
+        if (state.trackpoints && state.trackpoints.length > 0) {
+          var stats = TR.utils.segmentStats(state.trackpoints, cpPrev.distance, cpCurr.distance, state.elevationMode);
+          segDPlus = stats.dPlus;
+          segDMinus = stats.dMinus;
+        }
+
+        var segTimeMins = TR.utils.parseTime(cpCurr.segmentTime || '');
+        var targetTimeStr = TR.utils.formatTime(segTimeMins);
+
+        var cumulMins = 0;
+        for (var ci = 1; ci <= idx; ci++) {
+          cumulMins += TR.utils.parseTime(sortedCps[ci].segmentTime || '') + (sortedCps[ci].stopDuration || 0);
+        }
+        var startInfo = parseStartTime(state.startTime);
+        var passageStr = formatArrivalTime(startInfo, cumulMins, lang);
+        var stopStr = (cpCurr.stopDuration > 0) ? ' · ⏸ ' + cpCurr.stopDuration + 'min' : '';
+
+        detailsHtml =
+          '<td class="col-details">' +
+          '  <div class="seg-stats-row">' +
+          '    <span>' + segDist.toFixed(1) + ' km</span> · ' +
+          '    <span class="gain">+' + Math.round(segDPlus) + 'm</span> · ' +
+          '    <span class="loss">-' + Math.round(segDMinus) + 'm</span> · ' +
+          '    <span>⏱ ' + targetTimeStr + '</span>' + stopStr +
+          '  </div>' +
+          '  <div class="seg-passage">' + T[lang].labelPassage + ' ' + passageStr + '</div>' +
+          '</td>';
+      }
+
+      tr.innerHTML =
+        '<td class="col-num">' + seqLabel + '</td>' +
+        '<td class="col-name"><input type="text" data-idx="' + globalIdx + '" data-field="name" value="' + esc(cp.name) + '" placeholder="' + T[lang].placeholderCpNameInput + '"></td>' +
+        '<td class="col-dist"><input type="number" data-idx="' + globalIdx + '" data-field="distance" value="' + cp.distance + '" step="0.1" min="0"></td>' +
+        '<td class="col-time"><input type="text" data-idx="' + globalIdx + '" data-field="segmentTime" value="' + esc(cp.segmentTime || '') + '" placeholder="' + T[lang].placeholderTimeInput + '"' + (idx === 0 ? ' disabled' : '') + '></td>' +
+        '<td class="col-action">' +
+        '  <button class="btn-settings" data-idx="' + globalIdx + '" title="' + T[lang].settingsCpTitle + '">⚙️</button>' +
+        '  <button class="btn-delete" data-idx="' + globalIdx + '" title="' + T[lang].deleteCpTitle + '">✕</button>' +
+        '</td>' +
+        detailsHtml;
+
+      tr.addEventListener('click', function (e) {
+        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+          state.activeCPIndex = globalIdx;
+          renderCPTable();
+        }
+      });
+
+      tr.addEventListener('dblclick', function (e) {
+        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+          openCPModal(globalIdx);
+        }
+      });
+
+      dom.cpTbody.appendChild(tr);
+    });
+
+    dom.cpTbody.querySelectorAll('input').forEach(function (el) {
+      el.addEventListener('change', handleCPTableChange);
+      el.addEventListener('input', handleCPTableChange);
+    });
+
+    dom.cpTbody.querySelectorAll('.btn-settings').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var idx = parseInt(this.dataset.idx, 10);
+        openCPModal(idx);
+      });
+    });
+
+    dom.cpTbody.querySelectorAll('.btn-delete').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var idx = parseInt(this.dataset.idx, 10);
+        handleDeleteCP(idx);
+      });
+    });
+  }
+
+  function handleCPTableChange(e) {
+    var idx = parseInt(e.target.dataset.idx, 10);
+    var field = e.target.dataset.field;
+    var val = e.target.value;
+
+    if (field === 'distance') {
+      val = parseFloat(val) || 0;
+      state.checkpoints[idx].distance = val;
+      var curCP = state.checkpoints[idx];
+      sortCheckpoints();
+      state.activeCPIndex = state.checkpoints.indexOf(curCP);
+      updateArrivalTimes();
+      renderCPTable();
+    } else if (field === 'segmentTime') {
+      state.checkpoints[idx].segmentTime = val;
+      updateArrivalTimes();
+      renderCPTable();
+    } else {
+      state.checkpoints[idx][field] = val;
+    }
+
+    scheduleRender();
+    if (state.trackData) {
+      TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
+      renderSegmentTable();
+    }
+  }
+
+  function handleAddCP() {
+    var activeCP = state.checkpoints[state.activeCPIndex];
+    var newDist = 0;
+    if (activeCP) {
+      var sorted = state.checkpoints.slice().sort(function (a, b) { return a.distance - b.distance; });
+      var activeIdxInSorted = sorted.indexOf(activeCP);
+      if (activeIdxInSorted !== -1 && activeIdxInSorted < sorted.length - 1) {
+        newDist = Math.round(((activeCP.distance + sorted[activeIdxInSorted + 1].distance) / 2) * 100) / 100;
+      } else {
+        newDist = Math.round((activeCP.distance + 2.0) * 100) / 100;
+      }
+    } else {
+      newDist = 1.0;
+    }
+
+    var newCP = normalizeCP({
+      name: T[state.language].newCpName,
+      distance: newDist,
+      icon: 'classic',
+      arrivalTime: '',
+      segmentTime: '',
+      notes: ''
+    }, state.checkpoints.length);
+
+    state.checkpoints.push(newCP);
+    sortCheckpoints();
+    normalizeAllCPs();
+    state.activeCPIndex = state.checkpoints.indexOf(newCP);
+
+    renderCPTable();
+    scheduleRender();
+    if (state.trackData) {
+      TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
+      renderSegmentTable();
+    }
+    toast(T[state.language].toastAddCp + newDist + T[state.language].toastAddCpTail);
+  }
+
+  function handleDeleteCP(idx) {
+    if (state.checkpoints.length <= 1) {
+      toast(T[state.language].toastKeepOne);
+      return;
+    }
+    state.checkpoints.splice(idx, 1);
+    if (state.activeCPIndex >= state.checkpoints.length) {
+      state.activeCPIndex = state.checkpoints.length - 1;
+    }
+    sortCheckpoints();
+    normalizeAllCPs();
+    renderCPTable();
+    scheduleRender();
+    if (state.trackData) {
+      TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
+      renderSegmentTable();
+    }
+    toast(T[state.language].toastDeleted);
+  }
+
+  // ── Floating Modal: Checkpoint Visual Configuration ────────────────
+  function bindModalEvents() {
+    dom.btnModalClose.addEventListener('click', closeCPModal);
+    dom.btnModalCancel.addEventListener('click', closeCPModal);
+    dom.btnModalSave.addEventListener('click', saveCPModal);
+
+    dom.modalBackdrop.addEventListener('click', function (e) {
+      if (e.target === dom.modalBackdrop) {
+        closeCPModal();
+      }
+    });
+
+    function bindColorPicker(pickerEl, hexEl) {
+      if (!pickerEl || !hexEl) return;
+      pickerEl.addEventListener('input', function () { hexEl.value = this.value; });
+      hexEl.addEventListener('change', function () {
+        if (/^#[0-9A-F]{6}$/i.test(this.value)) pickerEl.value = this.value;
+      });
+    }
+
+    bindColorPicker(dom.poiAxisColor, dom.poiAxisColorHex);
+    bindColorPicker(dom.poiTextColor, dom.poiTextColorHex);
+  }
+
+  function openCPModal(cpIndex) {
+    state.activeCPIndex = cpIndex;
+    var cp = state.checkpoints[cpIndex];
+    if (!cp) return;
+
+    dom.modalCpTitle.textContent = '📍 ' + (cp.name || 'CP' + cpIndex) + ' — ' + T[state.language].poiPanelTitle;
+
+    dom.poiNameDetail.value = cp.name || '';
+    dom.poiPosition.value = cp.distance;
+    dom.poiTimeDetail.value = cp.segmentTime || '';
+    dom.poiTimeDetail.disabled = (cpIndex === 0);
+    dom.poiStopDuration.value = cp.stopDuration || 0;
+    dom.poiStopDuration.disabled = (cpIndex === 0);
+    dom.poiNotesDetail.value = cp.notes || '';
+    dom.poiIntermediate.checked = !!cp.useForIntermediateDistances;
+
+    if (dom.poiIconSelect) dom.poiIconSelect.value = cp.icon || 'classic';
+
+    dom.poiAxisColor.value = cp.axisColor || '#4e4e4e';
+    dom.poiAxisColorHex.value = cp.axisColor || '#4e4e4e';
+    dom.poiAxisThickness.value = cp.axisThickness || 1;
+
+    dom.poiTextColor.value = cp.textColor || '#1e293b';
+    dom.poiTextColorHex.value = cp.textColor || '#1e293b';
+    dom.poiTextSize.value = cp.textSize || 18;
+    dom.poiTextOrientation.value = cp.textOrientation || 'To the right';
+
+    dom.poiTxtLeftBottom.value = cp.texts.leftBottom || '';
+    dom.poiTxtLeftMiddle.value = cp.texts.leftMiddle || '';
+    dom.poiTxtLeftTop.value = cp.texts.leftTop || '';
+    dom.poiTxtRightBottom.value = cp.texts.rightBottom || '';
+    dom.poiTxtRightMiddle.value = cp.texts.rightMiddle || '';
+    dom.poiTxtRightTop.value = cp.texts.rightTop || '';
+
+    dom.modalBackdrop.classList.add('open');
+  }
+
+  function closeCPModal() {
+    dom.modalBackdrop.classList.remove('open');
+  }
+
+  function saveCPModal() {
+    var cp = state.checkpoints[state.activeCPIndex];
+    if (!cp) { closeCPModal(); return; }
+
+    cp.name = dom.poiNameDetail.value.trim() || 'CP';
+    cp.distance = parseFloat(dom.poiPosition.value) || 0;
+    cp.segmentTime = dom.poiTimeDetail.value.trim();
+    cp.stopDuration = parseInt(dom.poiStopDuration.value, 10) || 0;
+    cp.notes = dom.poiNotesDetail.value;
+    cp.useForIntermediateDistances = dom.poiIntermediate.checked;
+    cp.icon = dom.poiIconSelect.value;
+
+    cp.axisColor = dom.poiAxisColorHex.value;
+    cp.axisThickness = parseInt(dom.poiAxisThickness.value, 10) || 1;
+
+    cp.textColor = dom.poiTextColorHex.value;
+    cp.textSize = parseInt(dom.poiTextSize.value, 10) || 18;
+    cp.textOrientation = dom.poiTextOrientation.value;
+
+    cp.texts = {
+      leftBottom: dom.poiTxtLeftBottom.value,
+      leftMiddle: dom.poiTxtLeftMiddle.value,
+      leftTop: dom.poiTxtLeftTop.value,
+      rightBottom: dom.poiTxtRightBottom.value,
+      rightMiddle: dom.poiTxtRightMiddle.value,
+      rightTop: dom.poiTxtRightTop.value
+    };
+
+    sortCheckpoints();
+    normalizeAllCPs();
+    state.activeCPIndex = state.checkpoints.indexOf(cp);
+
+    renderCPTable();
+    scheduleRender();
+    if (state.trackData) {
+      TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
+      renderSegmentTable();
+    }
+
+    closeCPModal();
+  }
+
+  // ── CP Normalization & Utilities ────────────────────────────────────
   function normalizeCP(cp, idx) {
     if (cp.useForIntermediateDistances === undefined) cp.useForIntermediateDistances = true;
     if (!cp.icon && cp.icons && Array.isArray(cp.icons) && cp.icons[0]) cp.icon = cp.icons[0].symbol || '';
@@ -746,373 +1104,6 @@
     state.checkpoints.sort(function (a, b) { return a.distance - b.distance; });
   }
 
-  function handleAddCP() {
-    var activeCP = state.checkpoints[state.activeCPIndex];
-    var newDist = 0;
-    if (activeCP) {
-      var sorted = state.checkpoints.slice().sort(function (a, b) { return a.distance - b.distance; });
-      var activeIdxInSorted = sorted.indexOf(activeCP);
-      if (activeIdxInSorted !== -1 && activeIdxInSorted < sorted.length - 1) {
-        newDist = Math.round(((activeCP.distance + sorted[activeIdxInSorted + 1].distance) / 2) * 100) / 100;
-      } else {
-        newDist = Math.round((activeCP.distance + 2.0) * 100) / 100;
-      }
-    } else {
-      newDist = 1.0;
-    }
-
-    var newCP = normalizeCP({
-      name: T[state.language].newCpName,
-      distance: newDist,
-      icon: 'classic',
-      arrivalTime: '',
-      segmentTime: '',
-      notes: ''
-    }, state.checkpoints.length);
-
-    state.checkpoints.push(newCP);
-    sortCheckpoints();
-    normalizeAllCPs();
-    state.activeCPIndex = state.checkpoints.indexOf(newCP);
-
-    renderCPTable();
-    loadActiveCPDetails();
-    scheduleRender();
-    if (state.trackData) {
-      TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
-      renderSegmentTable();
-    }
-    toast(T[state.language].toastAddCp + newDist + T[state.language].toastAddCpTail);
-  }
-
-  // ── CP Table Rendering & Editing ────────────────────────────────────
-  function renderCPTable() {
-    dom.cpTbody.innerHTML = '';
-    var sortedCps = state.checkpoints.slice();
-    var lang = state.language;
-
-    sortedCps.forEach(function (cp, idx) {
-      var globalIdx = state.checkpoints.indexOf(cp);
-      var isSelected = (globalIdx === state.activeCPIndex);
-      var tr = document.createElement('tr');
-      if (isSelected) tr.classList.add('selected-row');
-
-      var seqLabel = (idx === 0) ? 'S' : (idx === sortedCps.length - 1 ? 'F' : idx);
-      var detailsHtml = '';
-
-      if (idx > 0) {
-        var cpPrev = sortedCps[idx - 1];
-        var cpCurr = cp;
-        var segDist = cpCurr.distance - cpPrev.distance;
-        var segDPlus = 0, segDMinus = 0;
-
-        if (state.trackpoints && state.trackpoints.length > 0) {
-          var stats = TR.utils.segmentStats(state.trackpoints, cpPrev.distance, cpCurr.distance, state.elevationMode);
-          segDPlus = stats.dPlus;
-          segDMinus = stats.dMinus;
-        }
-
-        var segTimeMins = TR.utils.parseTime(cpCurr.segmentTime || '');
-        var targetTimeStr = TR.utils.formatTime(segTimeMins);
-
-        var cumulMins = 0;
-        for (var ci = 1; ci <= idx; ci++) {
-          cumulMins += TR.utils.parseTime(sortedCps[ci].segmentTime || '') + (sortedCps[ci].stopDuration || 0);
-        }
-        var startInfo = parseStartTime(state.startTime);
-        var passageStr = formatArrivalTime(startInfo, cumulMins, lang);
-        var stopStr = (cpCurr.stopDuration > 0) ? ' · ⏸ ' + cpCurr.stopDuration + 'min' : '';
-
-        detailsHtml =
-          '<td class="col-details">' +
-          '  <div class="seg-stats-row">' +
-          '    <span>' + segDist.toFixed(1) + ' km</span> · ' +
-          '    <span class="gain">+' + Math.round(segDPlus) + 'm</span> · ' +
-          '    <span class="loss">-' + Math.round(segDMinus) + 'm</span> · ' +
-          '    <span>⏱ ' + targetTimeStr + '</span>' + stopStr +
-          '  </div>' +
-          '  <div class="seg-passage">' + T[lang].labelPassage + ' ' + passageStr + '</div>' +
-          '</td>';
-      }
-
-      tr.innerHTML =
-        '<td class="col-num">' + seqLabel + '</td>' +
-        '<td class="col-name"><input type="text" data-idx="' + globalIdx + '" data-field="name" value="' + esc(cp.name) + '" placeholder="' + T[lang].placeholderCpNameInput + '"></td>' +
-        '<td class="col-dist"><input type="number" data-idx="' + globalIdx + '" data-field="distance" value="' + cp.distance + '" step="0.1" min="0"></td>' +
-        '<td class="col-time"><input type="text" data-idx="' + globalIdx + '" data-field="segmentTime" value="' + esc(cp.segmentTime || '') + '" placeholder="' + T[lang].placeholderTimeInput + '"' + (idx === 0 ? ' disabled' : '') + '></td>' +
-        '<td class="col-action"><button class="btn-delete" data-idx="' + globalIdx + '" title="' + T[lang].deleteCpTitle + '">✕</button></td>' +
-        detailsHtml;
-
-      tr.addEventListener('click', function (e) {
-        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'BUTTON') {
-          state.activeCPIndex = globalIdx;
-          renderCPTable();
-          loadActiveCPDetails();
-        }
-      });
-
-      dom.cpTbody.appendChild(tr);
-    });
-
-    dom.cpTbody.querySelectorAll('input').forEach(function (el) {
-      el.addEventListener('change', handleCPTableChange);
-      el.addEventListener('input', handleCPTableChange);
-    });
-
-    dom.cpTbody.querySelectorAll('.btn-delete').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var idx = parseInt(this.dataset.idx, 10);
-        handleDeleteCP(idx);
-      });
-    });
-  }
-
-  function handleCPTableChange(e) {
-    var idx = parseInt(e.target.dataset.idx, 10);
-    var field = e.target.dataset.field;
-    var val = e.target.value;
-
-    if (field === 'distance') {
-      val = parseFloat(val) || 0;
-      state.checkpoints[idx].distance = val;
-      var curCP = state.checkpoints[idx];
-      sortCheckpoints();
-      state.activeCPIndex = state.checkpoints.indexOf(curCP);
-      updateArrivalTimes();
-      renderCPTable();
-    } else if (field === 'segmentTime') {
-      state.checkpoints[idx].segmentTime = val;
-      updateArrivalTimes();
-      renderCPTable();
-    } else {
-      state.checkpoints[idx][field] = val;
-    }
-
-    loadActiveCPDetails();
-    scheduleRender();
-    if (state.trackData) {
-      TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
-      renderSegmentTable();
-    }
-  }
-
-  function handleDeleteCP(idx) {
-    if (state.checkpoints.length <= 1) {
-      toast(T[state.language].toastKeepOne);
-      return;
-    }
-    state.checkpoints.splice(idx, 1);
-    if (state.activeCPIndex >= state.checkpoints.length) {
-      state.activeCPIndex = state.checkpoints.length - 1;
-    }
-    sortCheckpoints();
-    normalizeAllCPs();
-    renderCPTable();
-    loadActiveCPDetails();
-    scheduleRender();
-    if (state.trackData) {
-      TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
-      renderSegmentTable();
-    }
-    toast(T[state.language].toastDeleted);
-  }
-
-  function esc(str) {
-    if (!str) return '';
-    return str.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  }
-
-  // ── POI Event Handlers ──────────────────────────────────────────────
-  function bindPOIEvents() {
-    if (dom.poiNameDetail) {
-      dom.poiNameDetail.addEventListener('input', function () {
-        var cp = state.checkpoints[state.activeCPIndex];
-        if (cp) {
-          cp.name = this.value;
-          renderCPTable();
-          scheduleRender();
-        }
-      });
-    }
-    if (dom.poiTimeDetail) {
-      dom.poiTimeDetail.addEventListener('input', function () {
-        var cp = state.checkpoints[state.activeCPIndex];
-        if (cp) {
-          cp.segmentTime = this.value;
-          updateArrivalTimes();
-          renderCPTable();
-          scheduleRender();
-        }
-      });
-    }
-    if (dom.poiNotesDetail) {
-      dom.poiNotesDetail.addEventListener('input', function () {
-        var cp = state.checkpoints[state.activeCPIndex];
-        if (cp) {
-          cp.notes = this.value;
-          renderCPTable();
-          scheduleRender();
-        }
-      });
-    }
-
-    function bindColorPicker(pickerEl, hexEl, cb) {
-      if (!pickerEl || !hexEl) return;
-      pickerEl.addEventListener('input', function () { hexEl.value = this.value; cb(this.value); });
-      hexEl.addEventListener('change', function () {
-        if (/^#[0-9A-F]{6}$/i.test(this.value)) { pickerEl.value = this.value; cb(this.value); }
-      });
-    }
-
-    bindColorPicker(dom.poiAxisColor, dom.poiAxisColorHex, function (col) {
-      var cp = state.checkpoints[state.activeCPIndex];
-      if (cp) { cp.axisColor = col; scheduleRender(); }
-    });
-
-    bindColorPicker(dom.poiTextColor, dom.poiTextColorHex, function (col) {
-      var cp = state.checkpoints[state.activeCPIndex];
-      if (cp) { cp.textColor = col; scheduleRender(); }
-    });
-
-    // Font size inputs
-    var fsMap = {
-      'fs-title': 'fontSizeTitle',
-      'fs-cpname': 'fontSizeCPName',
-      'fs-cpelev': 'fontSizeCPElev',
-      'fs-cptime': 'fontSizeCPTime',
-      'fs-cpnotes': 'fontSizeCPNotes',
-      'fs-segment': 'fontSizeSegment',
-      'fs-cumuldist': 'fontSizeCumulDist'
-    };
-    Object.keys(fsMap).forEach(function (id) {
-      var el = document.getElementById(id);
-      if (el) {
-        el.addEventListener('input', function () {
-          state[fsMap[id]] = parseInt(this.value, 10) || 12;
-          scheduleRender();
-        });
-      }
-    });
-
-    dom.poiIntermediate.addEventListener('change', function () {
-      var cp = state.checkpoints[state.activeCPIndex];
-      if (cp) { cp.useForIntermediateDistances = this.checked; scheduleRender(); }
-    });
-
-    dom.poiPosition.addEventListener('change', function () {
-      var cp = state.checkpoints[state.activeCPIndex];
-      if (cp) {
-        cp.distance = parseFloat(this.value) || 0;
-        sortCheckpoints();
-        state.activeCPIndex = state.checkpoints.indexOf(cp);
-        renderCPTable();
-        scheduleRender();
-      }
-    });
-
-    if (dom.poiIconSelect) {
-      dom.poiIconSelect.addEventListener('change', function () {
-        var cp = state.checkpoints[state.activeCPIndex];
-        if (cp) { cp.icon = this.value; scheduleRender(); }
-      });
-    }
-
-    if (dom.poiStopDuration) {
-      dom.poiStopDuration.addEventListener('input', function () {
-        var cp = state.checkpoints[state.activeCPIndex];
-        if (cp) {
-          cp.stopDuration = parseInt(this.value, 10) || 0;
-          updateArrivalTimes();
-          renderCPTable();
-          scheduleRender();
-        }
-      });
-    }
-
-    if (dom.poiAxisThickness) {
-      dom.poiAxisThickness.addEventListener('input', function () {
-        var cp = state.checkpoints[state.activeCPIndex];
-        if (cp) { cp.axisThickness = parseInt(this.value, 10) || 1; scheduleRender(); }
-      });
-    }
-
-    if (dom.poiTextSize) {
-      dom.poiTextSize.addEventListener('input', function () {
-        var cp = state.checkpoints[state.activeCPIndex];
-        if (cp) { cp.textSize = parseInt(this.value, 10) || 18; scheduleRender(); }
-      });
-    }
-
-    if (dom.poiTextOrientation) {
-      dom.poiTextOrientation.addEventListener('change', function () {
-        var cp = state.checkpoints[state.activeCPIndex];
-        if (cp) { cp.textOrientation = this.value; scheduleRender(); }
-      });
-    }
-
-    var textMap = {
-      'poi-txt-left-bottom': 'leftBottom',
-      'poi-txt-left-middle': 'leftMiddle',
-      'poi-txt-left-top':    'leftTop',
-      'poi-txt-right-bottom':'rightBottom',
-      'poi-txt-right-middle':'rightMiddle',
-      'poi-txt-right-top':   'rightTop'
-    };
-    Object.keys(textMap).forEach(function (id) {
-      var el = document.getElementById(id);
-      if (el) {
-        el.addEventListener('input', function () {
-          var cp = state.checkpoints[state.activeCPIndex];
-          if (cp) { cp.texts[textMap[id]] = this.value; scheduleRender(); }
-        });
-      }
-    });
-  }
-
-  function loadActiveCPDetails() {
-    var cp = state.checkpoints[state.activeCPIndex];
-    if (!cp) return;
-
-    dom.poiIntermediate.checked = !!cp.useForIntermediateDistances;
-    dom.poiPosition.value = cp.distance;
-    if (dom.poiIconSelect) dom.poiIconSelect.value = cp.icon || 'classic';
-    if (dom.poiStopDuration) {
-      dom.poiStopDuration.value = cp.stopDuration || 0;
-      dom.poiStopDuration.disabled = (state.activeCPIndex === 0);
-    }
-
-    if (dom.poiNameDetail) dom.poiNameDetail.value = cp.name || '';
-    if (dom.poiTimeDetail) {
-      dom.poiTimeDetail.value = cp.segmentTime || '';
-      dom.poiTimeDetail.disabled = (state.activeCPIndex === 0);
-    }
-    if (dom.poiNotesDetail) dom.poiNotesDetail.value = cp.notes || '';
-
-    if (dom.fsTitle) dom.fsTitle.value = state.fontSizeTitle;
-    if (dom.fsCPName) dom.fsCPName.value = state.fontSizeCPName;
-    if (dom.fsCPElev) dom.fsCPElev.value = state.fontSizeCPElev;
-    if (dom.fsCPTime) dom.fsCPTime.value = state.fontSizeCPTime;
-    if (dom.fsCPNotes) dom.fsCPNotes.value = state.fontSizeCPNotes;
-    if (dom.fsSegment) dom.fsSegment.value = state.fontSizeSegment;
-    if (dom.fsCumulDist) dom.fsCumulDist.value = state.fontSizeCumulDist;
-
-    dom.poiAxisColor.value = cp.axisColor || '#4e4e4e';
-    dom.poiAxisColorHex.value = cp.axisColor || '#4e4e4e';
-    dom.poiAxisThickness.value = cp.axisThickness || 1;
-    dom.poiTextColor.value = cp.textColor || '#1e293b';
-    dom.poiTextColorHex.value = cp.textColor || '#1e293b';
-    dom.poiTextSize.value = cp.textSize || 18;
-    dom.poiTextOrientation.value = cp.textOrientation || 'To the right';
-
-    dom.poiTxtLeftBottom.value = cp.texts.leftBottom || '';
-    dom.poiTxtLeftMiddle.value = cp.texts.leftMiddle || '';
-    dom.poiTxtLeftTop.value = cp.texts.leftTop || '';
-    dom.poiTxtRightBottom.value = cp.texts.rightBottom || '';
-    dom.poiTxtRightMiddle.value = cp.texts.rightMiddle || '';
-    dom.poiTxtRightTop.value = cp.texts.rightTop || '';
-  }
-
   function parseStartTime(str) {
     str = (str || '周五 18:00').toLowerCase();
     var dayOffset = 4;
@@ -1145,34 +1136,12 @@
     return dayStr + ' ' + (hour < 10 ? '0' : '') + hour + ':' + (min < 10 ? '0' : '') + min;
   }
 
-  var renderTimer = null;
-  function scheduleRender() {
-    if (renderTimer) clearTimeout(renderTimer);
-    renderTimer = setTimeout(renderProfile, 120);
+  function esc(str) {
+    if (!str) return '';
+    return str.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  function renderProfile() {
-    if (!state.trackpoints) return;
-    if (dom.placeholder) dom.placeholder.style.display = 'none';
-
-    TR.profile.render(
-      dom.profileContainer,
-      state.trackpoints,
-      state.checkpoints,
-      state.raceName,
-      {
-        title: state.fontSizeTitle,
-        cpName: state.fontSizeCPName,
-        cpElev: state.fontSizeCPElev,
-        cpTime: state.fontSizeCPTime,
-        cpNotes: state.fontSizeCPNotes,
-        segment: state.fontSizeSegment,
-        cumulDist: state.fontSizeCumulDist
-      },
-      dom.exportRatio.value
-    );
-  }
-
+  // ── JSON Import / Export / Template ─────────────────────────────────
   function handleJsonImport() {
     var file = dom.inputJson.files[0];
     if (!file) return;
@@ -1189,6 +1158,10 @@
         if (data.fontSizeSegment) state.fontSizeSegment = parseInt(data.fontSizeSegment, 10);
         if (data.fontSizeCumulDist) state.fontSizeCumulDist = parseInt(data.fontSizeCumulDist, 10);
         if (data.language) state.language = data.language;
+        if (data.colorMode) {
+          state.colorMode = data.colorMode;
+          if (dom.selectColorMode) dom.selectColorMode.value = data.colorMode;
+        }
         if (data.elevationMode) setElevationMode(data.elevationMode);
         if (data.startTime) {
           state.startTime = data.startTime;
@@ -1212,6 +1185,7 @@
     var data = {
       raceName: state.raceName,
       elevationMode: state.elevationMode,
+      colorMode: state.colorMode,
       fontSizeTitle: state.fontSizeTitle,
       fontSizeCPName: state.fontSizeCPName,
       fontSizeCPElev: state.fontSizeCPElev,
@@ -1240,11 +1214,12 @@
     var template = {
       raceName: isZH ? "Talus 经典越野跑 100K" : "Talus Classic Trail 100K",
       elevationMode: "smooth",
+      colorMode: "classic",
       fontSizeTitle: 18,
-      fontSizeCPName: 12,
+      fontSizeCPName: 14,
       fontSizeCPElev: 11,
-      fontSizeCPTime: 11,
-      fontSizeCPNotes: 10,
+      fontSizeCPTime: 20,
+      fontSizeCPNotes: 18,
       fontSizeSegment: 11,
       fontSizeCumulDist: 12,
       language: state.language,
@@ -1267,6 +1242,7 @@
     toast(T[state.language].toastTemplateSuccess);
   }
 
+  // ── High-Resolution PNG Image Export ────────────────────────────────
   function handleImageExport(scale) {
     if (!state.trackpoints) {
       toast(T[state.language].toastGpxFirst);
@@ -1328,7 +1304,6 @@
 
     populateStartTimeOptions(state.startTime);
     renderCPTable();
-    loadActiveCPDetails();
     if (state.trackData) {
       renderAllComponents();
     }
