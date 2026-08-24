@@ -560,6 +560,14 @@
       state.trackData = trackData;
       state.trackpoints = trackData.points;
 
+      // Auto-detect base map layer: if outside China, default to OpenStreetMap ('osm')
+      var inChina = TR.trailMath.isTrackInChina(trackData.points);
+      var autoMapSource = inChina ? 'tiandituluwang' : 'osm';
+      if (dom.selectMapSource) {
+        dom.selectMapSource.value = autoMapSource;
+      }
+      TR.trailMap.changeMapSource(autoMapSource);
+
       var totalDist = trackData.totalDistance;
 
       state.checkpoints.forEach(function (cp) {

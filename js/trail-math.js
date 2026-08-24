@@ -175,6 +175,20 @@
   function outOfChina(lat, lon) {
     return lon < 72.004 || lon > 137.8347 || lat < 0.8293 || lat > 55.8271;
   }
+  TM.outOfChina = outOfChina;
+
+  TM.isTrackInChina = function (points) {
+    if (!points || points.length === 0) return true;
+    var step = Math.max(1, Math.floor(points.length / 20));
+    var outCount = 0, totalSampled = 0;
+    for (var i = 0; i < points.length; i += step) {
+      totalSampled++;
+      if (outOfChina(points[i].lat, points[i].lon)) {
+        outCount++;
+      }
+    }
+    return (outCount / totalSampled) < 0.5;
+  };
 
   function transformLat(x, y) {
     var ret = -100 + 2 * x + 3 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * Math.sqrt(Math.abs(x));
