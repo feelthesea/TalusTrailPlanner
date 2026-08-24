@@ -15,7 +15,7 @@ Upload GPX / KML / KMZ route files, explore the interactive map with real-time e
 ## ✨ Key Features
 
 - 📈 **Unified Interactive Elevation Profile**: Combines high-fidelity vector roadbook publishing with 60fps real-time exploration. Hovering or touching displays a live crosshair with elevation, distance, and slope grade, seamlessly synchronized with the map location cursor.
-- 🎨 **3 Profile Color Schemes**: Switch instantly between "Classic Sisyf Bars", "Grade Gradient", and "Elevation Gradient".
+- 🎨 **3 Profile Color Schemes**: Switch instantly between "Classic Colors", "Grade Gradient", and "Elevation Gradient".
 - 🗺️ **Interactive Trail Map**: Supports Tianditu (Road/Satellite/Terrain), Gaode (Hybrid/Road with automatic WGS-84 to GCJ-02 reprojection), OpenStreetMap, OpenTopoMap, and CyclOSM.
 - ⚡ **Dual Elevation Calculation Modes**: Switch between "Raw Data" and "Smooth Filter (4m Hysteresis)" to filter out barometric/GPS jitter and match official race data.
 - 📐 **6-Level Gradient Distribution & Practical Technical Tips**: Breaks down routes into Flat (≤5%), Gentle (5-10%), Moderate (10-15%), Steep (15-25%), Very Steep (25-35%), and Extremely Steep (>35%) for uphill and downhill, complete with cadence, pole technique, and posture recommendations.
@@ -43,7 +43,7 @@ Upload GPX / KML / KMZ route files, explore the interactive map with real-time e
 3. Choose the **⚡ Elevation Calc Mode**:
    - **Smooth (4m)** (Recommended): Filters sensor noise to reflect realistic climbing effort;
    - **Raw Data**: Displays raw cumulative GPS elevation.
-4. Select the **🎨 Profile Color Mode**: Switch between Classic Sisyf Bars, Grade Gradient, and Elevation Gradient.
+4. Select the **🎨 Profile Color Mode**: Switch between Classic Colors, Grade Gradient, and Elevation Gradient.
 
 ### Step 3: Add & Configure Checkpoints / Aid Stations
 1. **Add a Checkpoint**: Click **"＋ Add Checkpoint"** in Zone 3.

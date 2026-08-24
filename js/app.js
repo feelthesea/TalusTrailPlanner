@@ -181,7 +181,7 @@
       elevModeRaw: "Raw Data",
       elevModeSmooth: "Smooth (4m)",
       colorModeLabel: "🎨 Profile Color",
-      colorModeClassic: "Classic Sisyf Bars",
+      colorModeClassic: "Classic Colors",
       colorModeGradient: "By Grade Gradient",
       colorModeElevation: "By Elevation Gradient",
       importJson: "Import JSON",
