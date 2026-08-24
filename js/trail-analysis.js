@@ -250,32 +250,33 @@
     var segments = [];
 
     if (mode === 'waypoint') {
-      var wps = customWaypoints || trackData.waypoints || [];
-      var breakpoints = [0];
-      wps.forEach(function (wp) {
-        var dist = (wp.distance !== undefined && wp.distance !== null) ? wp.distance : (wp.dist || 0);
-        breakpoints.push(tm.findNearestPointIndexByDistance(points, dist));
+      var wps = (customWaypoints || []).filter(function (cp) {
+        return cp.useForIntermediateDistances !== false;
+      }).slice().sort(function (a, b) {
+        return a.distance - b.distance;
       });
-      breakpoints.push(points.length - 1);
 
-      var uniqueBreakpoints = Array.from(new Set(breakpoints)).sort(function (a, b) { return a - b; });
-
-      for (var i = 0; i < uniqueBreakpoints.length - 1; i++) {
-        var startIdx = uniqueBreakpoints[i];
-        var endIdx = uniqueBreakpoints[i + 1];
-        if (endIdx > startIdx) {
-          var seg = createSegment(points, startIdx, endIdx, 'auto', currentElevationMode);
-          if (i === 0) {
-            seg.name = (wps[0] && wps[0].name) ? (isZH ? '起点' : 'Start') : (isZH ? '起点' : 'Start');
-            seg.endName = (wps.length > 0 && wps[0]) ? wps[0].name : (isZH ? '分段 1' : 'Seg 1');
-          } else if (i === uniqueBreakpoints.length - 2) {
-            seg.name = wps[wps.length - 1] ? wps[wps.length - 1].name : (isZH ? '终点前' : 'Before Finish');
-            seg.endName = isZH ? '终点' : 'Finish';
-          } else {
-            seg.name = wps[i - 1] ? wps[i - 1].name : ((isZH ? '段 ' : 'Seg ') + i);
-            seg.endName = wps[i] ? wps[i].name : ((isZH ? '段 ' : 'Seg ') + (i + 1));
+      if (wps.length <= 1) {
+        // Fallback: full track if only 1 or 0 CPs
+        var seg0 = createSegment(points, 0, points.length - 1, 'auto', currentElevationMode);
+        seg0.name = isZH ? '起点' : 'Start';
+        seg0.endName = isZH ? '终点' : 'Finish';
+        segments.push(seg0);
+      } else {
+        for (var i = 0; i < wps.length - 1; i++) {
+          var startCp = wps[i];
+          var endCp = wps[i + 1];
+          var startIdx = tm.findNearestPointIndexByDistance(points, startCp.distance);
+          var endIdx = tm.findNearestPointIndexByDistance(points, endCp.distance);
+          if (endIdx > startIdx) {
+            var seg = createSegment(points, startIdx, endIdx, 'auto', currentElevationMode);
+            seg.name = startCp.name || (i === 0 ? (isZH ? '起点' : 'Start') : ('CP' + i));
+            seg.endName = endCp.name || (i === wps.length - 2 ? (isZH ? '终点' : 'Finish') : ('CP' + (i + 1)));
+            seg.startDist = startCp.distance;
+            seg.endDist = endCp.distance;
+            seg.distance = Math.max(0, endCp.distance - startCp.distance);
+            segments.push(seg);
           }
-          segments.push(seg);
         }
       }
     } else if (mode === 'auto') {

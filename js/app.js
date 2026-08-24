@@ -1,5 +1,5 @@
 /**
- * Talus - Trail Roadbook Generator & TrailScope — Main Application (v7.2)
+ * Talus - Trail Roadbook Generator & TrailScope — Main Application (v7.3)
  *
  * Full Bi-directional Linkage across:
  *  - GPX / KML / KMZ Parsing & Elevation Smoothing Modes
@@ -22,6 +22,7 @@
       headerSubtitle: "越野跑路书与轨迹分析",
       vibeCodedBy: "Vibe coded by",
       uploadTrack: "上传轨迹 (GPX/KML/KMZ)",
+      uploadTrackTitle: "上传 GPX / KML / KMZ 轨迹文件",
       raceNameLabel: "比赛名称",
       raceStartLabel: "出发时间",
       elevCalcModeLabel: "⚡ 爬升计算",
@@ -32,8 +33,11 @@
       colorModeGradient: "按坡度渐变",
       colorModeElevation: "按海拔渐变",
       importJson: "导入 JSON",
+      importJsonTitle: "从 JSON 文件导入检查点与配置",
       downloadTemplate: "下载模板",
+      downloadTemplateTitle: "下载配置 JSON 模板",
       exportJson: "导出 JSON",
+      exportJsonTitle: "导出检查点与配置为 JSON 文件",
       languageLabel: "🌐 语言",
       exportRatioLabel: "导出比例",
       ratioAuto: "默认自适应 (无白边)",
@@ -51,6 +55,16 @@
       mapExplorerTitle: "🗺️ 交互式轨迹地图",
       mapSourceLabel: "底图图层",
       btnFitMap: "居中全景",
+      btnFitMapTitle: "自动缩放至全景轨迹",
+
+      mapSourceTiandituVec: "天地图路网 (推荐)",
+      mapSourceTiandituSat: "天地图卫星",
+      mapSourceTiandituTer: "天地图地形",
+      mapSourceGaodeSat: "高德混合图",
+      mapSourceGaodeRoad: "高德路网图",
+      mapSourceOSM: "OpenStreetMap",
+      mapSourceOpenTopo: "OpenTopoMap",
+      mapSourceCyclOSM: "CyclOSM",
 
       statsGradientTitle: "📐 坡度分布与实战技术要点",
       segmentStatsTitle: "📋 多模式分段统计",
@@ -143,8 +157,14 @@
       newCpName: "新检查点",
       deleteCpTitle: "删除此CP",
       settingsCpTitle: "配置此CP视觉属性",
+      modalCloseTitle: "关闭",
       placeholderCpNameInput: "CP名称",
       placeholderTimeInput: "用时 H:MM",
+      placeholderNotesInput: "备注信息",
+      placeholderTextNone: "无",
+
+      btnCancel: "取消",
+      btnSaveApply: "✓ 保存并应用",
 
       labelStopDuration: "⏸️ 停留时间 (分钟)",
       labelPassage: "通过"
@@ -154,6 +174,7 @@
       headerSubtitle: "Trail Roadbook & Track Analytics",
       vibeCodedBy: "Vibe coded by",
       uploadTrack: "Upload Track (GPX/KML/KMZ)",
+      uploadTrackTitle: "Upload GPX / KML / KMZ route file",
       raceNameLabel: "Race Name",
       raceStartLabel: "Start Time",
       elevCalcModeLabel: "⚡ Elevation Calc",
@@ -164,8 +185,11 @@
       colorModeGradient: "By Grade Gradient",
       colorModeElevation: "By Elevation Gradient",
       importJson: "Import JSON",
+      importJsonTitle: "Import checkpoints & settings from JSON",
       downloadTemplate: "Template",
+      downloadTemplateTitle: "Download JSON template",
       exportJson: "Export JSON",
+      exportJsonTitle: "Export checkpoints & settings as JSON",
       languageLabel: "🌐 Language",
       exportRatioLabel: "Aspect Ratio",
       ratioAuto: "Auto-fit (No Padding)",
@@ -183,6 +207,16 @@
       mapExplorerTitle: "🗺️ Interactive Trail Map",
       mapSourceLabel: "Base Map",
       btnFitMap: "Center Map",
+      btnFitMapTitle: "Auto zoom and fit entire track",
+
+      mapSourceTiandituVec: "Tianditu Road (Recommended)",
+      mapSourceTiandituSat: "Tianditu Satellite",
+      mapSourceTiandituTer: "Tianditu Terrain",
+      mapSourceGaodeSat: "Gaode Hybrid",
+      mapSourceGaodeRoad: "Gaode Road",
+      mapSourceOSM: "OpenStreetMap",
+      mapSourceOpenTopo: "OpenTopoMap",
+      mapSourceCyclOSM: "CyclOSM",
 
       statsGradientTitle: "📐 Grade Distribution & Technical Tips",
       segmentStatsTitle: "📋 Segment Statistics",
@@ -275,8 +309,14 @@
       newCpName: "New Checkpoint",
       deleteCpTitle: "Delete Checkpoint",
       settingsCpTitle: "Configure Checkpoint Visuals",
+      modalCloseTitle: "Close",
       placeholderCpNameInput: "CP Name",
       placeholderTimeInput: "Duration H:MM",
+      placeholderNotesInput: "Notes",
+      placeholderTextNone: "None",
+
+      btnCancel: "Cancel",
+      btnSaveApply: "✓ Save & Apply",
 
       labelStopDuration: "⏸️ Stop Duration (min)",
       labelPassage: "Passage"
@@ -456,6 +496,7 @@
         this.classList.add('active');
         state.segmentMode = this.dataset.mode;
         state.activeSegmentIdx = -1;
+        TR.trailAnalysis.resetSegmentCache();
         renderSegmentTable();
         scheduleRender();
       });
@@ -544,6 +585,7 @@
 
       sortCheckpoints();
       normalizeAllCPs();
+      TR.trailAnalysis.resetSegmentCache();
       renderCPTable();
       renderAllComponents();
 
@@ -871,6 +913,7 @@
       state.checkpoints[idx][field] = val;
     }
 
+    TR.trailAnalysis.resetSegmentCache();
     scheduleRender();
     if (state.trackData) {
       TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
@@ -907,6 +950,7 @@
     normalizeAllCPs();
     state.activeCPIndex = state.checkpoints.indexOf(newCP);
 
+    TR.trailAnalysis.resetSegmentCache();
     renderCPTable();
     scheduleRender();
     if (state.trackData) {
@@ -927,6 +971,7 @@
     }
     sortCheckpoints();
     normalizeAllCPs();
+    TR.trailAnalysis.resetSegmentCache();
     renderCPTable();
     scheduleRender();
     if (state.trackData) {
@@ -987,12 +1032,12 @@
     dom.poiTextSize.value = cp.textSize || 18;
     dom.poiTextOrientation.value = cp.textOrientation || 'To the right';
 
-    dom.poiTxtLeftBottom.value = cp.texts.leftBottom || '';
-    dom.poiTxtLeftMiddle.value = cp.texts.leftMiddle || '';
-    dom.poiTxtLeftTop.value = cp.texts.leftTop || '';
-    dom.poiTxtRightBottom.value = cp.texts.rightBottom || '';
-    dom.poiTxtRightMiddle.value = cp.texts.rightMiddle || '';
-    dom.poiTxtRightTop.value = cp.texts.rightTop || '';
+    dom.poiTxtLeftBottom.value = (cp.texts && cp.texts.leftBottom) || '';
+    dom.poiTxtLeftMiddle.value = (cp.texts && cp.texts.leftMiddle) || '';
+    dom.poiTxtLeftTop.value = (cp.texts && cp.texts.leftTop) || '';
+    dom.poiTxtRightBottom.value = (cp.texts && cp.texts.rightBottom) || '';
+    dom.poiTxtRightMiddle.value = (cp.texts && cp.texts.rightMiddle) || '';
+    dom.poiTxtRightTop.value = (cp.texts && cp.texts.rightTop) || '';
 
     dom.modalBackdrop.classList.add('open');
   }
@@ -1033,6 +1078,7 @@
     normalizeAllCPs();
     state.activeCPIndex = state.checkpoints.indexOf(cp);
 
+    TR.trailAnalysis.resetSegmentCache();
     renderCPTable();
     scheduleRender();
     if (state.trackData) {
@@ -1302,9 +1348,20 @@
       if (dict[key] !== undefined) el.textContent = dict[key];
     });
 
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+      var key = el.dataset.i18nPlaceholder;
+      if (dict[key] !== undefined) el.placeholder = dict[key];
+    });
+
+    document.querySelectorAll('[data-i18n-title]').forEach(function (el) {
+      var key = el.dataset.i18nTitle;
+      if (dict[key] !== undefined) el.title = dict[key];
+    });
+
     populateStartTimeOptions(state.startTime);
     renderCPTable();
     if (state.trackData) {
+      TR.trailAnalysis.resetSegmentCache();
       renderAllComponents();
     }
   }

@@ -30,7 +30,7 @@
   var currentMarker = null;
   var segmentHighlightLayer = null;
   var trackDataRef = null;
-  var colorModeRef = 'gradient'; // 'gradient' | 'elevation'
+  var colorModeRef = 'gradient';
 
   var mapSources = {
     tiandituluwang: {
@@ -86,7 +86,7 @@
     return [gcj[0], gcj[1]];
   }
 
-  // ── Icons ────────────────────────────────────────────────────────────
+  // ── Custom Div Icons ────────────────────────────────────────────────
   function createCustomMarker(htmlContent, className, size) {
     size = size || 24;
     return L.divIcon({
@@ -97,9 +97,23 @@
     });
   }
 
-  var startIcon = createCustomMarker('<div class="custom-marker start-marker">🟢</div>', 'map-marker-start', 24);
-  var endIcon = createCustomMarker('<div class="custom-marker end-marker">🏁</div>', 'map-marker-end', 24);
-  var currentIcon = createCustomMarker('<div class="custom-marker current-marker"></div>', 'map-marker-current', 18);
+  var startIcon = createCustomMarker(
+    '<div style="background:#0d5236; color:#ffffff; font-family:var(--font-display); font-weight:800; font-size:12px; width:24px; height:24px; border:2px solid #ffffff; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.35);">S</div>',
+    'map-marker-start',
+    24
+  );
+
+  var endIcon = createCustomMarker(
+    '<div style="background:#b91c1c; color:#ffffff; font-family:var(--font-display); font-weight:800; font-size:12px; width:24px; height:24px; border:2px solid #ffffff; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.35);">F</div>',
+    'map-marker-end',
+    24
+  );
+
+  var currentIcon = createCustomMarker(
+    '<div style="background:#ef4444; width:16px; height:16px; border:3px solid #ffffff; border-radius:50%; box-shadow:0 0 10px rgba(239, 68, 68, 0.95), 0 2px 6px rgba(0,0,0,0.4);"></div>',
+    'map-marker-current',
+    16
+  );
 
   // ── Initialization ───────────────────────────────────────────────────
   TM_Map.initMap = function (containerId) {
@@ -181,7 +195,6 @@
     trackDataRef = trackData;
     colorModeRef = colorMode || 'gradient';
 
-    // Clear existing track & markers
     trackLayers.forEach(function (l) { leafletMap.removeLayer(l); });
     trackLayers = [];
     waypointMarkers.forEach(function (m) { leafletMap.removeLayer(m); });
@@ -199,8 +212,9 @@
     var points = trackData.points;
     var minEle = trackData.minElevation;
     var maxEle = trackData.maxElevation;
+    var isZH = !(window.TrailRoadbook.state && window.TrailRoadbook.state.language === 'en');
 
-    // Batch polylines by color buckets for smooth 60fps render
+    // Batch polylines by color buckets
     var groups = new Map();
     for (var i = 1; i < points.length; i++) {
       var prev = points[i - 1];
@@ -234,8 +248,12 @@
     var startPos = displayLatLng(points[0]);
     var endPos = displayLatLng(points[points.length - 1]);
 
-    var sm = L.marker(startPos, { icon: startIcon }).bindTooltip('🟢 起点 Start', { permanent: false }).addTo(leafletMap);
-    var em = L.marker(endPos, { icon: endIcon }).bindTooltip('🏁 终点 Finish', { permanent: false }).addTo(leafletMap);
+    var sm = L.marker(startPos, { icon: startIcon, zIndexOffset: 500 })
+      .bindTooltip(isZH ? '🟢 起点 (Start)' : '🟢 Start', { permanent: false })
+      .addTo(leafletMap);
+    var em = L.marker(endPos, { icon: endIcon, zIndexOffset: 500 })
+      .bindTooltip(isZH ? '🏁 终点 (Finish)' : '🏁 Finish', { permanent: false })
+      .addTo(leafletMap);
     trackLayers.push(sm);
     trackLayers.push(em);
 
@@ -243,20 +261,20 @@
     var cpList = customCPs || [];
     if (cpList.length > 0) {
       cpList.forEach(function (cp, idx) {
-        if (idx === 0 || idx === cpList.length - 1) return; // start/finish already drawn
+        if (idx === 0 || idx === cpList.length - 1) return;
         var nearestIdx = tm.findNearestPointIndexByDistance(points, cp.distance);
         var pt = points[nearestIdx] || points[0];
         var pos = displayLatLng(pt);
         var cpIcon = createCustomMarker(
-          '<div class="custom-marker" style="background:#d4a017; border:2px solid #fff; width:22px; height:22px; font-size:10px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold; box-shadow:0 2px 6px rgba(0,0,0,0.3);">' + (idx) + '</div>',
+          '<div style="background:#d4881e; color:#ffffff; font-family:var(--font-display); font-weight:800; font-size:11px; width:22px; height:22px; border:2px solid #ffffff; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.3);">' + (idx) + '</div>',
           'map-marker-cp',
           22
         );
-        var marker = L.marker(pos, { icon: cpIcon }).addTo(leafletMap);
+        var marker = L.marker(pos, { icon: cpIcon, zIndexOffset: 300 }).addTo(leafletMap);
         var popupContent = '<div style="font-size:12px; line-height:1.5; color:#1a2e1f; padding:4px 2px;">' +
           '<strong>' + (cp.name || ('CP ' + idx)) + '</strong><br>' +
-          '<span>距离: ' + cp.distance.toFixed(1) + ' km</span> | <span>海拔: ' + Math.round(pt.elevation) + ' m</span>' +
-          (cp.arrivalTime ? ('<br><span>预计抵达: ' + cp.arrivalTime + '</span>') : '') +
+          '<span>' + (isZH ? '距离: ' : 'Dist: ') + cp.distance.toFixed(1) + ' km</span> | <span>' + (isZH ? '海拔: ' : 'Elev: ') + Math.round(pt.elevation) + ' m</span>' +
+          (cp.arrivalTime ? ('<br><span>' + (isZH ? '预计抵达: ' : 'ETA: ') + cp.arrivalTime + '</span>') : '') +
           '</div>';
         marker.bindPopup(popupContent, { offset: [0, -8] });
         waypointMarkers.push(marker);
@@ -290,7 +308,7 @@
     var pos = displayLatLng(pt);
 
     if (!currentMarker) {
-      currentMarker = L.marker(pos, { icon: currentIcon }).addTo(leafletMap);
+      currentMarker = L.marker(pos, { icon: currentIcon, zIndexOffset: 1000 }).addTo(leafletMap);
     } else {
       currentMarker.setLatLng(pos);
     }
@@ -322,6 +340,13 @@
 
       var bounds = L.latLngBounds(segPoints);
       leafletMap.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
+    }
+  };
+
+  TM_Map.clearSegmentHighlight = function () {
+    if (segmentHighlightLayer && leafletMap) {
+      leafletMap.removeLayer(segmentHighlightLayer);
+      segmentHighlightLayer = null;
     }
   };
 

@@ -1,14 +1,13 @@
 /**
- * Talus - Trail Roadbook Generator & TrailScope — Unified SVG Profile Renderer (v7.1)
+ * Talus - Trail Roadbook Generator & TrailScope — Unified SVG Profile Renderer (v7.2)
  *
  * Draws a complete interactive roadbook elevation profile including:
  *   - Multiple Color Modes: Classic Sisyf Gradient Bars / Continuous Slope / Elevation
  *   - Real-time Hover Crosshair & Synced Map Tracking
  *   - Active Segment Highlighting
- *   - Multi-icon stacking (up to 3 icons) & 12 vector symbols
+ *   - Crisp Vector Badges for Start (S) / Finish (F) / CP (1,2,3...) / Emojis
  *   - Segment climb, arrival & interval times, notes
  *   - 3-line hexagonal/rectangular segment statistics boxes
- *   - Broken axis gap support
  *   - Global & granular font size adjustments
  *   - Associated text annotations
  *   - Ultra-HD multi-ratio PNG image export
@@ -79,17 +78,6 @@
     axisText:      '#64748b',
     peakLabel:     '#64748b',
   };
-
-  function iconColor(type) {
-    switch (type) {
-      case 'start':   return '#0d5236';
-      case 'finish':  return '#b91c1c';
-      case 'water':   return '#0284c7';
-      case 'food':    return '#d97706';
-      case 'peak':    return '#475569';
-      default:        return '#475569';
-    }
-  }
 
   function cpLineColor(type) {
     switch (type) {
@@ -265,14 +253,14 @@
       var clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
       var svgX = ((clientX - rect.left) / rect.width) * svg.viewBox.baseVal.width - margin;
-      var svgY = ((clientY - rect.top) / rect.height) * svg.viewBox.baseVal.height - margin;
 
-      if (svgX < 70 || svgX > 70 + m.chartW || svgY < Y.chartTop - 10 || svgY > Y.chartBot + 10) {
+      // Allow hover anywhere across the profile width
+      if (svgX < 50 || svgX > 70 + m.chartW + 30) {
         hideCursor();
         return;
       }
 
-      var distRatio = (svgX - 70) / m.chartW;
+      var distRatio = Math.max(0, Math.min(1, (svgX - 70) / m.chartW));
       var targetDist = distRatio * totalDist;
       var ptIdx = tm().findNearestPointIndexByDistance(pts, targetDist);
       var pt = pts[ptIdx] || pts[0];
@@ -287,20 +275,21 @@
       crosshairDot.setAttribute('cy', ptY);
 
       if (tooltipEl) {
+        var isZH = !(window.TrailRoadbook.state && window.TrailRoadbook.state.language === 'en');
         var grad = pt.smoothedGradient !== undefined ? pt.smoothedGradient : (pt.gradient || 0);
-        var gradLabel = tm().getGradientLabel(grad, window.TrailRoadbook.state ? window.TrailRoadbook.state.language : 'zh');
+        var gradLabel = tm().getGradientLabel(grad, isZH ? 'zh' : 'en');
         var gradSign = grad > 0 ? '+' : '';
         var gradColor = tm().getGradientColor(grad);
 
         tooltipEl.innerHTML =
           '<div style="font-weight:700; margin-bottom:2px;">' + pt.distance.toFixed(2) + ' km</div>' +
-          '<div>海拔: <strong>' + Math.round(pt.elevation) + ' m</strong></div>' +
-          '<div>坡度: <strong style="color:' + gradColor + '">' + gradSign + grad.toFixed(1) + '% (' + gradLabel + ')</strong></div>';
+          '<div>' + (isZH ? '海拔: ' : 'Elevation: ') + '<strong>' + Math.round(pt.elevation) + ' m</strong></div>' +
+          '<div>' + (isZH ? '坡度: ' : 'Grade: ') + '<strong style="color:' + gradColor + '">' + gradSign + grad.toFixed(1) + '% (' + gradLabel + ')</strong></div>';
         tooltipEl.classList.add('visible');
 
         var tipLeft = clientX + 15;
         var tipTop = clientY - 35;
-        if (tipLeft + 150 > window.innerWidth) tipLeft = clientX - 160;
+        if (tipLeft + 160 > window.innerWidth) tipLeft = clientX - 170;
         tooltipEl.style.left = tipLeft + 'px';
         tooltipEl.style.top = tipTop + 'px';
       }
@@ -525,8 +514,6 @@
 
   function getIconEmoji(symbol) {
     switch (symbol) {
-      case 'start':      return '🟢';
-      case 'finish':     return '🏁';
       case 'assisted':   return '🤝';
       case 'dropbag':    return '🛍️';
       case 'classic':    return '🍉';
@@ -535,7 +522,6 @@
       case 'peak':       return '🏔️';
       case 'danger':     return '⚡';
       case 'food':       return '🍽️';
-      case 'cp':         return '📍';
       default:           return '';
     }
   }
@@ -544,28 +530,58 @@
     cps.forEach(function (cp, idx) {
       var x  = m.distToX(cp.distance);
       var cy = Y.iconCY;
-      var size = 22;
 
       var symbol = cp.icon || (cp.icons && cp.icons[0] ? cp.icons[0].symbol : '') || '';
-      var emoji = getIconEmoji(symbol);
 
+      if (idx === 0 || symbol === 'start') {
+        var grpS = el('g', {});
+        grpS.appendChild(el('circle', {
+          cx: x, cy: cy, r: 12,
+          fill: '#0d5236', stroke: '#ffffff', 'stroke-width': '2'
+        }));
+        grpS.appendChild(el('text', {
+          x: x, y: cy + 4,
+          'text-anchor': 'middle', 'font-size': '12', 'font-weight': '800', fill: '#ffffff',
+          style: "font-family: var(--font-display), 'Barlow Condensed', sans-serif"
+        }, 'S'));
+        svg.appendChild(grpS);
+        return;
+      }
+
+      if (idx === cps.length - 1 || symbol === 'finish') {
+        var grpF = el('g', {});
+        grpF.appendChild(el('circle', {
+          cx: x, cy: cy, r: 12,
+          fill: '#b91c1c', stroke: '#ffffff', 'stroke-width': '2'
+        }));
+        grpF.appendChild(el('text', {
+          x: x, y: cy + 4,
+          'text-anchor': 'middle', 'font-size': '12', 'font-weight': '800', fill: '#ffffff',
+          style: "font-family: var(--font-display), 'Barlow Condensed', sans-serif"
+        }, 'F'));
+        svg.appendChild(grpF);
+        return;
+      }
+
+      var emoji = getIconEmoji(symbol);
       if (emoji) {
         svg.appendChild(el('text', {
-          x: x, y: cy + (size / 2.8),
-          'text-anchor': 'middle', 'font-size': size * 1.1,
-          style: 'font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Android Emoji", sans-serif;'
+          x: x, y: cy + 7,
+          'text-anchor': 'middle', 'font-size': '18',
+          style: 'font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;'
         }, emoji));
       } else {
-        var r = size / 2;
-        var col = cp.axisColor || iconColor(symbol || 'cp');
+        var r = 11;
+        var col = cp.axisColor || '#d97706';
         var grp = el('g', {});
         grp.appendChild(el('circle', {
           cx: x, cy: cy, r: r,
-          fill: col, stroke: '#fff', 'stroke-width': '2'
+          fill: col, stroke: '#ffffff', 'stroke-width': '2'
         }));
         grp.appendChild(el('text', {
-          x: x, y: cy + (r * 0.35),
-          'text-anchor': 'middle', 'font-size': Math.max(9, r * 1.2), 'font-weight': '700', fill: '#fff'
+          x: x, y: cy + 4,
+          'text-anchor': 'middle', 'font-size': '11', 'font-weight': '700', fill: '#ffffff',
+          style: "font-family: var(--font-display), 'Barlow Condensed', sans-serif"
         }, seqLabels[idx]));
         svg.appendChild(grp);
       }

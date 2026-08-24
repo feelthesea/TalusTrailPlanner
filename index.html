@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/leaflet.css">
-  <link rel="stylesheet" href="style.css?v=7.2">
+  <link rel="stylesheet" href="style.css?v=7.3">
 </head>
 <body>
 
@@ -26,7 +26,7 @@
   <div class="toolbar" id="toolbar">
     <!-- GPX / KML / KMZ upload -->
     <div class="group">
-      <button class="btn btn-primary" id="btn-gpx" title="Upload GPX / KML / KMZ file">
+      <button class="btn btn-primary" id="btn-gpx" title="Upload GPX / KML / KMZ file" data-i18n-title="uploadTrackTitle">
         <span class="icon">📂</span> <span data-i18n="uploadTrack">上传轨迹 (GPX/KML/KMZ)</span>
       </button>
       <input type="file" id="input-gpx" accept=".gpx,.kml,.kmz" class="hidden">
@@ -67,14 +67,14 @@
 
     <!-- JSON import / export -->
     <div class="group">
-      <button class="btn" id="btn-import" title="Import checkpoint data from JSON">
+      <button class="btn" id="btn-import" title="Import checkpoint data from JSON" data-i18n-title="importJsonTitle">
         <span class="icon">📥</span> <span data-i18n="importJson">导入 JSON</span>
       </button>
       <input type="file" id="input-json" accept=".json" class="hidden">
-      <button class="btn" id="btn-template-json" title="Download JSON configuration template">
+      <button class="btn" id="btn-template-json" title="Download JSON configuration template" data-i18n-title="downloadTemplateTitle">
         <span class="icon">📋</span> <span data-i18n="downloadTemplate">下载模板</span>
       </button>
-      <button class="btn" id="btn-export-json" title="Export checkpoint data as JSON">
+      <button class="btn" id="btn-export-json" title="Export checkpoint data as JSON" data-i18n-title="exportJsonTitle">
         <span class="icon">📤</span> <span data-i18n="exportJson">导出 JSON</span>
       </button>
     </div>
@@ -184,17 +184,17 @@
           <div class="map-controls-group">
             <label class="field-label" for="select-map-source" data-i18n="mapSourceLabel">底图图层</label>
             <select id="select-map-source" class="input-field" style="height: 30px; font-size: 0.76rem; padding: 2px 8px;">
-              <option value="tiandituluwang">天地图路网 (推荐)</option>
-              <option value="tiandituweixing">天地图卫星</option>
-              <option value="tianditudixing">天地图地形</option>
-              <option value="gaode_hybrid">高德混合图</option>
-              <option value="amaproad">高德路网图</option>
-              <option value="osm">OpenStreetMap</option>
-              <option value="opentopomap">OpenTopoMap</option>
-              <option value="cyclosm">CyclOSM</option>
+              <option value="tiandituluwang" data-i18n="mapSourceTiandituVec">天地图路网 (推荐)</option>
+              <option value="tiandituweixing" data-i18n="mapSourceTiandituSat">天地图卫星</option>
+              <option value="tianditudixing" data-i18n="mapSourceTiandituTer">天地图地形</option>
+              <option value="gaode_hybrid" data-i18n="mapSourceGaodeSat">高德混合图</option>
+              <option value="amaproad" data-i18n="mapSourceGaodeRoad">高德路网图</option>
+              <option value="osm" data-i18n="mapSourceOSM">OpenStreetMap</option>
+              <option value="opentopomap" data-i18n="mapSourceOpenTopo">OpenTopoMap</option>
+              <option value="cyclosm" data-i18n="mapSourceCyclOSM">CyclOSM</option>
             </select>
 
-            <button class="btn" id="btn-fit-map" title="适应全图" style="height: 30px; padding: 4px 10px; font-size: 0.76rem;">
+            <button class="btn" id="btn-fit-map" title="适应全图" data-i18n-title="btnFitMapTitle" style="height: 30px; padding: 4px 10px; font-size: 0.76rem;">
               <span>🎯</span> <span data-i18n="btnFitMap">居中全景</span>
             </button>
           </div>
@@ -296,8 +296,8 @@
   <div class="modal-backdrop" id="cp-modal-backdrop">
     <div class="modal-card" id="cp-modal-card">
       <div class="modal-header">
-        <h3 id="modal-cp-title">📍 检查点详细视觉配置</h3>
-        <button class="modal-close-btn" id="btn-modal-close" title="关闭">✕</button>
+        <h3 id="modal-cp-title" data-i18n="poiPanelTitle">📍 检查点详细视觉配置</h3>
+        <button class="modal-close-btn" id="btn-modal-close" title="关闭" data-i18n-title="modalCloseTitle">✕</button>
       </div>
 
       <div class="modal-body">
@@ -307,7 +307,7 @@
           <div class="modal-form-grid">
             <div class="poi-field">
               <label for="poi-name-detail" data-i18n="colName">名称</label>
-              <input type="text" id="poi-name-detail" class="input-field" placeholder="CP点名称">
+              <input type="text" id="poi-name-detail" class="input-field" placeholder="CP点名称" data-i18n-placeholder="placeholderCpNameInput">
             </div>
 
             <div class="poi-field">
@@ -317,7 +317,7 @@
 
             <div class="poi-field">
               <label for="poi-time-detail" data-i18n="colTime">抵达cp点总用时</label>
-              <input type="text" id="poi-time-detail" class="input-field" placeholder="用时 H:MM">
+              <input type="text" id="poi-time-detail" class="input-field" placeholder="用时 H:MM" data-i18n-placeholder="placeholderTimeInput">
             </div>
 
             <div class="poi-field">
@@ -327,7 +327,7 @@
 
             <div class="poi-field" style="grid-column: span 2;">
               <label for="poi-notes-detail" data-i18n="colNotes">备注 (支持回车多行)</label>
-              <textarea id="poi-notes-detail" class="input-field" placeholder="备注信息" style="height: 52px; resize: vertical;"></textarea>
+              <textarea id="poi-notes-detail" class="input-field" placeholder="备注信息" data-i18n-placeholder="placeholderNotesInput" style="height: 52px; resize: vertical;"></textarea>
             </div>
 
             <div class="poi-form-row inline" style="grid-column: span 2; margin: 4px 0;">
@@ -403,35 +403,35 @@
           <div class="poi-texts-grid-horizontal">
             <div class="poi-field">
               <label data-i18n="labelLeftBottom">左侧 - 下</label>
-              <input type="text" id="poi-txt-left-bottom" placeholder="无">
+              <input type="text" id="poi-txt-left-bottom" placeholder="无" data-i18n-placeholder="placeholderTextNone">
             </div>
             <div class="poi-field">
               <label data-i18n="labelLeftMiddle">左侧 - 中</label>
-              <input type="text" id="poi-txt-left-middle" placeholder="无">
+              <input type="text" id="poi-txt-left-middle" placeholder="无" data-i18n-placeholder="placeholderTextNone">
             </div>
             <div class="poi-field">
               <label data-i18n="labelLeftTop">左侧 - 上</label>
-              <input type="text" id="poi-txt-left-top" placeholder="无">
+              <input type="text" id="poi-txt-left-top" placeholder="无" data-i18n-placeholder="placeholderTextNone">
             </div>
             <div class="poi-field">
               <label data-i18n="labelRightBottom">右侧 - 下</label>
-              <input type="text" id="poi-txt-right-bottom" placeholder="无">
+              <input type="text" id="poi-txt-right-bottom" placeholder="无" data-i18n-placeholder="placeholderTextNone">
             </div>
             <div class="poi-field">
               <label data-i18n="labelRightMiddle">右侧 - 中</label>
-              <input type="text" id="poi-txt-right-middle" placeholder="无">
+              <input type="text" id="poi-txt-right-middle" placeholder="无" data-i18n-placeholder="placeholderTextNone">
             </div>
             <div class="poi-field">
               <label data-i18n="labelRightTop">右侧 - 上</label>
-              <input type="text" id="poi-txt-right-top" placeholder="无">
+              <input type="text" id="poi-txt-right-top" placeholder="无" data-i18n-placeholder="placeholderTextNone">
             </div>
           </div>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button class="btn" id="btn-modal-cancel">取消</button>
-        <button class="btn btn-primary" id="btn-modal-save">✓ 保存并应用</button>
+        <button class="btn" id="btn-modal-cancel" data-i18n="btnCancel">取消</button>
+        <button class="btn btn-primary" id="btn-modal-save" data-i18n="btnSaveApply">✓ 保存并应用</button>
       </div>
     </div>
   </div>
@@ -445,13 +445,13 @@
   <!-- ═══ Scripts ═══ -->
   <script src="js/leaflet.js"></script>
   <script src="js/leaflet-custom-headers.js"></script>
-  <script src="js/utils.js?v=7.2"></script>
-  <script src="js/trail-math.js?v=7.2"></script>
-  <script src="js/gpx-parser.js?v=7.2"></script>
-  <script src="js/trail-analysis.js?v=7.2"></script>
-  <script src="js/trail-map.js?v=7.2"></script>
-  <script src="js/profile.js?v=7.2"></script>
-  <script src="js/export.js?v=7.2"></script>
-  <script src="js/app.js?v=7.2"></script>
+  <script src="js/utils.js?v=7.3"></script>
+  <script src="js/trail-math.js?v=7.3"></script>
+  <script src="js/gpx-parser.js?v=7.3"></script>
+  <script src="js/trail-analysis.js?v=7.3"></script>
+  <script src="js/trail-map.js?v=7.3"></script>
+  <script src="js/profile.js?v=7.3"></script>
+  <script src="js/export.js?v=7.3"></script>
+  <script src="js/app.js?v=7.3"></script>
 </body>
 </html>
