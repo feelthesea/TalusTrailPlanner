@@ -113,13 +113,13 @@
     var onHoverCallback = options.onHover || null;
 
     fontSizes = fontSizes || {};
-    var fsTitle     = fontSizes.title || 16;
-    var fsCPName    = fontSizes.cpName || 14;
-    var fsCPElev    = fontSizes.cpElev || 12;
-    var fsCPTime    = fontSizes.cpTime || 14;
-    var fsCPNotes   = fontSizes.cpNotes || 12;
-    var fsSegment   = fontSizes.segment || 12;
-    var fsCumulDist = fontSizes.cumulDist || 12;
+    var fsTitle     = fontSizes.title || 18;
+    var fsCPName    = fontSizes.cpName || 20;
+    var fsCPElev    = fontSizes.cpElev || 11;
+    var fsCPTime    = fontSizes.cpTime || 20;
+    var fsCPNotes   = fontSizes.cpNotes || 22;
+    var fsSegment   = fontSizes.segment || 17;
+    var fsCumulDist = fontSizes.cumulDist || 17;
 
     cps = (cps || []).slice().sort(function (a, b) { return a.distance - b.distance; });
 
@@ -761,21 +761,21 @@
 
       svg.appendChild(el('text', {
         x: mx, y: Y.segLine1,
-        'text-anchor': 'middle', 'font-size': String(fontSize + 1), 'font-weight': '800',
+        'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '800',
         fill: C.segInfoText,
         style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
       }, stats.distance + ' km'));
 
       svg.appendChild(el('text', {
         x: mx, y: Y.segLine2,
-        'text-anchor': 'middle', 'font-size': String(fontSize - 1), 'font-weight': '700',
+        'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '700',
         fill: '#10b981',
         style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
       }, '▲ ' + stats.dPlus + 'm'));
 
       svg.appendChild(el('text', {
         x: mx, y: Y.segLine3,
-        'text-anchor': 'middle', 'font-size': String(fontSize - 1), 'font-weight': '700',
+        'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '700',
         fill: '#ef4444',
         style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
       }, '▼ ' + stats.dMinus + 'm'));
@@ -788,7 +788,7 @@
       var x = m.distToX(cp.distance);
       svg.appendChild(el('text', {
         x: x, y: Y.cumulBase,
-        'text-anchor': 'middle', 'font-size': String(fontSize + 1), 'font-weight': '700',
+        'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '700',
         fill: C.cumulText,
         style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
       }, cp.distance.toFixed(1)));

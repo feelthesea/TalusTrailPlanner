@@ -357,12 +357,12 @@
     segmentMode: 'waypoint',  // 'waypoint' | 'auto' | '1000' | '5000'
     activeSegmentIdx: -1,
     fontSizeTitle: 18,
-    fontSizeCPName: 14,
+    fontSizeCPName: 20,
     fontSizeCPElev: 11,
     fontSizeCPTime: 20,
-    fontSizeCPNotes: 18,
-    fontSizeSegment: 11,
-    fontSizeCumulDist: 12,
+    fontSizeCPNotes: 22,
+    fontSizeSegment: 17,
+    fontSizeCumulDist: 17,
     language: 'zh',
     checkpoints: []
   };
@@ -1340,12 +1340,12 @@
       elevationMode: "smooth",
       colorMode: "classic",
       fontSizeTitle: 18,
-      fontSizeCPName: 14,
+      fontSizeCPName: 20,
       fontSizeCPElev: 11,
       fontSizeCPTime: 20,
-      fontSizeCPNotes: 18,
-      fontSizeSegment: 11,
-      fontSizeCumulDist: 12,
+      fontSizeCPNotes: 22,
+      fontSizeSegment: 17,
+      fontSizeCumulDist: 17,
       language: state.language,
       startTime: "2026-08-28T06:00",
       checkpoints: [
