@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/leaflet.css">
-  <link rel="stylesheet" href="style.css?v=7.0">
+  <link rel="stylesheet" href="style.css?v=7.1">
 </head>
 <body>
 
@@ -245,7 +245,6 @@
                 <th data-i18n="segColDescent">下降</th>
                 <th data-i18n="segColAvgGrad">平均坡度</th>
                 <th data-i18n="segColMaxGrad">最大坡度</th>
-                <th data-i18n="segColEstTime">预估耗时</th>
               </tr>
             </thead>
             <tbody id="segment-tbody">
@@ -258,7 +257,7 @@
 
     <!-- ═══ 4. Section 4: Two-Column Editor Section (CP List Table + Details Panel) ═══ -->
     <div class="editor-container">
-      <!-- Left Column: CP List Table & Nutrition/Plan Summary -->
+      <!-- Left Column: CP List Table -->
       <section class="editor-left">
         <h2><span data-i18n="cpTableTitle">📍 CP 点 / 补给站 列表</span></h2>
         <div class="cp-table-wrap">
@@ -280,27 +279,6 @@
             <button class="btn" id="btn-add-cp">
               <span class="icon">＋</span> <span data-i18n="addCpBtn">添加 CP 点</span>
             </button>
-          </div>
-        </div>
-
-        <!-- Summary, Checks & Ravito Calculator Panels -->
-        <div class="summary-and-checks">
-          <!-- Summary Card -->
-          <div class="panel-card summary-card">
-            <h3 data-i18n="summaryTitle">📋 计划汇总</h3>
-            <div id="summary-content" class="summary-content"></div>
-          </div>
-          
-          <!-- Verification Card -->
-          <div class="panel-card checks-card">
-            <h3 data-i18n="verificationTitle">✓ 计划检查</h3>
-            <div id="checks-content" class="checks-content"></div>
-          </div>
-
-          <!-- Ravito Calculator Card -->
-          <div class="panel-card ravito-calc-card" style="grid-column: span 2;">
-            <h3 data-i18n="ravitoCalcTitle">📦 补给计算器</h3>
-            <div id="ravito-calc-content"></div>
           </div>
         </div>
       </section>
@@ -435,70 +413,6 @@
               </div>
             </div>
           </div>
-
-          <!-- COLUMN 5: Nutrition Strategy -->
-          <div class="poi-form-grid-horizontal" style="grid-column: span 2; margin-top: 10px; border-top: 1.5px dashed var(--border-subtle); padding-top: 12px;">
-            <h4 data-i18n="poiCol5Title" style="margin-bottom: 8px;">补给计划 (Nutrition Plan)</h4>
-            <div class="poi-form-grid-3" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
-              <div class="poi-field">
-                <label for="poi-water" data-i18n="labelWater">水分补充 (mL/h)</label>
-                <select id="poi-water" class="input-field">
-                  <option value="0">0 mL/h</option>
-                  <option value="200">200 mL/h</option>
-                  <option value="300">300 mL/h</option>
-                  <option value="400">400 mL/h</option>
-                  <option value="500">500 mL/h</option>
-                  <option value="600">600 mL/h</option>
-                  <option value="700">700 mL/h</option>
-                  <option value="800">800 mL/h</option>
-                  <option value="900">900 mL/h</option>
-                  <option value="1000">1000 mL/h</option>
-                </select>
-              </div>
-              <div class="poi-field">
-                <label for="poi-carbs" data-i18n="labelCarbs">碳水化合物 (g/h)</label>
-                <select id="poi-carbs" class="input-field">
-                  <option value="0">0 g/h</option>
-                  <option value="20">20 g/h</option>
-                  <option value="30">30 g/h</option>
-                  <option value="40">40 g/h</option>
-                  <option value="50">50 g/h</option>
-                  <option value="60">60 g/h</option>
-                  <option value="70">70 g/h</option>
-                  <option value="80">80 g/h</option>
-                  <option value="90">90 g/h</option>
-                  <option value="100">100 g/h</option>
-                </select>
-              </div>
-              <div class="poi-field">
-                <label for="poi-sodium" data-i18n="labelSodium">钠补充 (mg/L)</label>
-                <select id="poi-sodium" class="input-field">
-                  <option value="0">0 mg/L</option>
-                  <option value="200">200 mg/L</option>
-                  <option value="300">300 mg/L</option>
-                  <option value="400">400 mg/L</option>
-                  <option value="500">500 mg/L</option>
-                  <option value="600">600 mg/L</option>
-                  <option value="700">700 mg/L</option>
-                  <option value="800">800 mg/L</option>
-                  <option value="1000">1000 mg/L</option>
-                </select>
-              </div>
-              <div class="poi-field">
-                <label for="poi-caffeine" data-i18n="labelCaffeine">咖啡因 (mg)</label>
-                <select id="poi-caffeine" class="input-field">
-                  <option value="0">0 mg</option>
-                  <option value="20">20 mg</option>
-                  <option value="40">40 mg</option>
-                  <option value="50">50 mg</option>
-                  <option value="80">80 mg</option>
-                  <option value="100">100 mg</option>
-                  <option value="150">150 mg</option>
-                  <option value="200">200 mg</option>
-                </select>
-              </div>
-            </div>
-          </div>
         </div>
       </aside>
     </div>
@@ -510,14 +424,14 @@
   <!-- ═══ Scripts ═══ -->
   <script src="js/leaflet.js"></script>
   <script src="js/leaflet-custom-headers.js"></script>
-  <script src="js/utils.js?v=7.0"></script>
-  <script src="js/trail-math.js?v=7.0"></script>
-  <script src="js/gpx-parser.js?v=7.0"></script>
-  <script src="js/trail-analysis.js?v=7.0"></script>
-  <script src="js/trail-map.js?v=7.0"></script>
-  <script src="js/interactive-chart.js?v=7.0"></script>
-  <script src="js/profile.js?v=7.0"></script>
-  <script src="js/export.js?v=7.0"></script>
-  <script src="js/app.js?v=7.0"></script>
+  <script src="js/utils.js?v=7.1"></script>
+  <script src="js/trail-math.js?v=7.1"></script>
+  <script src="js/gpx-parser.js?v=7.1"></script>
+  <script src="js/trail-analysis.js?v=7.1"></script>
+  <script src="js/trail-map.js?v=7.1"></script>
+  <script src="js/interactive-chart.js?v=7.1"></script>
+  <script src="js/profile.js?v=7.1"></script>
+  <script src="js/export.js?v=7.1"></script>
+  <script src="js/app.js?v=7.1"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 /**
- * Talus - Trail Roadbook Generator & TrailScope — Main Application (v7.0)
+ * Talus - Trail Roadbook Generator & TrailScope — Main Application (v7.1)
  *
  * Wires together:
  *  - GPX / KML / KMZ Multi-format Parser
@@ -7,9 +7,9 @@
  *  - Interactive Leaflet Map with Multiple Tile Sources & GCJ-02 Support
  *  - Interactive Canvas Elevation Profile with LOD & Real-time Map Cursor Sync
  *  - Slope Gradient Distribution & Practical Technical Tips for Trail Running & Hiking
- *  - Multi-mode Segment Statistics Table (Waypoints / Auto Slope / Fixed Distance)
+ *  - Multi-mode Segment Statistics Table (Waypoints / Auto Slope / 1km / 5km)
  *  - SVG Roadbook Profile Generator & Multi-Ratio High-Res Image Exporter
- *  - Checkpoint List Editor, Nutrition Strategy & Plan Verification
+ *  - Checkpoint List Editor & Details Visual Customization
  *  - Dynamic Chinese / English i18n Localization
  */
 (function () {
@@ -67,7 +67,6 @@
       segColDescent: "下降",
       segColAvgGrad: "平均坡度",
       segColMaxGrad: "最大坡度",
-      segColEstTime: "预估耗时",
 
       // Stats Metric Labels
       statTotalDistance: "总里程",
@@ -122,7 +121,6 @@
       labelRightBottom: "右侧 - 下",
       labelRightMiddle: "右侧 - 中",
       labelRightTop: "右侧 - 上",
-      poiCol5Title: "补给计划 (Nutrition Plan)",
 
       iconStart: "🟢 起点",
       iconFinish: "🏁 终点",
@@ -154,56 +152,8 @@
       placeholderTimeInput: "用时 H:MM",
       placeholderTextNone: "无",
 
-      // Summary & Checklist Keys
-      summaryTitle: "📋 计划汇总",
-      verificationTitle: "✓ 计划检查",
-      labelCourse: "路线",
-      labelTemps: "用时",
-      labelPlan: "计划",
-      labelOptimiste: "乐观",
-      labelPessimiste: "悲观",
-      labelArriveeEstime: "预计到达",
-      labelWaterAvg: "平均水分",
-      labelCarbsAvg: "平均碳水",
-      labelSodiumAvg: "平均钠",
-      labelCaffeineAvg: "平均咖啡因",
-      labelWaterTotal: "总水分",
-      labelCarbsTotal: "总碳水",
-      labelSodiumTotal: "总钠",
-      labelCaffeineTotal: "总咖啡因",
-      labelSugarCubeEq: "块方糖",
-      labelWater: "水分补充 (mL/h)",
-      labelCarbs: "碳水化合物 (g/h)",
-      labelSodium: "电解质钠 (mg/L)",
-      labelCaffeine: "咖啡因 (mg)",
       labelStopDuration: "⏸️ 停留时间 (分钟)",
-      labelPassage: "通过",
-      ravitoCalcTitle: "📦 补给计算器",
-      ravitoColName: "补给站",
-      ravitoColTime: "分段",
-      ravitoColWater: "水 (mL)",
-      ravitoColCarbs: "碳水 (g)",
-      ravitoColSodium: "钠 (mg)",
-      ravitoColCaff: "咖啡因 (mg)",
-      ravitoTotal: "总计",
-
-      checkDistOk: "检查点距离顺序递增正常",
-      checkDistErr: "警告：检查点距离未按递增顺序排列",
-      checkFinishOk: "终点距离与路线全长匹配",
-      checkFinishWarn: "提示：设定的终点距离与 GPX 全长不完全匹配 (相差较远)",
-      checkWaterOk: "平均水分摄入适中 (400-800 mL/h)",
-      checkWaterLow: "提示：水分补充偏低 (<400 mL/h)，可能脱水",
-      checkWaterHigh: "提示：水分补充过高 (>800 mL/h)，增加胃肠负担",
-      checkCarbsOk: "平均碳水摄入达标 (30-100 g/h)",
-      checkCarbsLow: "提示：碳水补充偏低 (<30 g/h)，可能能量不足(Bonk)",
-      checkCarbsHigh: "提示：碳水补充过高 (>100 g/h)，可能引起肠胃不适",
-      checkSodiumOk: "平均电解质/钠浓度合理 (300-700 mg/L)",
-      checkSodiumZero: "警告：未配置任何钠补充，容易引起抽筋",
-      checkSodiumLow: "提示：平均钠浓度偏低 (<300 mg/L)，容易发生低钠血症",
-      checkSodiumHigh: "提示：平均钠浓度偏高 (>700 mg/L)，可能会增加口渴感",
-      checkCaffOk: "总咖啡因摄入安全",
-      checkCaffHigh: "警告：总咖啡因摄入偏高 (>400 mg)，注意心慌/神经过敏风险",
-      checkGpxMissing: "提示：上传 GPX/KML/KMZ 文件后可自动检查越野爬升"
+      labelPassage: "通过"
     },
     en: {
       pageTitle: "🏔️ Talus - Trail Roadbook Generator",
@@ -253,7 +203,6 @@
       segColDescent: "Loss",
       segColAvgGrad: "Avg Grade",
       segColMaxGrad: "Max Grade",
-      segColEstTime: "Est. Time",
 
       // Stats Metric Labels
       statTotalDistance: "Total Distance",
@@ -308,7 +257,6 @@
       labelRightBottom: "Right - Bottom",
       labelRightMiddle: "Right - Middle",
       labelRightTop: "Right - Top",
-      poiCol5Title: "Nutrition Strategy",
 
       iconStart: "🟢 Start",
       iconFinish: "🏁 Finish",
@@ -340,56 +288,8 @@
       placeholderTimeInput: "Duration H:MM",
       placeholderTextNone: "None",
 
-      // Summary & Checklist Keys
-      summaryTitle: "📋 Plan Summary",
-      verificationTitle: "✓ Plan Verification",
-      labelCourse: "Course",
-      labelTemps: "Duration",
-      labelPlan: "Target",
-      labelOptimiste: "Optimistic",
-      labelPessimiste: "Pessimistic",
-      labelArriveeEstime: "Estimated Arrival",
-      labelWaterAvg: "Avg Water",
-      labelCarbsAvg: "Avg Carbs",
-      labelSodiumAvg: "Avg Sodium",
-      labelCaffeineAvg: "Avg Caffeine",
-      labelWaterTotal: "Total Water",
-      labelCarbsTotal: "Total Carbs",
-      labelSodiumTotal: "Total Sodium",
-      labelCaffeineTotal: "Total Caffeine",
-      labelSugarCubeEq: "sugar cubes",
-      labelWater: "Water Intake (mL/h)",
-      labelCarbs: "Carbohydrates (g/h)",
-      labelSodium: "Sodium Conc. (mg/L)",
-      labelCaffeine: "Caffeine (mg)",
       labelStopDuration: "⏸️ Stop Duration (min)",
-      labelPassage: "Passage",
-      ravitoCalcTitle: "📦 Ravito Calculator",
-      ravitoColName: "Aid Station",
-      ravitoColTime: "Segment",
-      ravitoColWater: "Water (mL)",
-      ravitoColCarbs: "Carbs (g)",
-      ravitoColSodium: "Sodium (mg)",
-      ravitoColCaff: "Caffeine (mg)",
-      ravitoTotal: "Total",
-
-      checkDistOk: "Checkpoint distances are strictly increasing",
-      checkDistErr: "Warning: Checkpoint distances are not strictly increasing",
-      checkFinishOk: "Finish distance matches track total length",
-      checkFinishWarn: "Tip: Finish distance does not match track total length",
-      checkWaterOk: "Average hydration rate is balanced (400-800 mL/h)",
-      checkWaterLow: "Tip: Hydration is low (<400 mL/h), risk of dehydration",
-      checkWaterHigh: "Tip: Hydration is high (>800 mL/h), risk of stomach distress",
-      checkCarbsOk: "Carbohydrate intake is on target (30-100 g/h)",
-      checkCarbsLow: "Tip: Carbs are low (<30 g/h), risk of bonking",
-      checkCarbsHigh: "Tip: Carbs are high (>100 g/h), risk of GI distress",
-      checkSodiumOk: "Sodium concentration is balanced (300-700 mg/L)",
-      checkSodiumZero: "Warning: No sodium replacement configured, risk of cramping",
-      checkSodiumLow: "Tip: Sodium concentration is low (<300 mg/L)",
-      checkSodiumHigh: "Tip: Sodium concentration is high (>700 mg/L)",
-      checkCaffOk: "Total caffeine is within safe limits",
-      checkCaffHigh: "Warning: Total caffeine is high (>400 mg)",
-      checkGpxMissing: "Tip: Upload a track file to automatically check climb data"
+      labelPassage: "Passage"
     }
   };
 
@@ -402,13 +302,13 @@
 
   // ── Global State ────────────────────────────────────────────────────
   var state = {
-    trackData: null,          // enriched track object from parser
-    trackpoints: null,        // points array
+    trackData: null,
+    trackpoints: null,
     trackFileName: '',
     raceName: '',
     startTime: '周五 18:00',
     activeCPIndex: 0,
-    elevationMode: 'smooth',  // 'smooth' (4m threshold) | 'raw'
+    elevationMode: 'smooth',  // 'smooth' | 'raw'
     colorMode: 'gradient',    // 'gradient' | 'elevation'
     segmentMode: 'waypoint',  // 'waypoint' | 'auto' | '1000' | '5000'
     activeSegmentIdx: -1,
@@ -423,7 +323,6 @@
     checkpoints: []
   };
 
-  // Expose state globally for modules
   TR.state = state;
 
   // ── DOM References ──────────────────────────────────────────────────
@@ -460,7 +359,7 @@
     dom.gradientDistContent = document.getElementById('gradient-distribution-content');
     dom.segmentTbody      = document.getElementById('segment-tbody');
 
-    // POI & Summary references
+    // POI references
     dom.poiPanel          = document.getElementById('poi-panel');
     dom.poiIntermediate   = document.getElementById('poi-intermediate');
     dom.poiPosition       = document.getElementById('poi-position');
@@ -469,13 +368,6 @@
     dom.poiNameDetail     = document.getElementById('poi-name-detail');
     dom.poiTimeDetail     = document.getElementById('poi-time-detail');
     dom.poiNotesDetail    = document.getElementById('poi-notes-detail');
-    dom.poiWater          = document.getElementById('poi-water');
-    dom.poiCarbs          = document.getElementById('poi-carbs');
-    dom.poiSodium         = document.getElementById('poi-sodium');
-    dom.poiCaffeine       = document.getElementById('poi-caffeine');
-    dom.summaryContent    = document.getElementById('summary-content');
-    dom.checksContent     = document.getElementById('checks-content');
-    dom.ravitoCalcContent = document.getElementById('ravito-calc-content');
 
     // Font Sizes
     dom.fsTitle           = document.getElementById('fs-title');
@@ -527,17 +419,14 @@
 
   // ── Event Bindings ──────────────────────────────────────────────────
   function bindEvents() {
-    // Multi-format Upload (GPX / KML / KMZ)
     dom.btnGpx.addEventListener('click', function () { dom.inputGpx.click(); });
     dom.inputGpx.addEventListener('change', handleTrackUpload);
 
-    // Race name
     dom.inputName.addEventListener('input', function () {
       state.raceName = this.value;
       scheduleRender();
     });
 
-    // Start time
     if (dom.inputStartTime) {
       dom.inputStartTime.addEventListener('change', function () {
         state.startTime = this.value;
@@ -545,11 +434,9 @@
       });
     }
 
-    // Elevation mode switches (Raw vs Smooth 4m)
     dom.btnElevRaw.addEventListener('click', function () { setElevationMode('raw'); });
     dom.btnElevSmooth.addEventListener('click', function () { setElevationMode('smooth'); });
 
-    // Map & Chart Explorer events
     if (dom.selectMapSource) {
       dom.selectMapSource.addEventListener('change', function () {
         TR.trailMap.changeMapSource(this.value);
@@ -570,7 +457,6 @@
       });
     }
 
-    // Segment mode toggle buttons
     document.querySelectorAll('.seg-mode-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
         document.querySelectorAll('.seg-mode-btn').forEach(function (b) { b.classList.remove('active'); });
@@ -580,19 +466,16 @@
       });
     });
 
-    // JSON import / export / template
     dom.btnImport.addEventListener('click', function () { dom.inputJson.click(); });
     dom.inputJson.addEventListener('change', handleJsonImport);
     dom.btnTemplateJson.addEventListener('click', handleJsonTemplateDownload);
     dom.btnExportJson.addEventListener('click', handleJsonExport);
 
-    // Language selector
     dom.selectLang.addEventListener('change', function () {
       state.language = this.value;
       applyLanguage();
     });
 
-    // Image export dropdown
     dom.btnExportImg.addEventListener('click', function (e) {
       e.stopPropagation();
       dom.exportMenu.classList.toggle('open');
@@ -607,10 +490,7 @@
       dom.exportMenu.classList.remove('open');
     });
 
-    // Add Checkpoint
     dom.btnAddCp.addEventListener('click', handleAddCP);
-
-    // Aspect ratio change
     dom.exportRatio.addEventListener('change', scheduleRender);
   }
 
@@ -626,14 +506,12 @@
 
       var totalDist = trackData.totalDistance;
 
-      // Auto-set finish distance
       state.checkpoints.forEach(function (cp) {
         if (cp.icon === 'finish' && cp.distance === 0) {
           cp.distance = Math.round(totalDist * 100) / 100;
         }
       });
 
-      // Merge waypoints from file into CP list if waypoints exist and CPs are just start/finish
       if (trackData.waypoints && trackData.waypoints.length > 0 && state.checkpoints.length <= 2) {
         trackData.waypoints.forEach(function (wp) {
           if (wp.distance > 0.5 && wp.distance < totalDist - 0.5) {
@@ -690,7 +568,6 @@
     renderTrailSummaryStats();
     renderGradientDistribution();
     renderSegmentTable();
-    updateSummaryAndChecks();
   }
 
   // ── 1. Trail Summary Stats Cards ────────────────────────────────────
@@ -728,7 +605,7 @@
 
     var isZH = (state.language === 'zh');
 
-    function buildSection(title, list, isUp) {
+    function buildSection(title, list) {
       var barHtml = '<div class="gradient-bar-stack">';
       list.forEach(function (l) {
         if (l.percentage > 0) {
@@ -760,8 +637,8 @@
     var downTitle = isZH ? '🔵 下坡坡度分级 (Downhill)' : '🔵 Downhill Grade Breakdown';
 
     dom.gradientDistContent.innerHTML =
-      buildSection(upTitle, dist.uphill, true) +
-      buildSection(downTitle, dist.downhill, false);
+      buildSection(upTitle, dist.uphill) +
+      buildSection(downTitle, dist.downhill);
   }
 
   // ── 3. Multi-Mode Segment Table ─────────────────────────────────────
@@ -779,7 +656,6 @@
     segments.forEach(function (seg, idx) {
       var isSelected = (state.activeSegmentIdx === idx);
       var nameStr = seg.name ? (seg.name + (seg.endName ? (' → ' + seg.endName) : '')) : ('Seg ' + (idx + 1));
-      var timeStr = TR.utils.formatTime(Math.round(seg.time * 60));
 
       html += '<tr class="segment-row' + (isSelected ? ' active-seg-row' : '') + '" data-idx="' + idx + '">' +
         '<td>' + (idx + 1) + '</td>' +
@@ -788,7 +664,6 @@
         '<td style="color:var(--danger)">-' + Math.round(seg.descent) + 'm</td>' +
         '<td>' + seg.uphillAvg.toFixed(1) + '%</td>' +
         '<td>+' + seg.maxUphillGrad.toFixed(1) + '%</td>' +
-        '<td>' + timeStr + '</td>' +
         '</tr>';
     });
 
@@ -826,10 +701,6 @@
     if (cp.arrivalTime === undefined) cp.arrivalTime = '';
     if (cp.segmentTime === undefined) cp.segmentTime = '';
     if (cp.stopDuration === undefined) cp.stopDuration = 0;
-    if (cp.water === undefined) cp.water = 0;
-    if (cp.carbs === undefined) cp.carbs = 0;
-    if (cp.sodium === undefined) cp.sodium = 0;
-    if (cp.caffeine === undefined) cp.caffeine = 0;
     return cp;
   }
 
@@ -950,11 +821,6 @@
         }
         var startInfo = parseStartTime(state.startTime);
         var passageStr = formatArrivalTime(startInfo, cumulMins, lang);
-
-        var water = cpCurr.water || 0;
-        var carbs = cpCurr.carbs || 0;
-        var sodium = cpCurr.sodium || 0;
-        var caffeine = cpCurr.caffeine || 0;
         var stopStr = (cpCurr.stopDuration > 0) ? ' · ⏸ ' + cpCurr.stopDuration + 'min' : '';
 
         detailsHtml =
@@ -964,13 +830,6 @@
           '    <span class="gain">+' + Math.round(segDPlus) + 'm</span> · ' +
           '    <span class="loss">-' + Math.round(segDMinus) + 'm</span> · ' +
           '    <span>⏱ ' + targetTimeStr + '</span>' + stopStr +
-          '  </div>' +
-          '  <div class="seg-nut-row">' +
-          '    <span class="nut-label">Nutrition</span>' +
-          '    <span class="nut-val nut-water">' + water + ' mL/h</span>' +
-          '    <span class="nut-val nut-carbs">' + carbs + ' g/h</span>' +
-          '    <span class="nut-val nut-sodium">' + sodium + ' mg/L</span>' +
-          '    <span class="nut-val nut-caff">' + caffeine + ' mg</span>' +
           '  </div>' +
           '  <div class="seg-passage">' + T[lang].labelPassage + ' ' + passageStr + '</div>' +
           '</td>';
@@ -1209,21 +1068,6 @@
         });
       }
     });
-
-    ['poi-water', 'poi-carbs', 'poi-sodium', 'poi-caffeine'].forEach(function (id) {
-      var el = document.getElementById(id);
-      if (el) {
-        var prop = id.replace('poi-', '');
-        el.addEventListener('change', function () {
-          var cp = state.checkpoints[state.activeCPIndex];
-          if (cp) {
-            cp[prop] = parseFloat(this.value) || 0;
-            renderCPTable();
-            scheduleRender();
-          }
-        });
-      }
-    });
   }
 
   function loadActiveCPDetails() {
@@ -1244,11 +1088,6 @@
       dom.poiTimeDetail.disabled = (state.activeCPIndex === 0);
     }
     if (dom.poiNotesDetail) dom.poiNotesDetail.value = cp.notes || '';
-
-    syncSelectValue(dom.poiWater, cp.water || 0);
-    syncSelectValue(dom.poiCarbs, cp.carbs || 0);
-    syncSelectValue(dom.poiSodium, cp.sodium || 0);
-    syncSelectValue(dom.poiCaffeine, cp.caffeine || 0);
 
     if (dom.fsTitle) dom.fsTitle.value = state.fontSizeTitle;
     if (dom.fsCPName) dom.fsCPName.value = state.fontSizeCPName;
@@ -1272,27 +1111,6 @@
     dom.poiTxtRightBottom.value = cp.texts.rightBottom || '';
     dom.poiTxtRightMiddle.value = cp.texts.rightMiddle || '';
     dom.poiTxtRightTop.value = cp.texts.rightTop || '';
-  }
-
-  function syncSelectValue(selectEl, value) {
-    if (!selectEl) return;
-    var valStr = String(value);
-    var exists = false;
-    for (var i = 0; i < selectEl.options.length; i++) {
-      if (selectEl.options[i].value === valStr) { exists = true; break; }
-    }
-    if (!exists && valStr && valStr !== '0' && valStr !== 'undefined') {
-      var opt = document.createElement('option');
-      opt.value = valStr;
-      var suffix = '';
-      if (selectEl.id === 'poi-water') suffix = ' mL/h';
-      else if (selectEl.id === 'poi-carbs') suffix = ' g/h';
-      else if (selectEl.id === 'poi-sodium') suffix = ' mg/L';
-      else if (selectEl.id === 'poi-caffeine') suffix = ' mg';
-      opt.textContent = valStr + suffix;
-      selectEl.appendChild(opt);
-    }
-    selectEl.value = valStr;
   }
 
   function parseStartTime(str) {
@@ -1327,168 +1145,8 @@
     return dayStr + ' ' + (hour < 10 ? '0' : '') + hour + ':' + (min < 10 ? '0' : '') + min;
   }
 
-  function updateSummaryAndChecks() {
-    if (!dom.summaryContent || !dom.checksContent) return;
-    var lang = state.language;
-    var dict = T[lang];
-
-    var totalDist = 0, totalDPlus = 0, totalDMinus = 0;
-    if (state.trackData) {
-      totalDist = state.trackData.totalDistance;
-      totalDPlus = state.trackData.totalAscent;
-      totalDMinus = state.trackData.totalDescent;
-    } else if (state.checkpoints.length > 0) {
-      totalDist = state.checkpoints[state.checkpoints.length - 1].distance;
-    }
-
-    var totalTargetMinutes = 0, totalStopMinutes = 0;
-    state.checkpoints.forEach(function (cp, idx) {
-      if (idx > 0) {
-        totalTargetMinutes += TR.utils.parseTime(cp.segmentTime || '');
-        totalStopMinutes += (cp.stopDuration || 0);
-      }
-    });
-    totalTargetMinutes += totalStopMinutes;
-
-    var targetTimeStr = TR.utils.formatTime(totalTargetMinutes);
-    var optMins = Math.round(totalTargetMinutes * 0.95);
-    var pesMins = Math.round(totalTargetMinutes * 1.08);
-
-    var startInfo = parseStartTime(state.startTime);
-    var arrivalStr = formatArrivalTime(startInfo, totalTargetMinutes, lang);
-    var optArrivalStr = formatArrivalTime(startInfo, optMins, lang);
-    var pesArrivalStr = formatArrivalTime(startInfo, pesMins, lang);
-
-    var totalWater = 0, totalCarbs = 0, totalSodium = 0, totalCaffeine = 0;
-    state.checkpoints.forEach(function (cp, idx) {
-      if (idx > 0) {
-        var segHours = TR.utils.parseTime(cp.segmentTime || '') / 60;
-        var segWater = (parseFloat(cp.water) || 0) * segHours;
-        totalWater += segWater;
-        totalCarbs += (parseFloat(cp.carbs) || 0) * segHours;
-        totalCaffeine += (parseFloat(cp.caffeine) || 0);
-        totalSodium += segWater * ((parseFloat(cp.sodium) || 0) / 1000);
-      }
-    });
-
-    var totalHours = totalTargetMinutes / 60;
-    var avgWater = totalHours > 0 ? Math.round(totalWater / totalHours) : 0;
-    var avgCarbs = totalHours > 0 ? (totalCarbs / totalHours).toFixed(1) : '0.0';
-    var avgCaffeine = totalHours > 0 ? (totalCaffeine / totalHours).toFixed(1) : '0.0';
-    var avgSodium = totalWater > 0 ? Math.round((totalSodium * 1000) / totalWater) : 0;
-    var sugarCubes = Math.round(totalCarbs / 5);
-
-    var summaryHtml =
-      '<div class="summary-group">' +
-      '  <div class="summary-group-title">' + dict.labelCourse + '</div>' +
-      '  <div class="summary-row"><span class="summary-label">Distance</span><span class="summary-val">' + totalDist.toFixed(1) + ' km</span></div>' +
-      '  <div class="summary-row"><span class="summary-label">Gain / Loss</span><span class="summary-val"><span style="color:var(--success)">+' + Math.round(totalDPlus) + 'm</span> / <span style="color:var(--danger)">-' + Math.round(totalDMinus) + 'm</span></span></div>' +
-      '</div>' +
-      '<div class="summary-group">' +
-      '  <div class="summary-group-title">' + dict.labelTemps + '</div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelPlan + '</span><span class="summary-val">' + targetTimeStr + '</span></div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelOptimiste + '</span><span class="summary-val">' + TR.utils.formatTime(optMins) + '</span></div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelPessimiste + '</span><span class="summary-val">' + TR.utils.formatTime(pesMins) + '</span></div>' +
-      '</div>' +
-      '<div class="summary-group">' +
-      '  <div class="summary-group-title">' + dict.labelArriveeEstime + '</div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelPlan + '</span><span class="summary-val">' + arrivalStr + '</span></div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelOptimiste + '</span><span class="summary-val">' + optArrivalStr + '</span></div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelPessimiste + '</span><span class="summary-val">' + pesArrivalStr + '</span></div>' +
-      '</div>' +
-      '<div class="summary-group">' +
-      '  <div class="summary-group-title">' + (lang === 'zh' ? '平均补给' : 'Nutrition (Avg)') + '</div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelWaterAvg + '</span><span class="summary-val">' + avgWater + ' mL/h</span></div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelCarbsAvg + '</span><span class="summary-val">' + avgCarbs + ' g/h</span></div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelSodiumAvg + '</span><span class="summary-val">' + avgSodium + ' mg/L</span></div>' +
-      '</div>' +
-      '<div class="summary-group">' +
-      '  <div class="summary-group-title">' + (lang === 'zh' ? '累计补给' : 'Nutrition (Total)') + '</div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelWaterTotal + '</span><span class="summary-val">' + (totalWater/1000).toFixed(1) + ' L</span></div>' +
-      '  <div class="summary-row"><span class="summary-label">' + dict.labelCarbsTotal + '</span><span class="summary-val">' + Math.round(totalCarbs) + ' g</span></div>' +
-      '</div>';
-    dom.summaryContent.innerHTML = summaryHtml;
-
-    var checks = [];
-    var distOk = true;
-    for (var i = 1; i < state.checkpoints.length; i++) {
-      if (state.checkpoints[i].distance < state.checkpoints[i - 1].distance) { distOk = false; break; }
-    }
-    checks.push({ status: distOk ? 'ok' : 'danger', text: distOk ? dict.checkDistOk : dict.checkDistErr });
-
-    if (state.trackData) {
-      var lastCpDist = state.checkpoints[state.checkpoints.length - 1].distance;
-      var match = Math.abs(lastCpDist - state.trackData.totalDistance) < 1.0;
-      checks.push({ status: match ? 'ok' : 'warning', text: match ? dict.checkFinishOk : dict.checkFinishWarn });
-    }
-
-    if (avgWater >= 400 && avgWater <= 800) checks.push({ status: 'ok', text: dict.checkWaterOk });
-    else if (avgWater < 400) checks.push({ status: 'warning', text: dict.checkWaterLow });
-    else checks.push({ status: 'warning', text: dict.checkWaterHigh });
-
-    if (parseFloat(avgCarbs) >= 30 && parseFloat(avgCarbs) <= 100) checks.push({ status: 'ok', text: dict.checkCarbsOk });
-    else if (parseFloat(avgCarbs) < 30) checks.push({ status: 'warning', text: dict.checkCarbsLow });
-
-    var checksHtml = '';
-    checks.forEach(function (c) {
-      var icon = (c.status === 'ok') ? '🟢' : ((c.status === 'warning') ? '🟡' : '🔴');
-      checksHtml += '<div class="check-item"><span class="check-icon">' + icon + '</span><span class="check-text">' + c.text + '</span></div>';
-    });
-    dom.checksContent.innerHTML = checksHtml;
-
-    if (dom.ravitoCalcContent) {
-      var ravitoHtml = '<table class="ravito-table"><thead><tr>' +
-        '<th>' + dict.ravitoColName + '</th>' +
-        '<th>' + dict.ravitoColTime + '</th>' +
-        '<th>' + dict.ravitoColWater + '</th>' +
-        '<th>' + dict.ravitoColCarbs + '</th>' +
-        '<th>' + dict.ravitoColSodium + '</th>' +
-        '<th>' + dict.ravitoColCaff + '</th>' +
-        '</tr></thead><tbody>';
-
-      var rvTotalWater = 0, rvTotalCarbs = 0, rvTotalSodium = 0, rvTotalCaff = 0, rvTotalTime = 0;
-      state.checkpoints.forEach(function (cp, idx) {
-        if (idx > 0) {
-          var segMins = TR.utils.parseTime(cp.segmentTime || '');
-          var segH = segMins / 60;
-          rvTotalTime += segMins;
-          var sWater = Math.round((cp.water || 0) * segH);
-          var sCarbs = Math.round((cp.carbs || 0) * segH);
-          var sSodium = Math.round(sWater * ((cp.sodium || 0) / 1000));
-          var sCaff = Math.round(cp.caffeine || 0);
-
-          rvTotalWater += sWater;
-          rvTotalCarbs += sCarbs;
-          rvTotalSodium += sSodium;
-          rvTotalCaff += sCaff;
-
-          ravitoHtml += '<tr>' +
-            '<td>' + (cp.name || 'CP' + idx) + '</td>' +
-            '<td>' + TR.utils.formatTime(segMins) + '</td>' +
-            '<td class="nut-water">' + sWater + '</td>' +
-            '<td class="nut-carbs">' + sCarbs + '</td>' +
-            '<td class="nut-sodium">' + sSodium + '</td>' +
-            '<td class="nut-caff">' + sCaff + '</td>' +
-            '</tr>';
-        }
-      });
-
-      ravitoHtml += '<tr>' +
-        '<td>' + dict.ravitoTotal + '</td>' +
-        '<td>' + TR.utils.formatTime(rvTotalTime) + '</td>' +
-        '<td class="nut-water">' + rvTotalWater + '</td>' +
-        '<td class="nut-carbs">' + rvTotalCarbs + '</td>' +
-        '<td class="nut-sodium">' + rvTotalSodium + '</td>' +
-        '<td class="nut-caff">' + rvTotalCaff + '</td>' +
-        '</tr></tbody></table>';
-
-      dom.ravitoCalcContent.innerHTML = ravitoHtml;
-    }
-  }
-
   var renderTimer = null;
   function scheduleRender() {
-    updateSummaryAndChecks();
     if (renderTimer) clearTimeout(renderTimer);
     renderTimer = setTimeout(renderProfile, 120);
   }
@@ -1593,7 +1251,7 @@
       startTime: isZH ? "周五 06:00" : "Fri 06:00",
       checkpoints: [
         { name: isZH ? "起点" : "Start", distance: 0.0, arrivalTime: "0:00", segmentTime: "0:00", icon: "start" },
-        { name: "CP1", distance: 15.0, arrivalTime: "1:45", segmentTime: "1:45", icon: "classic", water: 500, carbs: 45 },
+        { name: "CP1", distance: 15.0, arrivalTime: "1:45", segmentTime: "1:45", icon: "classic" },
         { name: isZH ? "终点" : "Finish", distance: 100.0, arrivalTime: "14:00", segmentTime: "12:15", icon: "finish" }
       ]
     };
@@ -1676,7 +1334,6 @@
     }
   }
 
-  // Auto initialize on DOMContentLoaded
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {

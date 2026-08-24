@@ -890,57 +890,6 @@ table.cp-table {
   resize: vertical;
 }
 
-/* ── Summary & Verification Panels ───────────────────────────── */
-.summary-and-checks {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-top: 16px;
-}
-.summary-card, .checks-card, .ravito-calc-card {
-  padding: 14px 16px;
-}
-.summary-card h3, .checks-card h3, .ravito-calc-card h3 {
-  font-family: var(--font-display);
-  font-size: 0.95rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0 0 10px 0;
-  color: var(--text-primary);
-}
-.summary-group-title {
-  font-family: var(--font-display);
-  font-size: 0.82rem;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
-  font-weight: 700;
-  border-bottom: 1px dashed rgba(31,36,34,0.06);
-  padding-bottom: 2px;
-}
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 3px 0;
-}
-.summary-label { font-size: 0.8rem; color: var(--text-secondary); }
-.summary-val { font-family: var(--font-mono); font-weight: 700; font-size: 0.9rem; color: var(--text-primary); }
-
-.check-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 5px 0;
-  font-size: 0.8rem;
-  border-bottom: 1px dashed rgba(31,36,34,0.04);
-}
-.check-item:last-child { border-bottom: none; }
-.check-icon { font-size: 0.85rem; }
-.check-text { flex: 1; color: var(--text-secondary); }
-
 /* ── Toast ───────────────────────────────────────────────────── */
 .toast {
   position: fixed;
@@ -1045,7 +994,6 @@ table.cp-table {
   .editor-container { flex-direction: column; }
   .map-layout-split { grid-template-columns: 1fr; }
   .stats-and-segments-grid { grid-template-columns: 1fr; }
-  .summary-and-checks { grid-template-columns: 1fr; }
   .trail-stat-cards { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 768px) {
