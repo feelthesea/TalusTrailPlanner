@@ -87,7 +87,9 @@
 
       var eleNode = pt.querySelector('ele');
       var ele = eleNode ? parseFloat(eleNode.textContent) : null;
-      rawPoints.push({ lat: lat, lon: lon, ele: Number.isFinite(ele) ? ele : null });
+      var timeNode = pt.querySelector('time');
+      var time = timeNode ? timeNode.textContent.trim() : null;
+      rawPoints.push({ lat: lat, lon: lon, ele: Number.isFinite(ele) ? ele : null, time: time });
     }
 
     // Extract waypoints <wpt>
@@ -259,6 +261,7 @@
         lon: curr.lon,
         elevation: curr.ele,
         ele: curr.ele,
+        time: curr.time || null,
         distance: totalDistance,
         horizontalDistance: totalHorizontalDistance,
         gradient: grad,
@@ -327,6 +330,7 @@
     return {
       points: points,
       waypoints: matchedWaypoints,
+      startTime: (points[0] && points[0].time) ? points[0].time : null,
       totalDistance: totalDistance,
       totalHorizontalDistance: totalHorizontalDistance,
       totalAscent: elevTotals.ascent,

@@ -330,13 +330,27 @@
     return 'en';
   }
 
+  function getDefaultStartDatetime() {
+    var now = new Date();
+    var day = now.getDay();
+    var diff = (6 - day + 7) % 7; // Default to upcoming Saturday (or today if Sat)
+    if (diff === 0 && now.getHours() >= 12) diff = 7;
+    var target = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diff, 6, 0, 0);
+    var y = target.getFullYear();
+    var m = target.getMonth() + 1;
+    var d = target.getDate();
+    var hh = target.getHours();
+    var mm = target.getMinutes();
+    return y + '-' + (m < 10 ? '0' : '') + m + '-' + (d < 10 ? '0' : '') + d + 'T' + (hh < 10 ? '0' : '') + hh + ':' + (mm < 10 ? '0' : '') + mm;
+  }
+
   // ── Global Application State ────────────────────────────────────────
   var state = {
     trackData: null,
     trackpoints: null,
     trackFileName: '',
     raceName: '',
-    startTime: '周五 18:00',
+    startTime: getDefaultStartDatetime(),
     activeCPIndex: 0,
     elevationMode: 'smooth',  // 'smooth' | 'raw'
     colorMode: 'classic',     // 'classic' | 'gradient' | 'elevation'
@@ -444,7 +458,9 @@
       ];
     }
 
-    populateStartTimeOptions('周五 18:00');
+    if (dom.inputStartTime) {
+      dom.inputStartTime.value = state.startTime;
+    }
     normalizeAllCPs();
     bindEvents();
     bindModalEvents();
@@ -464,6 +480,7 @@
     if (dom.inputStartTime) {
       dom.inputStartTime.addEventListener('change', function () {
         state.startTime = this.value;
+        renderCPTable();
         scheduleRender();
       });
     }
@@ -559,6 +576,21 @@
     TR.gpxParser.parseFile(file, state.elevationMode).then(function (trackData) {
       state.trackData = trackData;
       state.trackpoints = trackData.points;
+
+      // Auto-detect race start time from track if available
+      if (trackData.startTime) {
+        var d = new Date(trackData.startTime);
+        if (!isNaN(d.getTime())) {
+          var y = d.getFullYear();
+          var m = d.getMonth() + 1;
+          var day = d.getDate();
+          var hh = d.getHours();
+          var mm = d.getMinutes();
+          var iso = y + '-' + (m < 10 ? '0' : '') + m + '-' + (day < 10 ? '0' : '') + day + 'T' + (hh < 10 ? '0' : '') + hh + ':' + (mm < 10 ? '0' : '') + mm;
+          state.startTime = iso;
+          if (dom.inputStartTime) dom.inputStartTime.value = iso;
+        }
+      }
 
       // Auto-detect base map layer: if outside China, default to OpenStreetMap ('osm')
       var inChina = TR.trailMath.isTrackInChina(trackData.points);
@@ -1163,35 +1195,69 @@
   }
 
   function parseStartTime(str) {
-    str = (str || '周五 18:00').toLowerCase();
+    if (!str) str = getDefaultStartDatetime();
+
+    // 1. Check if str is standard ISO datetime format (YYYY-MM-DDTHH:MM)
+    var isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})/);
+    if (isoMatch) {
+      var year = parseInt(isoMatch[1], 10);
+      var month = parseInt(isoMatch[2], 10) - 1;
+      var day = parseInt(isoMatch[3], 10);
+      var hour = parseInt(isoMatch[4], 10);
+      var min = parseInt(isoMatch[5], 10);
+      var d = new Date(year, month, day, hour, min);
+      if (!isNaN(d.getTime())) {
+        return {
+          isDate: true,
+          dateObj: d,
+          dayOffset: (d.getDay() + 6) % 7,
+          hour: hour,
+          min: min
+        };
+      }
+    }
+
+    // 2. Fallback: Legacy strings like '周五 18:00' or 'Fri 06:00'
+    var lower = str.toLowerCase();
     var dayOffset = 4;
-    if (str.indexOf('mon') !== -1 || str.indexOf('一') !== -1) dayOffset = 0;
-    else if (str.indexOf('tue') !== -1 || str.indexOf('二') !== -1) dayOffset = 1;
-    else if (str.indexOf('wed') !== -1 || str.indexOf('三') !== -1) dayOffset = 2;
-    else if (str.indexOf('thu') !== -1 || str.indexOf('四') !== -1) dayOffset = 3;
-    else if (str.indexOf('fri') !== -1 || str.indexOf('五') !== -1) dayOffset = 4;
-    else if (str.indexOf('sat') !== -1 || str.indexOf('六') !== -1) dayOffset = 5;
-    else if (str.indexOf('sun') !== -1 || str.indexOf('日') !== -1) dayOffset = 6;
+    if (lower.indexOf('mon') !== -1 || lower.indexOf('一') !== -1) dayOffset = 0;
+    else if (lower.indexOf('tue') !== -1 || lower.indexOf('二') !== -1) dayOffset = 1;
+    else if (lower.indexOf('wed') !== -1 || lower.indexOf('三') !== -1) dayOffset = 2;
+    else if (lower.indexOf('thu') !== -1 || lower.indexOf('四') !== -1) dayOffset = 3;
+    else if (lower.indexOf('fri') !== -1 || lower.indexOf('五') !== -1) dayOffset = 4;
+    else if (lower.indexOf('sat') !== -1 || lower.indexOf('六') !== -1) dayOffset = 5;
+    else if (lower.indexOf('sun') !== -1 || lower.indexOf('日') !== -1) dayOffset = 6;
 
     var timeMatch = str.match(/(\d{1,2})[:：](\d{2})/);
-    var hour = 6, min = 0;
+    var hourFallback = 6, minFallback = 0;
     if (timeMatch) {
-      hour = parseInt(timeMatch[1], 10);
-      min = parseInt(timeMatch[2], 10);
+      hourFallback = parseInt(timeMatch[1], 10);
+      minFallback = parseInt(timeMatch[2], 10);
     }
-    return { dayOffset: dayOffset, hour: hour, min: min };
+    return { isDate: false, dayOffset: dayOffset, hour: hourFallback, min: minFallback };
   }
 
   function formatArrivalTime(startInfo, durationMinutes, lang) {
+    if (startInfo.isDate && startInfo.dateObj) {
+      var arrivalDate = new Date(startInfo.dateObj.getTime() + durationMinutes * 60 * 1000);
+      var dayOfWeek = (arrivalDate.getDay() + 6) % 7;
+      var hour = arrivalDate.getHours();
+      var min = arrivalDate.getMinutes();
+      var daysZH = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+      var daysEN = ['Mon.', 'Tue.', 'Wed.', 'Thu.', 'Fri.', 'Sat.', 'Sun.'];
+      var dayStr = (lang === 'zh') ? daysZH[dayOfWeek] : daysEN[dayOfWeek];
+      return dayStr + ' ' + (hour < 10 ? '0' : '') + hour + ':' + (min < 10 ? '0' : '') + min;
+    }
+
     var totalMins = startInfo.dayOffset * 24 * 60 + startInfo.hour * 60 + startInfo.min + durationMinutes;
     var day = Math.floor(totalMins / (24 * 60)) % 7;
     var restMins = totalMins % (24 * 60);
-    var hour = Math.floor(restMins / 60);
-    var min = restMins % 60;
-    var daysZH = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-    var daysEN = ['Mon.', 'Tue.', 'Wed.', 'Thu.', 'Fri.', 'Sat.', 'Sun.'];
-    var dayStr = (lang === 'zh') ? daysZH[day] : daysEN[day];
-    return dayStr + ' ' + (hour < 10 ? '0' : '') + hour + ':' + (min < 10 ? '0' : '') + min;
+    var hourLegacy = Math.floor(restMins / 60);
+    var minLegacy = restMins % 60;
+    var daysZH2 = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    var daysEN2 = ['Mon.', 'Tue.', 'Wed.', 'Thu.', 'Fri.', 'Sat.', 'Sun.'];
+    var dayStr2 = (lang === 'zh') ? daysZH2[day] : daysEN2[day];
+    return dayStr2 + ' ' + (hourLegacy < 10 ? '0' : '') + hourLegacy + ':' + (minLegacy < 10 ? '0' : '') + minLegacy;
   }
 
   function esc(str) {
@@ -1223,7 +1289,7 @@
         if (data.elevationMode) setElevationMode(data.elevationMode);
         if (data.startTime) {
           state.startTime = data.startTime;
-          populateStartTimeOptions(data.startTime);
+          if (dom.inputStartTime) dom.inputStartTime.value = data.startTime;
         }
         if (Array.isArray(data.checkpoints)) state.checkpoints = data.checkpoints;
         sortCheckpoints();
@@ -1281,7 +1347,7 @@
       fontSizeSegment: 11,
       fontSizeCumulDist: 12,
       language: state.language,
-      startTime: isZH ? "周五 06:00" : "Fri 06:00",
+      startTime: "2026-08-28T06:00",
       checkpoints: [
         { name: isZH ? "起点" : "Start", distance: 0.0, arrivalTime: "0:00", segmentTime: "0:00", icon: "start" },
         { name: "CP1", distance: 15.0, arrivalTime: "1:45", segmentTime: "1:45", icon: "classic" },
@@ -1325,32 +1391,6 @@
     toastTimer = setTimeout(function () { dom.toast.classList.remove('show'); }, 3000);
   }
 
-  function populateStartTimeOptions(selectedValue) {
-    if (!dom.inputStartTime) return;
-    selectedValue = selectedValue || dom.inputStartTime.value || state.startTime || '周五 18:00';
-    dom.inputStartTime.innerHTML = '';
-    var lang = state.language;
-    var daysZH = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-    var daysEN = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    var displayDays = (lang === 'zh') ? daysZH : daysEN;
-
-    for (var d = 0; d < 7; d++) {
-      for (var h = 0; h < 24; h++) {
-        for (var m = 0; m < 60; m += 30) {
-          var timeStr = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
-          var val = daysZH[d] + ' ' + timeStr;
-          var label = displayDays[d] + ' ' + timeStr;
-          var opt = document.createElement('option');
-          opt.value = val;
-          opt.textContent = label;
-          if (val === selectedValue) opt.selected = true;
-          dom.inputStartTime.appendChild(opt);
-        }
-      }
-    }
-    state.startTime = selectedValue;
-  }
-
   function applyLanguage() {
     var lang = state.language;
     var dict = T[lang];
@@ -1370,7 +1410,6 @@
       if (dict[key] !== undefined) el.title = dict[key];
     });
 
-    populateStartTimeOptions(state.startTime);
     renderCPTable();
     if (state.trackData) {
       TR.trailAnalysis.resetSegmentCache();
