@@ -24,12 +24,51 @@
   }
 
   function parseTime(str) {
-    if (!str || !str.trim()) return 0;
-    var parts = str.trim().split(':');
-    if (parts.length !== 2) return 0;
-    var h = parseInt(parts[0], 10) || 0;
-    var m = parseInt(parts[1], 10) || 0;
-    return h * 60 + m;
+    if (str === null || str === undefined) return 0;
+    if (typeof str === 'number') {
+      return isNaN(str) ? 0 : Math.max(0, Math.round(str));
+    }
+    str = String(str).trim();
+    if (!str) return 0;
+
+    // Handle "H:MM:SS" or "HH:MM:SS"
+    if (/^\d+:\d{1,2}:\d{1,2}$/.test(str)) {
+      var p3 = str.split(':');
+      var h3 = parseInt(p3[0], 10) || 0;
+      var m3 = parseInt(p3[1], 10) || 0;
+      var s3 = parseInt(p3[2], 10) || 0;
+      return h3 * 60 + m3 + Math.round(s3 / 60);
+    }
+
+    // Handle "H:MM" or "HH:MM"
+    if (/^\d+:\d{1,2}$/.test(str)) {
+      var p2 = str.split(':');
+      var h2 = parseInt(p2[0], 10) || 0;
+      var m2 = parseInt(p2[1], 10) || 0;
+      return h2 * 60 + m2;
+    }
+
+    // Handle strings like "1h30", "1h 30m", "1h30min", "2h", "45m", "1小时30分", "45分钟"
+    var hMatch = str.match(/(\d+(?:\.\d+)?)\s*(?:h|hr|hrs|hours?|小时|时)/i);
+    var mMatch = str.match(/(\d+)\s*(?:m|min|mins|minutes?|分钟|分)/i);
+    if (hMatch || mMatch) {
+      var hVal = hMatch ? parseFloat(hMatch[1]) : 0;
+      var mVal = mMatch ? parseInt(mMatch[1], 10) : 0;
+      return Math.round(hVal * 60 + mVal);
+    }
+
+    // Handle decimal hours like "1.5" or "2.25"
+    if (/^\d+\.\d+$/.test(str)) {
+      var dec = parseFloat(str);
+      return isNaN(dec) ? 0 : Math.round(dec * 60);
+    }
+
+    // Handle pure integer like "90" (standard: pure number = minutes)
+    if (/^\d+$/.test(str)) {
+      return parseInt(str, 10) || 0;
+    }
+
+    return 0;
   }
 
   function formatTime(totalMinutes) {

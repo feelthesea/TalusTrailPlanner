@@ -156,19 +156,42 @@
     var config = mapSources[sourceKey];
     var tiandituKey = '50fdf5d2464091ca4951c7c2d7e017c4';
 
+    var tiandituErrorCount = 0;
+    var fallbackTriggered = false;
+    function handleTiandituError() {
+      if (fallbackTriggered) return;
+      tiandituErrorCount++;
+      if (tiandituErrorCount >= 3) {
+        fallbackTriggered = true;
+        var inChina = trackDataRef ? getTM().isTrackInChina(trackDataRef.points) : true;
+        var fallbackSource = inChina ? 'gaode_hybrid' : 'osm';
+        console.warn('Tianditu tiles failed to load. Falling back to:', fallbackSource);
+        TM_Map.changeMapSource(fallbackSource);
+        if (typeof TM_Map.onFallback === 'function') {
+          TM_Map.onFallback(fallbackSource, sourceKey);
+        }
+      }
+    }
+
     if (config.type === 'tianditu_vec') {
       var r = L.tileLayer('https://t{s}.tianditu.gov.cn/cva_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cva&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tiandituKey, { subdomains: ['0','1','2','3','4','5','6','7'], maxZoom: 18 });
       var v = L.tileLayer('https://t{s}.tianditu.gov.cn/vec_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tiandituKey, { subdomains: ['0','1','2','3','4','5','6','7'], maxZoom: 18 });
+      v.on('tileerror', handleTiandituError);
+      r.on('tileerror', handleTiandituError);
       v.setZIndex(5); r.setZIndex(10);
       currentTileLayer = L.layerGroup([v, r]).addTo(leafletMap);
     } else if (config.type === 'tianditu_img') {
       var r2 = L.tileLayer('https://t{s}.tianditu.gov.cn/cia_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cia&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tiandituKey, { subdomains: ['0','1','2','3','4','5','6','7'], maxZoom: 18 });
       var s2 = L.tileLayer('https://t{s}.tianditu.gov.cn/img_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tiandituKey, { subdomains: ['0','1','2','3','4','5','6','7'], maxZoom: 18 });
+      s2.on('tileerror', handleTiandituError);
+      r2.on('tileerror', handleTiandituError);
       s2.setZIndex(5); r2.setZIndex(10);
       currentTileLayer = L.layerGroup([s2, r2]).addTo(leafletMap);
     } else if (config.type === 'tianditu_ter') {
       var r3 = L.tileLayer('https://t{s}.tianditu.gov.cn/cta_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cta&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tiandituKey, { subdomains: ['0','1','2','3','4','5','6','7'], maxZoom: 14 });
       var t3 = L.tileLayer('https://t{s}.tianditu.gov.cn/ter_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ter&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tiandituKey, { subdomains: ['0','1','2','3','4','5','6','7'], maxZoom: 14 });
+      t3.on('tileerror', handleTiandituError);
+      r3.on('tileerror', handleTiandituError);
       t3.setZIndex(5); r3.setZIndex(10);
       currentTileLayer = L.layerGroup([t3, r3]).addTo(leafletMap);
     } else if (config.type === 'gaode_hybrid') {
@@ -187,6 +210,10 @@
     if (trackDataRef && prevGCJ !== useGCJ02Display) {
       TM_Map.drawMap(trackDataRef, colorModeRef, null, true);
     }
+  };
+
+  TM_Map.getMapSource = function () {
+    return currentMapSource;
   };
 
   // ── Track & Markers Drawing ──────────────────────────────────────────

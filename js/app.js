@@ -171,7 +171,8 @@
       btnSaveApply: "✓ 保存并应用",
 
       labelStopDuration: "⏸️ 停留时间 (分钟)",
-      labelPassage: "通过"
+      labelPassage: "通过",
+      toastMapFallback: "天地图图层加载受阻，已自动为您切换至备用地图图层（高德/OSM） ✓"
     },
     en: {
       pageTitle: "🏔️ Talus - Trail Roadbook Generator",
@@ -327,7 +328,8 @@
       btnSaveApply: "✓ Save & Apply",
 
       labelStopDuration: "⏸️ Stop Duration (min)",
-      labelPassage: "Passage"
+      labelPassage: "Passage",
+      toastMapFallback: "Tianditu tiles failed to load, automatically switched to backup map (Gaode/OSM) ✓"
     }
   };
 
@@ -515,6 +517,12 @@
       });
     }
 
+    // Auto Fallback callback for Map Tiles
+    TR.trailMap.onFallback = function (fallbackSource, oldSource) {
+      if (dom.selectMapSource) dom.selectMapSource.value = fallbackSource;
+      toast(T[state.language].toastMapFallback);
+    };
+
     if (dom.btnFitMap) {
       dom.btnFitMap.addEventListener('click', function () {
         TR.trailMap.fitMapToTrack();
@@ -559,6 +567,14 @@
 
     dom.btnAddCp.addEventListener('click', handleAddCP);
     dom.exportRatio.addEventListener('change', scheduleRender);
+
+    // CP Table Event Delegation
+    if (dom.cpTbody) {
+      dom.cpTbody.addEventListener('input', handleCPTableInput);
+      dom.cpTbody.addEventListener('change', handleCPTableChange);
+      dom.cpTbody.addEventListener('click', handleCPTableClick);
+      dom.cpTbody.addEventListener('dblclick', handleCPTableDblClick);
+    }
 
     // Font Sizes Modal Events
     if (dom.btnOpenFontSizes) dom.btnOpenFontSizes.addEventListener('click', openFontSizesModal);
@@ -884,18 +900,16 @@
     });
   }
 
-  // ── 3. Zone 3: CP Table Rendering & Direct In-place Editing ─────────
+  // ── 3. Zone 3: CP Table Rendering & Event Delegation ───────────────
   function renderCPTable() {
-    dom.cpTbody.innerHTML = '';
+    if (!dom.cpTbody) return;
     var sortedCps = state.checkpoints.slice();
     var lang = state.language;
+    var html = '';
 
     sortedCps.forEach(function (cp, idx) {
       var globalIdx = state.checkpoints.indexOf(cp);
       var isSelected = (globalIdx === state.activeCPIndex);
-      var tr = document.createElement('tr');
-      if (isSelected) tr.classList.add('selected-row');
-
       var seqLabel = (idx === 0) ? 'S' : (idx === sortedCps.length - 1 ? 'F' : idx);
       var detailsHtml = '';
 
@@ -934,74 +948,93 @@
           '</td>';
       }
 
-      tr.innerHTML =
+      html +=
+        '<tr class="cp-table-row' + (isSelected ? ' selected-row' : '') + '" data-global-idx="' + globalIdx + '">' +
         '<td class="col-num">' + seqLabel + '</td>' +
         '<td class="col-name"><input type="text" data-idx="' + globalIdx + '" data-field="name" value="' + esc(cp.name) + '" placeholder="' + T[lang].placeholderCpNameInput + '"></td>' +
         '<td class="col-dist"><input type="number" data-idx="' + globalIdx + '" data-field="distance" value="' + cp.distance + '" step="0.1" min="0"></td>' +
         '<td class="col-time"><input type="text" data-idx="' + globalIdx + '" data-field="segmentTime" value="' + esc(cp.segmentTime || '') + '" placeholder="' + T[lang].placeholderTimeInput + '"' + (idx === 0 ? ' disabled' : '') + '></td>' +
         '<td class="col-action">' +
-        '  <button class="btn-settings" data-idx="' + globalIdx + '" title="' + T[lang].settingsCpTitle + '">⚙️</button>' +
-        '  <button class="btn-delete" data-idx="' + globalIdx + '" title="' + T[lang].deleteCpTitle + '">✕</button>' +
+        '  <button type="button" class="btn-settings" data-idx="' + globalIdx + '" title="' + T[lang].settingsCpTitle + '">⚙️</button>' +
+        '  <button type="button" class="btn-delete" data-idx="' + globalIdx + '" title="' + T[lang].deleteCpTitle + '">✕</button>' +
         '</td>' +
-        detailsHtml;
-
-      tr.addEventListener('click', function (e) {
-        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
-          state.activeCPIndex = globalIdx;
-          renderCPTable();
-        }
-      });
-
-      tr.addEventListener('dblclick', function (e) {
-        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
-          openCPModal(globalIdx);
-        }
-      });
-
-      dom.cpTbody.appendChild(tr);
+        detailsHtml +
+        '</tr>';
     });
 
-    dom.cpTbody.querySelectorAll('input').forEach(function (el) {
-      el.addEventListener('change', handleCPTableChange);
-      el.addEventListener('input', handleCPTableChange);
-    });
+    dom.cpTbody.innerHTML = html;
+  }
 
-    dom.cpTbody.querySelectorAll('.btn-settings').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var idx = parseInt(this.dataset.idx, 10);
-        openCPModal(idx);
-      });
-    });
+  function handleCPTableClick(e) {
+    var settingsBtn = e.target.closest('.btn-settings');
+    if (settingsBtn) {
+      e.stopPropagation();
+      var idx = parseInt(settingsBtn.dataset.idx, 10);
+      openCPModal(idx);
+      return;
+    }
 
-    dom.cpTbody.querySelectorAll('.btn-delete').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var idx = parseInt(this.dataset.idx, 10);
-        handleDeleteCP(idx);
-      });
-    });
+    var delBtn = e.target.closest('.btn-delete');
+    if (delBtn) {
+      e.stopPropagation();
+      var delIdx = parseInt(delBtn.dataset.idx, 10);
+      handleDeleteCP(delIdx);
+      return;
+    }
+
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+      var row = e.target.closest('tr');
+      if (row && row.dataset.globalIdx !== undefined) {
+        state.activeCPIndex = parseInt(row.dataset.globalIdx, 10);
+        dom.cpTbody.querySelectorAll('tr').forEach(function (r) { r.classList.remove('selected-row'); });
+        row.classList.add('selected-row');
+      }
+    }
+  }
+
+  function handleCPTableDblClick(e) {
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+      var row = e.target.closest('tr');
+      if (row && row.dataset.globalIdx !== undefined) {
+        openCPModal(parseInt(row.dataset.globalIdx, 10));
+      }
+    }
+  }
+
+  function handleCPTableInput(e) {
+    if (!e.target.matches('input')) return;
+    var idx = parseInt(e.target.dataset.idx, 10);
+    var field = e.target.dataset.field;
+    if (isNaN(idx) || !state.checkpoints[idx]) return;
+
+    if (field === 'name') {
+      state.checkpoints[idx].name = e.target.value;
+      scheduleRender();
+    }
   }
 
   function handleCPTableChange(e) {
+    if (!e.target.matches('input')) return;
     var idx = parseInt(e.target.dataset.idx, 10);
     var field = e.target.dataset.field;
     var val = e.target.value;
+    if (isNaN(idx) || !state.checkpoints[idx]) return;
 
     if (field === 'distance') {
-      val = parseFloat(val) || 0;
-      state.checkpoints[idx].distance = val;
+      var numVal = parseFloat(val);
+      if (isNaN(numVal) || numVal < 0) numVal = 0;
+      state.checkpoints[idx].distance = Math.round(numVal * 100) / 100;
       var curCP = state.checkpoints[idx];
       sortCheckpoints();
       state.activeCPIndex = state.checkpoints.indexOf(curCP);
       updateArrivalTimes();
       renderCPTable();
     } else if (field === 'segmentTime') {
-      state.checkpoints[idx].segmentTime = val;
+      state.checkpoints[idx].segmentTime = val.trim();
       updateArrivalTimes();
       renderCPTable();
-    } else {
-      state.checkpoints[idx][field] = val;
+    } else if (field === 'name') {
+      state.checkpoints[idx].name = val.trim();
     }
 
     TR.trailAnalysis.resetSegmentCache();
@@ -1142,9 +1175,11 @@
     if (!cp) { closeCPModal(); return; }
 
     cp.name = dom.poiNameDetail.value.trim() || 'CP';
-    cp.distance = parseFloat(dom.poiPosition.value) || 0;
+    var rawDist = parseFloat(dom.poiPosition.value);
+    cp.distance = (!isNaN(rawDist) && rawDist >= 0) ? Math.round(rawDist * 100) / 100 : 0;
     cp.segmentTime = dom.poiTimeDetail.value.trim();
-    cp.stopDuration = parseInt(dom.poiStopDuration.value, 10) || 0;
+    var rawStop = parseInt(dom.poiStopDuration.value, 10);
+    cp.stopDuration = (!isNaN(rawStop) && rawStop >= 0) ? Math.min(rawStop, 1440) : 0;
     cp.notes = dom.poiNotesDetail.value;
     cp.useForIntermediateDistances = dom.poiIntermediate.checked;
     cp.icon = dom.poiIconSelect.value;

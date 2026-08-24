@@ -141,6 +141,8 @@
   var cachedSegmentsMode = null;
   var cachedSegmentsElevationMode = null;
   var cachedSegmentsPointCount = -1;
+  var cachedWaypointsSignature = '';
+  var cachedSegmentsLang = null;
   var allSegments = [];
 
   TA.resetSegmentCache = function () {
@@ -148,6 +150,8 @@
     cachedSegmentsMode = null;
     cachedSegmentsElevationMode = null;
     cachedSegmentsPointCount = -1;
+    cachedWaypointsSignature = '';
+    cachedSegmentsLang = null;
     allSegments = [];
   };
 
@@ -238,11 +242,19 @@
     var isZH = (lang !== 'en');
 
     var currentElevationMode = elevationMode || 'smooth';
+    var wpSig = (mode === 'waypoint' && customWaypoints)
+      ? customWaypoints.map(function (w) {
+          return (w.name || '') + ':' + (w.distance || 0) + ':' + (w.useForIntermediateDistances !== false ? '1' : '0');
+        }).join('|')
+      : '';
+
     if (
       cachedSegmentsTrack === trackData &&
       cachedSegmentsMode === mode &&
       cachedSegmentsElevationMode === currentElevationMode &&
-      cachedSegmentsPointCount === points.length
+      cachedSegmentsPointCount === points.length &&
+      cachedWaypointsSignature === wpSig &&
+      cachedSegmentsLang === lang
     ) {
       return allSegments;
     }
@@ -329,6 +341,8 @@
     cachedSegmentsMode = mode;
     cachedSegmentsElevationMode = currentElevationMode;
     cachedSegmentsPointCount = points.length;
+    cachedWaypointsSignature = wpSig;
+    cachedSegmentsLang = lang;
     allSegments = segments;
 
     return segments;
