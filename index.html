@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/leaflet.css">
-  <link rel="stylesheet" href="style.css?v=7.3">
+  <link rel="stylesheet" href="style.css?v=7.6">
 </head>
 <body>
 
@@ -224,28 +224,24 @@
         </div>
       </div>
 
-      <!-- Zone 3 Right: Multi-Mode Segment Statistics -->
+      <!-- Zone 3 Right: Segment Statistics (UTMB OCC Style) -->
       <div class="panel-card segment-stats-panel-card">
         <div class="panel-card-header">
-          <h3><span data-i18n="segmentStatsTitle">📋 多模式分段统计</span></h3>
-          <div class="seg-mode-bar">
-            <button class="seg-mode-btn active" data-mode="waypoint" data-i18n="segModeWaypoint">📍 检查点</button>
-            <button class="seg-mode-btn" data-mode="auto" data-i18n="segModeAuto">📈 坡度变化</button>
-            <button class="seg-mode-btn" data-mode="1000" data-i18n="segMode1km">📏 1 km</button>
-            <button class="seg-mode-btn" data-mode="5000" data-i18n="segMode5km">📏 5 km</button>
-          </div>
+          <h3><span data-i18n="segmentStatsTitle">📋 赛段分段统计</span></h3>
+          <span style="font-size:0.72rem; color:var(--text-muted);" data-i18n="segmentStatsTip">点击或悬停表格行可与上方剖面图及地图实时联动</span>
         </div>
 
         <div class="segment-table-wrap">
-          <table class="segment-table">
+          <table class="segment-table utmb-segment-table">
             <thead>
               <tr>
-                <th data-i18n="segColNum">#</th>
-                <th data-i18n="segColDist">分段里程</th>
-                <th data-i18n="segColAscent">爬升</th>
-                <th data-i18n="segColDescent">下降</th>
-                <th data-i18n="segColAvgGrad">平均坡度</th>
-                <th data-i18n="segColMaxGrad">最大坡度</th>
+                <th class="col-seg-name" data-i18n="segColPoint">点位名称</th>
+                <th class="col-seg-profile" data-i18n="segColProfile">分段轮廓</th>
+                <th class="col-seg-dist" data-i18n="segColDistance">距离</th>
+                <th class="col-seg-elev" data-i18n="segColGainLoss">爬升 / 下降</th>
+                <th class="col-seg-alt" data-i18n="segColAltitude">海拔</th>
+                <th class="col-seg-grade" data-i18n="segColGrade">坡度</th>
+                <th class="col-seg-time" data-i18n="segColTimeline">预计抵达与时间轴</th>
               </tr>
             </thead>
             <tbody id="segment-tbody">
@@ -461,13 +457,13 @@
   <!-- ═══ Scripts ═══ -->
   <script src="js/leaflet.js"></script>
   <script src="js/leaflet-custom-headers.js"></script>
-  <script src="js/utils.js?v=7.4"></script>
-  <script src="js/trail-math.js?v=7.4"></script>
-  <script src="js/gpx-parser.js?v=7.4"></script>
-  <script src="js/trail-analysis.js?v=7.4"></script>
-  <script src="js/trail-map.js?v=7.4"></script>
-  <script src="js/profile.js?v=7.4"></script>
-  <script src="js/export.js?v=7.4"></script>
-  <script src="js/app.js?v=7.4"></script>
+  <script src="js/utils.js?v=7.6"></script>
+  <script src="js/trail-math.js?v=7.6"></script>
+  <script src="js/gpx-parser.js?v=7.6"></script>
+  <script src="js/trail-analysis.js?v=7.6"></script>
+  <script src="js/trail-map.js?v=7.6"></script>
+  <script src="js/profile.js?v=7.6"></script>
+  <script src="js/export.js?v=7.6"></script>
+  <script src="js/app.js?v=7.6"></script>
 </body>
 </html>

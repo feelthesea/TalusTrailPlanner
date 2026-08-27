@@ -180,6 +180,17 @@
     var g = el('g', { transform: 'translate(' + margin + ', ' + margin + ')' });
     svg.appendChild(g);
 
+    // Hover Segment Highlight Overlay
+    var hoverSegmentRect = el('rect', {
+      id: 'hover-segment-rect',
+      style: 'pointer-events:none; display:none;',
+      fill: 'rgba(232, 168, 48, 0.14)',
+      stroke: '#e8a830',
+      'stroke-width': '1.5',
+      'stroke-dasharray': '3,3'
+    });
+    g.appendChild(hoverSegmentRect);
+
     // Active Segment Highlight
     if (activeSegment) {
       renderSegmentHighlight(g, pts, m, Y, activeSegment);
@@ -201,7 +212,7 @@
     renderElevLabels(g, cps, pts, m, Y, fsCPElev);
     renderTimeLabels(g, cps, cumulTimes, m, Y, fsCPTime);
     renderNotes(g, cps, m, Y, fsCPNotes);
-    renderSegmentInfo(g, cps, pts, m, Y, fsSegment, cumulTimes);
+    renderSegmentInfo(g, cps, pts, m, Y, fsSegment, cumulTimes, options);
     renderCumulDist(g, cps, m, Y, fsCumulDist);
     renderPeakLabels(g, pts, cps, m, Y, fsCPElev);
     renderAssociatedTexts(g, cps, m, Y);
@@ -217,14 +228,24 @@
     container.appendChild(svg);
 
     // ── Interactive Hover & Touch Event Layer ────────────────────────
-    bindInteractiveEvents(svg, g, crosshairG, crosshairLine, crosshairDot, pts, m, Y, margin, onHoverCallback);
+    bindInteractiveEvents(svg, g, crosshairG, crosshairLine, crosshairDot, hoverSegmentRect, pts, cps, m, Y, margin, options);
 
     return svg;
   }
 
-  function bindInteractiveEvents(svg, g, crosshairG, crosshairLine, crosshairDot, pts, m, Y, margin, onHoverCallback) {
+  function bindInteractiveEvents(svg, g, crosshairG, crosshairLine, crosshairDot, hoverSegmentRect, pts, cps, m, Y, margin, options) {
     var tooltipEl = document.getElementById('chartTooltip');
     var totalDist = pts[pts.length - 1].distance;
+    var onHoverCallback = options.onHover || null;
+    var onSegmentHover = options.onSegmentHover || null;
+    var onSegmentClick = options.onSegmentClick || null;
+    var segments = options.segments || [];
+
+    var lastSegIdx = -1;
+
+    function esc(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
 
     function handlePointer(e) {
       var rect = svg.getBoundingClientRect();
@@ -253,6 +274,31 @@
       crosshairDot.setAttribute('cx', ptX);
       crosshairDot.setAttribute('cy', ptY);
 
+      // Find which segment this point belongs to
+      var segIdx = -1;
+      var currentSeg = null;
+      for (var si = 0; si < segments.length; si++) {
+        if (targetDist >= segments[si].startDist && (targetDist <= segments[si].endDist || si === segments.length - 1)) {
+          segIdx = si;
+          currentSeg = segments[si];
+          break;
+        }
+      }
+
+      // Update dynamic hover segment rectangle
+      if (currentSeg && hoverSegmentRect) {
+        var x1 = m.distToX(currentSeg.startDist);
+        var x2 = m.distToX(currentSeg.endDist);
+        var w = Math.max(2, x2 - x1);
+        hoverSegmentRect.setAttribute('x', x1);
+        hoverSegmentRect.setAttribute('y', Y.chartTop);
+        hoverSegmentRect.setAttribute('width', w);
+        hoverSegmentRect.setAttribute('height', Y.chartBot - Y.chartTop);
+        hoverSegmentRect.style.display = 'block';
+      } else if (hoverSegmentRect) {
+        hoverSegmentRect.style.display = 'none';
+      }
+
       if (tooltipEl) {
         var isZH = !(window.TrailRoadbook.state && window.TrailRoadbook.state.language === 'en');
         var grad = pt.smoothedGradient !== undefined ? pt.smoothedGradient : (pt.gradient || 0);
@@ -260,30 +306,81 @@
         var gradSign = grad > 0 ? '+' : '';
         var gradColor = tm().getGradientColor(grad);
 
+        var segInfoHtml = '';
+        if (currentSeg) {
+          var segNameStr = esc(currentSeg.name) + (currentSeg.endName ? (' → ' + esc(currentSeg.endName)) : '');
+          segInfoHtml =
+            '<div style="margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.25); font-size:0.75rem;">' +
+            '  <div style="font-weight:700; color:#fbbf24; margin-bottom:2px;">📍 ' + segNameStr + '</div>' +
+            '  <div style="font-size:0.72rem; color:#e2e8f0; display:flex; gap:6px; flex-wrap:wrap;">' +
+            '    <span>' + (isZH ? '分段: ' : 'Seg: ') + '<strong>' + currentSeg.distance.toFixed(1) + 'km</strong></span>' +
+            '    <span style="color:#34d399;">+' + Math.round(currentSeg.ascent) + 'm</span>' +
+            '    <span style="color:#f87171;">-' + Math.round(currentSeg.descent) + 'm</span>' +
+            '    <span>' + (isZH ? '均坡: ' : 'Avg: ') + currentSeg.uphillAvg.toFixed(1) + '%</span>' +
+            '  </div>' +
+            '</div>';
+        }
+
         tooltipEl.innerHTML =
-          '<div style="font-weight:700; margin-bottom:2px;">' + pt.distance.toFixed(2) + ' km</div>' +
+          '<div style="font-weight:700; margin-bottom:2px; font-size:0.85rem;">' + pt.distance.toFixed(2) + ' km</div>' +
           '<div>' + (isZH ? '海拔: ' : 'Elevation: ') + '<strong>' + Math.round(pt.elevation) + ' m</strong></div>' +
-          '<div>' + (isZH ? '坡度: ' : 'Grade: ') + '<strong style="color:' + gradColor + '">' + gradSign + grad.toFixed(1) + '% (' + gradLabel + ')</strong></div>';
+          '<div>' + (isZH ? '坡度: ' : 'Grade: ') + '<strong style="color:' + gradColor + '">' + gradSign + grad.toFixed(1) + '% (' + gradLabel + ')</strong></div>' +
+          segInfoHtml;
+
         tooltipEl.classList.add('visible');
 
         var tipLeft = clientX + 15;
-        var tipTop = clientY - 35;
-        if (tipLeft + 160 > window.innerWidth) tipLeft = clientX - 170;
+        var tipTop = clientY - 45;
+        if (tipLeft + 190 > window.innerWidth) tipLeft = clientX - 200;
         tooltipEl.style.left = tipLeft + 'px';
         tooltipEl.style.top = tipTop + 'px';
       }
 
-      if (onHoverCallback) onHoverCallback(ptIdx, pt);
+      if (onHoverCallback) onHoverCallback(ptIdx, pt, segIdx, currentSeg);
+      if (onSegmentHover && segIdx !== lastSegIdx) {
+        lastSegIdx = segIdx;
+        onSegmentHover(segIdx, currentSeg);
+      }
     }
 
     function hideCursor() {
       crosshairG.style.display = 'none';
+      if (hoverSegmentRect) hoverSegmentRect.style.display = 'none';
       if (tooltipEl) tooltipEl.classList.remove('visible');
-      if (onHoverCallback) onHoverCallback(-1);
+      if (onHoverCallback) onHoverCallback(-1, null, -1, null);
+      if (onSegmentHover && lastSegIdx !== -1) {
+        lastSegIdx = -1;
+        onSegmentHover(-1, null);
+      }
+    }
+
+    function handleClick(e) {
+      var rect = svg.getBoundingClientRect();
+      var clientX = e.clientX;
+      var svgX = ((clientX - rect.left) / rect.width) * svg.viewBox.baseVal.width - margin;
+      if (svgX < 50 || svgX > 70 + m.chartW + 30) return;
+
+      var distRatio = Math.max(0, Math.min(1, (svgX - 70) / m.chartW));
+      var targetDist = distRatio * totalDist;
+      var clickedSegIdx = -1;
+      var clickedSeg = null;
+
+      for (var si = 0; si < segments.length; si++) {
+        if (targetDist >= segments[si].startDist && (targetDist <= segments[si].endDist || si === segments.length - 1)) {
+          clickedSegIdx = si;
+          clickedSeg = segments[si];
+          break;
+        }
+      }
+
+      if (clickedSegIdx >= 0 && onSegmentClick) {
+        onSegmentClick(clickedSegIdx, clickedSeg);
+      }
     }
 
     svg.addEventListener('mousemove', handlePointer);
     svg.addEventListener('mouseleave', hideCursor);
+    svg.addEventListener('click', handleClick);
     svg.addEventListener('touchstart', handlePointer, { passive: true });
     svg.addEventListener('touchmove', handlePointer, { passive: true });
     svg.addEventListener('touchend', hideCursor);
@@ -303,9 +400,9 @@
       y: Y.chartTop,
       width: w,
       height: Y.chartBot - Y.chartTop,
-      fill: 'rgba(232, 168, 48, 0.16)',
+      fill: 'rgba(232, 168, 48, 0.22)',
       stroke: '#e8a830',
-      'stroke-width': '1.5',
+      'stroke-width': '2',
       'stroke-dasharray': '4,3'
     }));
   }
@@ -720,9 +817,14 @@
   }
 
   // ── 3-Line Hexagonal / Rectangular Segment Statistics Boxes ────────
-  function renderSegmentInfo(svg, cps, pts, m, Y, fontSize, times) {
+  function renderSegmentInfo(svg, cps, pts, m, Y, fontSize, times, options) {
+    options = options || {};
+    var onSegmentClick = options.onSegmentClick || null;
+    var onSegmentHover = options.onSegmentHover || null;
+    var segments = options.segments || [];
+
     var splitCps = cps.filter(function (cp, idx) {
-      return cp.useForIntermediateDistances || idx === 0 || idx === cps.length - 1;
+      return cp.useForIntermediateDistances !== false || idx === 0 || idx === cps.length - 1;
     });
 
     for (var i = 0; i < splitCps.length - 1; i++) {
@@ -735,6 +837,13 @@
       var pad = 2;
       var dx = 6;
       var y_mid = Y.segTop + 28;
+      var segIdx = i;
+      var currentSeg = segments[i] || null;
+
+      var grp = el('g', {
+        'data-seg-idx': String(i),
+        style: 'cursor: pointer;'
+      });
 
       if (w > 2 * (pad + dx)) {
         var pointsStr = [
@@ -746,12 +855,12 @@
           (x1 + pad + dx) + ',' + (Y.segTop + 56)
         ].join(' ');
 
-        svg.appendChild(el('polygon', {
+        grp.appendChild(el('polygon', {
           points: pointsStr,
           fill: C.segInfoBg, stroke: C.segInfoBorder, 'stroke-width': '0.75'
         }));
       } else {
-        svg.appendChild(el('rect', {
+        grp.appendChild(el('rect', {
           x: x1 + pad, y: Y.segTop,
           width: Math.max(w - 2 * pad, 0), height: 56,
           rx: 3, ry: 3,
@@ -759,26 +868,41 @@
         }));
       }
 
-      svg.appendChild(el('text', {
+      grp.appendChild(el('text', {
         x: mx, y: Y.segLine1,
         'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '800',
         fill: C.segInfoText,
         style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
       }, stats.distance + ' km'));
 
-      svg.appendChild(el('text', {
+      grp.appendChild(el('text', {
         x: mx, y: Y.segLine2,
         'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '700',
         fill: '#10b981',
         style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
       }, '▲ ' + stats.dPlus + 'm'));
 
-      svg.appendChild(el('text', {
+      grp.appendChild(el('text', {
         x: mx, y: Y.segLine3,
         'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '700',
         fill: '#ef4444',
         style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
       }, '▼ ' + stats.dMinus + 'm'));
+
+      (function (idxVal, segVal) {
+        grp.addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (onSegmentClick) onSegmentClick(idxVal, segVal);
+        });
+        grp.addEventListener('mouseenter', function () {
+          if (onSegmentHover) onSegmentHover(idxVal, segVal);
+        });
+        grp.addEventListener('mouseleave', function () {
+          if (onSegmentHover) onSegmentHover(-1, null);
+        });
+      })(segIdx, currentSeg);
+
+      svg.appendChild(grp);
     }
   }
 

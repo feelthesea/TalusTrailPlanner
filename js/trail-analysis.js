@@ -137,30 +137,33 @@
   };
 
   // ── Multi-Mode Segment Analysis ─────────────────────────────────────
+  // ── Checkpoint Segment Analysis & UTMB Table Data Engine ──────────────
   var cachedSegmentsTrack = null;
-  var cachedSegmentsMode = null;
   var cachedSegmentsElevationMode = null;
   var cachedSegmentsPointCount = -1;
   var cachedWaypointsSignature = '';
+  var cachedSegmentsStartTime = '';
   var cachedSegmentsLang = null;
   var allSegments = [];
+  var checkpointTableRows = [];
 
   TA.resetSegmentCache = function () {
     cachedSegmentsTrack = null;
-    cachedSegmentsMode = null;
     cachedSegmentsElevationMode = null;
     cachedSegmentsPointCount = -1;
     cachedWaypointsSignature = '';
+    cachedSegmentsStartTime = '';
     cachedSegmentsLang = null;
     allSegments = [];
+    checkpointTableRows = [];
   };
 
-  function createSegment(points, startIdx, endIdx, type, elevationMode) {
+  function createSegment(points, startIdx, endIdx, type, elevationMode, startCp, endCp) {
     var tm = getTM();
-    var startPt = points[startIdx];
-    var endPt = points[endIdx];
-    var distance = endPt.distance - startPt.distance;
-    var hDist = (endPt.horizontalDistance || 0) - (startPt.horizontalDistance || 0);
+    var startPt = points[startIdx] || points[0];
+    var endPt = points[endIdx] || points[points.length - 1];
+    var distance = Math.max(0, endPt.distance - startPt.distance);
+    var hDist = Math.max(0, (endPt.horizontalDistance || 0) - (startPt.horizontalDistance || 0));
 
     var mode = elevationMode || 'smooth';
     var elevResult = tm.ElevationCalculator.computeSegment(points, startIdx, endIdx, mode);
@@ -192,29 +195,8 @@
     var uphillAvg = uphillHorizontalDist > 0 ? (uphillAscent / (uphillHorizontalDist * 1000)) * 100 : 0;
     var downhillAvg = downhillHorizontalDist > 0 ? (downhillDescent / (downhillHorizontalDist * 1000)) * 100 : 0;
 
-    if (type === 'auto') {
-      var totalChange = uphillAscent + downhillDescent;
-      if (totalChange === 0) {
-        type = 'flat';
-      } else {
-        var ascentRatio = uphillAscent / totalChange;
-        if (ascentRatio >= 0.6) {
-          type = 'climb';
-        } else if (ascentRatio <= 0.4) {
-          type = 'descent';
-        } else {
-          type = 'mixed';
-        }
-      }
-    }
-
-    // Naismith's Rule with Slope Penalty
-    var baseTimeMinutes = (distance / 5) * 60; // 5 km/h base
-    var elevTimeMinutes = (ascent / 100) * 10; // +10 min per 100m climb
-    var steepAdjust = Math.max(maxUphillGrad, Math.abs(maxDownhillGrad)) > 15
-      ? (Math.max(maxUphillGrad, Math.abs(maxDownhillGrad)) - 15) * 0.5
-      : 0;
-    var segTimeHours = (baseTimeMinutes + elevTimeMinutes + steepAdjust) / 60;
+    // Overall segment average grade
+    var segAvgGrade = distance > 0 ? ((endPt.elevation - startPt.elevation) / (distance * 1000)) * 100 : 0;
 
     return {
       startIdx: startIdx,
@@ -224,128 +206,315 @@
       descent: descent,
       uphillAvg: uphillAvg,
       downhillAvg: downhillAvg,
+      segAvgGrade: segAvgGrade,
       maxUphillGrad: maxUphillGrad,
       maxDownhillGrad: maxDownhillGrad,
-      type: type,
-      time: segTimeHours,
+      type: type || 'auto',
       startEle: startPt.elevation,
       endEle: endPt.elevation,
       startDist: startPt.distance,
-      endDist: endPt.distance
+      endDist: endPt.distance,
+      startCp: startCp,
+      endCp: endCp
     };
   }
 
-  TA.analyzeSegments = function (trackData, mode, customWaypoints, elevationMode, lang) {
-    if (!trackData || !trackData.points) return [];
+  /**
+   * Determine day / night status based on date/time.
+   * Standard astronomical estimate for trail running:
+   *  - Daytime: 06:30 ~ 19:30
+   *  - Sunset/Dusk: 19:30 ~ 20:30
+   *  - Nighttime: 20:30 ~ 05:30
+   *  - Sunrise/Dawn: 05:30 ~ 06:30
+   */
+  TA.getDayNightStatus = function (datetimeObj) {
+    if (!datetimeObj || isNaN(datetimeObj.getTime())) return { isNight: false, icon: '☀️', type: 'day' };
+    var hours = datetimeObj.getHours() + datetimeObj.getMinutes() / 60;
+    if (hours >= 20.5 || hours < 5.5) {
+      return { isNight: true, icon: '🌙', type: 'night' };
+    } else if (hours >= 19.5 && hours < 20.5) {
+      return { isNight: true, icon: '🌅', type: 'sunset' };
+    } else if (hours >= 5.5 && hours < 6.5) {
+      return { isNight: false, icon: '🌄', type: 'sunrise' };
+    } else {
+      return { isNight: false, icon: '☀️', type: 'day' };
+    }
+  };
+
+  /**
+   * Checkpoint Segment Analysis & UTMB OCC Table Data Generator
+   */
+  TA.analyzeSegments = function (trackData, mode, customWaypoints, elevationMode, lang, startTimeStr) {
+    if (!trackData || !trackData.points || trackData.points.length === 0) return [];
     var tm = getTM();
     var points = trackData.points;
     var isZH = (lang !== 'en');
-
     var currentElevationMode = elevationMode || 'smooth';
-    var wpSig = (mode === 'waypoint' && customWaypoints)
-      ? customWaypoints.map(function (w) {
-          return (w.name || '') + ':' + (w.distance || 0) + ':' + (w.useForIntermediateDistances !== false ? '1' : '0');
-        }).join('|')
-      : '';
+
+    var wpSig = (customWaypoints || []).map(function (w) {
+      return (w.name || '') + ':' + (w.distance || 0) + ':' + (w.arrivalTime || '') + ':' + (w.segmentTime || '') + ':' + (w.stopDuration || 0) + ':' + (w.useForIntermediateDistances !== false ? '1' : '0');
+    }).join('|');
 
     if (
       cachedSegmentsTrack === trackData &&
-      cachedSegmentsMode === mode &&
       cachedSegmentsElevationMode === currentElevationMode &&
       cachedSegmentsPointCount === points.length &&
       cachedWaypointsSignature === wpSig &&
+      cachedSegmentsStartTime === (startTimeStr || '') &&
       cachedSegmentsLang === lang
     ) {
       return allSegments;
     }
 
-    var segments = [];
+    var wps = (customWaypoints || []).filter(function (cp) {
+      return cp.useForIntermediateDistances !== false;
+    }).slice().sort(function (a, b) {
+      return a.distance - b.distance;
+    });
 
-    if (mode === 'waypoint') {
-      var wps = (customWaypoints || []).filter(function (cp) {
-        return cp.useForIntermediateDistances !== false;
-      }).slice().sort(function (a, b) {
-        return a.distance - b.distance;
-      });
-
-      if (wps.length <= 1) {
-        // Fallback: full track if only 1 or 0 CPs
-        var seg0 = createSegment(points, 0, points.length - 1, 'auto', currentElevationMode);
-        seg0.name = isZH ? '起点' : 'Start';
-        seg0.endName = isZH ? '终点' : 'Finish';
-        segments.push(seg0);
+    if (wps.length === 0) {
+      wps = [
+        { name: isZH ? '起点' : 'Start', distance: 0, icon: 'start' },
+        { name: isZH ? '终点' : 'Finish', distance: trackData.totalDistance || points[points.length - 1].distance, icon: 'finish' }
+      ];
+    } else if (wps.length === 1) {
+      if (wps[0].distance > 0) {
+        wps.unshift({ name: isZH ? '起点' : 'Start', distance: 0, icon: 'start' });
       } else {
-        for (var i = 0; i < wps.length - 1; i++) {
-          var startCp = wps[i];
-          var endCp = wps[i + 1];
-          var startIdx = tm.findNearestPointIndexByDistance(points, startCp.distance);
-          var endIdx = tm.findNearestPointIndexByDistance(points, endCp.distance);
-          if (endIdx > startIdx) {
-            var seg = createSegment(points, startIdx, endIdx, 'auto', currentElevationMode);
-            seg.name = startCp.name || (i === 0 ? (isZH ? '起点' : 'Start') : ('CP' + i));
-            seg.endName = endCp.name || (i === wps.length - 2 ? (isZH ? '终点' : 'Finish') : ('CP' + (i + 1)));
-            seg.startDist = startCp.distance;
-            seg.endDist = endCp.distance;
-            seg.distance = Math.max(0, endCp.distance - startCp.distance);
-            segments.push(seg);
-          }
-        }
-      }
-    } else if (mode === 'auto') {
-      var segStart = 0;
-      var firstGrad = points[1] ? (points[1].smoothedGradient || points[1].gradient || 0) : 0;
-      var segType = firstGrad > 3 ? 'climb' : (firstGrad < -3 ? 'descent' : 'flat');
-
-      for (var j = 2; j < points.length; j++) {
-        var currGrad = points[j].smoothedGradient || points[j].gradient || 0;
-        var newType = currGrad > 3 ? 'climb' : (currGrad < -3 ? 'descent' : 'flat');
-
-        if (newType !== segType) {
-          var segDist = points[j - 1].distance - points[segStart].distance;
-          if (segDist >= 0.2) {
-            segments.push(createSegment(points, segStart, j - 1, segType, currentElevationMode));
-          }
-          segStart = j - 1;
-          segType = newType;
-        }
-      }
-
-      var lastDist = points[points.length - 1].distance - points[segStart].distance;
-      if (lastDist >= 0.2) {
-        segments.push(createSegment(points, segStart, points.length - 1, segType, currentElevationMode));
-      }
-    } else {
-      // Fixed distance mode (e.g. 1000m or 5000m)
-      var intervalKm = (parseInt(mode, 10) || 1000) / 1000;
-      var totalDist = points[points.length - 1].distance;
-      var numSegs = Math.floor(totalDist / intervalKm + 1e-10);
-      var currStart = 0;
-
-      for (var s = 0; s < numSegs; s++) {
-        var targetDist = (s + 1) * intervalKm;
-        var targetIdx = tm.findNearestPointIndexByDistance(points, targetDist);
-        if (targetIdx > currStart) {
-          segments.push(createSegment(points, currStart, targetIdx, 'auto', currentElevationMode));
-          currStart = targetIdx;
-        }
-      }
-      if (currStart < points.length - 1) {
-        var remDist = points[points.length - 1].distance - points[currStart].distance;
-        if (remDist > intervalKm * 0.01) {
-          segments.push(createSegment(points, currStart, points.length - 1, 'auto', currentElevationMode));
-        }
+        wps.push({ name: isZH ? '终点' : 'Finish', distance: trackData.totalDistance || points[points.length - 1].distance, icon: 'finish' });
       }
     }
 
+    var segments = [];
+    var cumulAscent = 0;
+    var cumulDescent = 0;
+
+    for (var i = 0; i < wps.length - 1; i++) {
+      var startCp = wps[i];
+      var endCp = wps[i + 1];
+      var startIdx = tm.findNearestPointIndexByDistance(points, startCp.distance);
+      var endIdx = tm.findNearestPointIndexByDistance(points, endCp.distance);
+
+      if (endIdx <= startIdx && startIdx < points.length - 1) {
+        endIdx = Math.min(points.length - 1, startIdx + 1);
+      }
+
+      var seg = createSegment(points, startIdx, endIdx, 'waypoint', currentElevationMode, startCp, endCp);
+      seg.segmentIndex = i;
+      seg.name = startCp.name || (i === 0 ? (isZH ? '起点' : 'Start') : ('CP ' + i));
+      seg.endName = endCp.name || (i === wps.length - 2 ? (isZH ? '终点' : 'Finish') : ('CP ' + (i + 1)));
+      seg.startDist = startCp.distance;
+      seg.endDist = endCp.distance;
+      seg.distance = Math.max(0, endCp.distance - startCp.distance);
+
+      cumulAscent += seg.ascent;
+      cumulDescent += seg.descent;
+      seg.cumulDist = endCp.distance;
+      seg.cumulAscent = cumulAscent;
+      seg.cumulDescent = cumulDescent;
+
+      segments.push(seg);
+    }
+
     cachedSegmentsTrack = trackData;
-    cachedSegmentsMode = mode;
     cachedSegmentsElevationMode = currentElevationMode;
     cachedSegmentsPointCount = points.length;
     cachedWaypointsSignature = wpSig;
+    cachedSegmentsStartTime = (startTimeStr || '');
     cachedSegmentsLang = lang;
     allSegments = segments;
 
     return segments;
+  };
+
+  /**
+   * Generates full rows for the UTMB OCC-Style Checkpoint Table (Start -> CPs -> Finish)
+   */
+  TA.generateUTMBTableRows = function (trackData, customWaypoints, elevationMode, startTimeStr, lang) {
+    if (!trackData || !trackData.points || trackData.points.length === 0) return [];
+    var tm = getTM();
+    var u = window.TrailRoadbook.utils;
+    var points = trackData.points;
+    var isZH = (lang !== 'en');
+    var currentElevationMode = elevationMode || 'smooth';
+
+    var wps = (customWaypoints || []).filter(function (cp) {
+      return cp.useForIntermediateDistances !== false;
+    }).slice().sort(function (a, b) {
+      return a.distance - b.distance;
+    });
+
+    if (wps.length === 0) {
+      wps = [
+        { name: isZH ? '起点' : 'Start', distance: 0, icon: 'start' },
+        { name: isZH ? '终点' : 'Finish', distance: trackData.totalDistance || points[points.length - 1].distance, icon: 'finish' }
+      ];
+    } else if (wps.length === 1) {
+      if (wps[0].distance > 0) {
+        wps.unshift({ name: isZH ? '起点' : 'Start', distance: 0, icon: 'start' });
+      } else {
+        wps.push({ name: isZH ? '终点' : 'Finish', distance: trackData.totalDistance || points[points.length - 1].distance, icon: 'finish' });
+      }
+    }
+
+    // Base start date / time
+    var baseDate = null;
+    if (startTimeStr) {
+      var d = new Date(startTimeStr);
+      if (!isNaN(d.getTime())) baseDate = d;
+    }
+    if (!baseDate) {
+      baseDate = new Date();
+      baseDate.setHours(8, 0, 0, 0); // Default 08:00
+    }
+
+    var rows = [];
+    var cumulDist = 0;
+    var cumulAscent = 0;
+    var cumulDescent = 0;
+    var cumulElapsedMinutes = 0;
+
+    for (var idx = 0; idx < wps.length; idx++) {
+      var cp = wps[idx];
+      var ptIdx = tm.findNearestPointIndexByDistance(points, cp.distance);
+      var pt = points[ptIdx] || points[0];
+      var elevation = Math.round(pt.elevation);
+
+      var segDist = 0;
+      var segAscent = 0;
+      var segDescent = 0;
+      var uphillAvg = 0;
+      var maxUphillGrad = 0;
+      var segAvgGrade = 0;
+      var segStartIdx = 0;
+      var segEndIdx = ptIdx;
+      var segTimeMinutes = 0;
+
+      if (idx > 0) {
+        var prevCp = wps[idx - 1];
+        var prevPtIdx = tm.findNearestPointIndexByDistance(points, prevCp.distance);
+        segStartIdx = prevPtIdx;
+        segDist = Math.max(0, cp.distance - prevCp.distance);
+
+        var elevResult = tm.ElevationCalculator.computeSegment(points, prevPtIdx, ptIdx, currentElevationMode);
+        segAscent = elevResult.ascent;
+        segDescent = elevResult.descent;
+
+        cumulDist += segDist;
+        cumulAscent += segAscent;
+        cumulDescent += segDescent;
+
+        // compute gradient specifics for segment
+        var maxUp = 0;
+        var hDist = 0;
+        var upAsc = 0;
+        for (var k = prevPtIdx + 1; k <= ptIdx; k++) {
+          var g = points[k].smoothedGradient !== undefined ? points[k].smoothedGradient : (points[k].gradient || 0);
+          var hd = (points[k].horizontalDistance || 0) - (points[k - 1].horizontalDistance || 0);
+          if (g > 1) {
+            maxUp = Math.max(maxUp, g);
+            upAsc += Math.max(0, points[k].elevation - points[k - 1].elevation);
+            hDist += hd;
+          }
+        }
+        maxUphillGrad = maxUp;
+        uphillAvg = hDist > 0 ? (upAsc / (hDist * 1000)) * 100 : 0;
+        segAvgGrade = segDist > 0 ? ((pt.elevation - points[prevPtIdx].elevation) / (segDist * 1000)) * 100 : 0;
+
+        // Segment time from user input or Naismith
+        if (cp.segmentTime) {
+          segTimeMinutes = u.parseTime(cp.segmentTime);
+        } else if (cp.arrivalTime) {
+          var arrMins = u.parseTime(cp.arrivalTime);
+          segTimeMinutes = Math.max(0, arrMins - cumulElapsedMinutes);
+        } else {
+          // Default estimation
+          segTimeMinutes = Math.round((segDist / 5) * 60 + (segAscent / 100) * 10);
+        }
+        cumulElapsedMinutes += segTimeMinutes + (cp.stopDuration || 0);
+      } else {
+        cumulDist = cp.distance;
+        cumulAscent = 0;
+        cumulDescent = 0;
+        cumulElapsedMinutes = 0;
+      }
+
+      // Calculate passage datetime
+      var passageDate = new Date(baseDate.getTime() + cumulElapsedMinutes * 60000);
+      var dayNight = TA.getDayNightStatus(passageDate);
+
+      // Formatting time string
+      var dayNamesZh = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+      var dayNamesEn = ['Sun.', 'Mon.', 'Tue.', 'Wed.', 'Thu.', 'Fri.', 'Sat.'];
+      var dayStr = isZH ? dayNamesZh[passageDate.getDay()] : dayNamesEn[passageDate.getDay()];
+      var hh = String(passageDate.getHours()).padStart(2, '0');
+      var mm = String(passageDate.getMinutes()).padStart(2, '0');
+      var passageTimeStr = dayStr + ' ' + hh + ':' + mm;
+
+      var nameStr = (cp.name || '').trim();
+      if (!nameStr) {
+        nameStr = (idx === 0 ? (isZH ? '起点' : 'Start') : (idx === wps.length - 1 ? (isZH ? '终点' : 'Finish') : ('CP ' + idx)));
+      }
+
+      rows.push({
+        index: idx,
+        cp: cp,
+        name: nameStr,
+        icon: cp.icon || (idx === 0 ? 'start' : (idx === wps.length - 1 ? 'finish' : 'checkpoint')),
+        cumulDist: cumulDist,
+        segDist: segDist,
+        cumulAscent: Math.round(cumulAscent),
+        cumulDescent: Math.round(cumulDescent),
+        segAscent: Math.round(segAscent),
+        segDescent: Math.round(segDescent),
+        elevation: elevation,
+        uphillAvg: uphillAvg,
+        maxUphillGrad: maxUphillGrad,
+        segAvgGrade: segAvgGrade,
+        segStartIdx: segStartIdx,
+        segEndIdx: segEndIdx,
+        segStartDist: idx > 0 ? wps[idx - 1].distance : 0,
+        segEndDist: cp.distance,
+        segTimeMinutes: segTimeMinutes,
+        stopDuration: cp.stopDuration || 0,
+        cumulElapsedMinutes: cumulElapsedMinutes,
+        passageTimeStr: passageTimeStr,
+        passageDate: passageDate,
+        dayNight: dayNight,
+        isSegmentRow: idx > 0
+      });
+    }
+
+    // Determine milestone celestial badges (avoiding duplicate/repeating suns)
+    var stateTransitions = [];
+    for (var r = 0; r < rows.length; r++) {
+      rows[r].showMilestoneBadge = false;
+      if (r > 0 && rows[r].dayNight.type !== rows[r - 1].dayNight.type) {
+        // Transition point detected (day -> sunset, sunset -> night, night -> sunrise, sunrise -> day)
+        rows[r].showMilestoneBadge = true;
+        stateTransitions.push(r);
+      }
+    }
+
+    // If NO transition occurred across all checkpoints:
+    // Place a single milestone badge at the checkpoint closest to midday (13:00) or midnight (00:00)
+    if (stateTransitions.length === 0 && rows.length > 0) {
+      var targetHour = rows[0].dayNight.isNight ? 0 : 13;
+      var bestIdx = 0;
+      var bestDiff = Infinity;
+      for (var b = 0; b < rows.length; b++) {
+        var h = rows[b].passageDate.getHours() + rows[b].passageDate.getMinutes() / 60;
+        var diff = Math.abs(h - targetHour);
+        if (diff > 12) diff = 24 - diff;
+        if (diff < bestDiff) {
+          bestDiff = diff;
+          bestIdx = b;
+        }
+      }
+      rows[bestIdx].showMilestoneBadge = true;
+    }
+
+    return rows;
   };
 
   window.TrailRoadbook.trailAnalysis = TA;

@@ -67,17 +67,15 @@
       mapSourceCyclOSM: "CyclOSM",
 
       statsGradientTitle: "📐 坡度分布与实战技术要点",
-      segmentStatsTitle: "📋 多模式分段统计",
-      segModeWaypoint: "📍 检查点",
-      segModeAuto: "📈 坡度变化",
-      segMode1km: "📏 1 km",
-      segMode5km: "📏 5 km",
-      segColNum: "#",
-      segColDist: "分段里程",
-      segColAscent: "爬升",
-      segColDescent: "下降",
-      segColAvgGrad: "平均坡度",
-      segColMaxGrad: "最大坡度",
+      segmentStatsTitle: "📋 赛段分段统计",
+      segmentStatsTip: "点击或悬停表格行可与上方剖面图及地图实时联动",
+      segColPoint: "点位名称",
+      segColProfile: "分段轮廓",
+      segColDistance: "距离",
+      segColGainLoss: "爬升 / 下降",
+      segColAltitude: "海拔",
+      segColGrade: "坡度",
+      segColTimeline: "预计抵达与时间轴",
 
       statTotalDistance: "总里程",
       statTotalAscent: "累计爬升 (D+)",
@@ -225,16 +223,14 @@
 
       statsGradientTitle: "📐 Grade Distribution & Technical Tips",
       segmentStatsTitle: "📋 Segment Statistics",
-      segModeWaypoint: "📍 Checkpoints",
-      segModeAuto: "📈 Grade Changes",
-      segMode1km: "📏 1 km",
-      segMode5km: "📏 5 km",
-      segColNum: "#",
-      segColDist: "Segment",
-      segColAscent: "Gain",
-      segColDescent: "Loss",
-      segColAvgGrad: "Avg Grade",
-      segColMaxGrad: "Max Grade",
+      segmentStatsTip: "Click or hover a row to sync with profile & map",
+      segColPoint: "Point",
+      segColProfile: "Profile",
+      segColDistance: "Distance",
+      segColGainLoss: "Gain / Loss",
+      segColAltitude: "Altitude",
+      segColGrade: "Grade",
+      segColTimeline: "ETA & Timeline",
 
       statTotalDistance: "Total Distance",
       statTotalAscent: "Elevation Gain (D+)",
@@ -529,18 +525,6 @@
       });
     }
 
-    document.querySelectorAll('.seg-mode-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        document.querySelectorAll('.seg-mode-btn').forEach(function (b) { b.classList.remove('active'); });
-        this.classList.add('active');
-        state.segmentMode = this.dataset.mode;
-        state.activeSegmentIdx = -1;
-        TR.trailAnalysis.resetSegmentCache();
-        renderSegmentTable();
-        scheduleRender();
-      });
-    });
-
     dom.btnImport.addEventListener('click', function () { dom.inputJson.click(); });
     dom.inputJson.addEventListener('change', handleJsonImport);
     dom.btnTemplateJson.addEventListener('click', handleJsonTemplateDownload);
@@ -741,10 +725,11 @@
 
     var segments = TR.trailAnalysis.analyzeSegments(
       state.trackData,
-      state.segmentMode,
+      'waypoint',
       state.checkpoints,
       state.elevationMode,
-      state.language
+      state.language,
+      state.startTime
     );
     var activeSeg = (state.activeSegmentIdx >= 0 && segments[state.activeSegmentIdx]) ? segments[state.activeSegmentIdx] : null;
 
@@ -766,8 +751,20 @@
       {
         colorMode: state.colorMode,
         activeSegment: activeSeg,
-        onHover: function (ptIdx) {
+        segments: segments,
+        onHover: function (ptIdx, pt, segIdx, seg) {
           TR.trailMap.updateMapCurrentPoint(ptIdx);
+        },
+        onSegmentHover: function (segIdx, seg) {
+          highlightTableRow(segIdx, true);
+          if (segIdx >= 0 && seg && state.activeSegmentIdx < 0) {
+            TR.trailMap.highlightSegment(seg.startIdx, seg.endIdx);
+          } else if (state.activeSegmentIdx < 0) {
+            TR.trailMap.clearSegmentHighlight();
+          }
+        },
+        onSegmentClick: function (segIdx, seg) {
+          toggleSegmentActive(segIdx);
         }
       }
     );
@@ -848,53 +845,302 @@
       buildSection(downTitle, dist.downhill);
   }
 
-  // ── 3. Zone 3: Multi-Mode Segment Statistics Table ───────────────────
-  function renderSegmentTable() {
-    if (!dom.segmentTbody || !state.trackData) return;
+  // ── Mini Elevation Profile SVG Generator (PROFIL DE SECTION - Local Zoom Window) ──
+  function generateMiniProfileSvg(trackData, startDist, endDist) {
+    if (!trackData || !trackData.points || trackData.points.length === 0) return '';
+    var points = trackData.points;
+    var totalDist = trackData.totalDistance || points[points.length - 1].distance || 1;
+
+    var segLen = Math.max(0.1, endDist - startDist);
+
+    // Dynamic context window around segment (zoomed in, like UTMB OCC)
+    var padLeft = startDist === 0 ? 0 : Math.max(segLen * 0.35, 1.5);
+    var padRight = endDist >= totalDist ? 0 : Math.max(segLen * 0.35, 1.5);
+
+    // If segment is near edges, give symmetric padding to the available side
+    if (startDist === 0) padRight = Math.max(padRight, Math.min(totalDist - endDist, segLen * 0.6 + 2.0));
+    if (endDist >= totalDist) padLeft = Math.max(padLeft, Math.min(startDist, segLen * 0.6 + 2.0));
+
+    var winStart = Math.max(0, startDist - padLeft);
+    var winEnd = Math.min(totalDist, endDist + padRight);
+
+    // Ensure window spans at least 2.5 km for short segments
+    if ((winEnd - winStart) < 2.5 && totalDist >= 2.5) {
+      var needed = 2.5 - (winEnd - winStart);
+      var addLeft = Math.min(winStart, needed / 2);
+      var addRight = Math.min(totalDist - winEnd, needed - addLeft);
+      winStart = Math.max(0, winStart - (needed - addRight));
+      winEnd = Math.min(totalDist, winEnd + addRight);
+    }
+    var winDistSpan = Math.max(0.01, winEnd - winStart);
+
+    // Extract window points and calculate local min/max elevation
+    var winPts = points.filter(function (p) {
+      return p.distance >= winStart && p.distance <= winEnd;
+    });
+    if (winPts.length < 2) {
+      var tm = window.TrailRoadbook.trailMath;
+      var pA = points[tm.findNearestPointIndexByDistance(points, winStart)];
+      var pB = points[tm.findNearestPointIndexByDistance(points, winEnd)];
+      winPts = [pA, pB];
+    }
+
+    var localMinE = Infinity;
+    var localMaxE = -Infinity;
+    winPts.forEach(function (p) {
+      if (p.elevation < localMinE) localMinE = p.elevation;
+      if (p.elevation > localMaxE) localMaxE = p.elevation;
+    });
+
+    var elevSpan = Math.max(25, localMaxE - localMinE);
+    var ePad = elevSpan * 0.16;
+    var eMin = localMinE - ePad;
+    var eMax = localMaxE + ePad;
+    var eRange = Math.max(1, eMax - eMin);
+
+    var width = 125;
+    var height = 36;
+    var padX = 4;
+    var padY = 4;
+    var innerW = width - 2 * padX;
+    var innerH = height - 2 * padY;
+
+    function scaleX(d) {
+      var ratio = Math.max(0, Math.min(1, (d - winStart) / winDistSpan));
+      return (padX + ratio * innerW).toFixed(1);
+    }
+    function scaleY(e) {
+      var ratio = Math.max(0, Math.min(1, (e - eMin) / eRange));
+      return (height - padY - ratio * innerH).toFixed(1);
+    }
+
+    // 1. Context Window Background Curve (light subtle grey)
+    var step = Math.max(1, Math.floor(winPts.length / 50));
+    var fullD = '';
+    var count = 0;
+    for (var i = 0; i < winPts.length; i += step) {
+      fullD += (count === 0 ? 'M' : 'L') + scaleX(winPts[i].distance) + ',' + scaleY(winPts[i].elevation);
+      count++;
+    }
+    var lastWinPt = winPts[winPts.length - 1];
+    fullD += 'L' + scaleX(lastWinPt.distance) + ',' + scaleY(lastWinPt.elevation);
+
+    // 2. Active Segment Curve & Gradient Area Fill (vibrant amber / orange)
+    var segPts = points.filter(function (p) {
+      return p.distance >= startDist && p.distance <= endDist;
+    });
+    if (segPts.length < 2) {
+      var tm2 = window.TrailRoadbook.trailMath;
+      var p1 = points[tm2.findNearestPointIndexByDistance(points, startDist)];
+      var p2 = points[tm2.findNearestPointIndexByDistance(points, endDist)];
+      segPts = [p1, p2];
+    }
+
+    var segStep = Math.max(1, Math.floor(segPts.length / 40));
+    var segD = '';
+    var segCount = 0;
+    var firstX = scaleX(segPts[0].distance);
+    var lastX = scaleX(segPts[segPts.length - 1].distance);
+
+    for (var j = 0; j < segPts.length; j += segStep) {
+      segD += (segCount === 0 ? 'M' : 'L') + scaleX(segPts[j].distance) + ',' + scaleY(segPts[j].elevation);
+      segCount++;
+    }
+    var finalSegPt = segPts[segPts.length - 1];
+    segD += 'L' + scaleX(finalSegPt.distance) + ',' + scaleY(finalSegPt.elevation);
+
+    var botY = (height - padY).toFixed(1);
+    var segAreaD = segD + ' L' + lastX + ',' + botY + ' L' + firstX + ',' + botY + ' Z';
+
+    var gradId = 'segGrad_' + Math.round(startDist * 10) + '_' + Math.round(endDist * 10);
+
+    return '<svg class="mini-profile-svg" viewBox="0 0 ' + width + ' ' + height + '" width="' + width + '" height="' + height + '">' +
+      '<defs>' +
+      '  <linearGradient id="' + gradId + '" x1="0%" y1="0%" x2="0%" y2="100%">' +
+      '    <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.45"/>' +
+      '    <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.04"/>' +
+      '  </linearGradient>' +
+      '</defs>' +
+      '<path d="' + fullD + '" fill="none" stroke="rgba(148,163,184,0.4)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<path d="' + segAreaD + '" fill="url(#' + gradId + ')"/>' +
+      '<path d="' + segD + '" fill="none" stroke="#f59e0b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '</svg>';
+  }
+
+  // ── Segment Active Selection & Hover Linkage Helpers ────────────────
+  function toggleSegmentActive(segIdx) {
     var segments = TR.trailAnalysis.analyzeSegments(
       state.trackData,
-      state.segmentMode,
+      'waypoint',
       state.checkpoints,
       state.elevationMode,
+      state.language,
+      state.startTime
+    );
+
+    if (state.activeSegmentIdx === segIdx) {
+      state.activeSegmentIdx = -1;
+      if (dom.segmentTbody) {
+        dom.segmentTbody.querySelectorAll('.segment-row').forEach(function (r) { r.classList.remove('active-seg-row'); });
+      }
+      TR.trailMap.clearSegmentHighlight();
+      scheduleRender();
+      return;
+    }
+
+    state.activeSegmentIdx = segIdx;
+    if (dom.segmentTbody) {
+      dom.segmentTbody.querySelectorAll('.segment-row').forEach(function (r) { r.classList.remove('active-seg-row'); });
+      var targetRow = dom.segmentTbody.querySelector('.segment-row[data-seg-idx="' + segIdx + '"]');
+      if (targetRow) {
+        targetRow.classList.add('active-seg-row');
+        targetRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    var seg = segments[segIdx];
+    if (seg) {
+      TR.trailMap.highlightSegment(seg.startIdx, seg.endIdx);
+      scheduleRender();
+    }
+  }
+
+  function highlightTableRow(segIdx, isFromHover) {
+    if (!dom.segmentTbody) return;
+    dom.segmentTbody.querySelectorAll('.segment-row').forEach(function (r) {
+      r.classList.remove('hover-seg-row');
+    });
+
+    if (segIdx >= 0) {
+      var row = dom.segmentTbody.querySelector('.segment-row[data-seg-idx="' + segIdx + '"]');
+      if (row) {
+        row.classList.add('hover-seg-row');
+      }
+    }
+  }
+
+  // ── 3. Zone 3: UTMB OCC-Style Segment Table Rendering ──────────────
+  function renderSegmentTable() {
+    if (!dom.segmentTbody || !state.trackData) return;
+    var rows = TR.trailAnalysis.generateUTMBTableRows(
+      state.trackData,
+      state.checkpoints,
+      state.elevationMode,
+      state.startTime,
       state.language
     );
 
-    var html = '';
-    segments.forEach(function (seg, idx) {
-      var isSelected = (state.activeSegmentIdx === idx);
-      var nameStr = seg.name ? (seg.name + (seg.endName ? (' → ' + seg.endName) : '')) : ('Seg ' + (idx + 1));
+    if (rows.length === 0) {
+      dom.segmentTbody.innerHTML = '';
+      return;
+    }
 
-      html += '<tr class="segment-row' + (isSelected ? ' active-seg-row' : '') + '" data-idx="' + idx + '">' +
-        '<td>' + (idx + 1) + '</td>' +
-        '<td><strong>' + esc(nameStr) + '</strong> (' + seg.distance.toFixed(1) + 'km)</td>' +
-        '<td style="color:var(--success)">+' + Math.round(seg.ascent) + 'm</td>' +
-        '<td style="color:var(--danger)">-' + Math.round(seg.descent) + 'm</td>' +
-        '<td>' + seg.uphillAvg.toFixed(1) + '%</td>' +
-        '<td>+' + seg.maxUphillGrad.toFixed(1) + '%</td>' +
+    var html = '';
+    rows.forEach(function (r, idx) {
+      var isSelected = (idx > 0 && state.activeSegmentIdx === (idx - 1));
+      var segIdx = idx - 1;
+
+      // Checkpoint badge
+      var badgeClass = 'cp-badge-default';
+      var badgeText = String(idx);
+      if (idx === 0) {
+        badgeClass = 'cp-badge-start';
+        badgeText = 'S';
+      } else if (idx === rows.length - 1) {
+        badgeClass = 'cp-badge-finish';
+        badgeText = 'F';
+      }
+
+      // Mini profile column
+      var profileHtml = '';
+      if (idx === 0) {
+        profileHtml = '<div class="mini-profile-start-placeholder"><span>🟢</span></div>';
+      } else {
+        profileHtml = generateMiniProfileSvg(state.trackData, r.segStartDist, r.segEndDist);
+      }
+
+      // Distance column: Top = Cumul, Bottom = Segment Delta
+      var distHtml = '<div class="stat-primary">' + r.cumulDist.toFixed(1) + ' km</div>' +
+        '<div class="stat-secondary">' + (r.isSegmentRow ? (r.segDist.toFixed(1) + ' km') : '-') + '</div>';
+
+      // Dénivelé column: Top = Cumul +Ascent, Bottom = +Delta / -Delta
+      var elevHtml = '<div class="stat-primary gain">+' + r.cumulAscent + ' m</div>' +
+        '<div class="stat-secondary">' + (r.isSegmentRow ? ('+' + r.segAscent + ' m | -' + r.segDescent + ' m') : '-') + '</div>';
+
+      // Altitude column
+      var altHtml = '<div class="stat-primary font-mono">' + r.elevation + ' m</div>';
+
+      // Grade column: Top = Avg Grade, Bottom = Max Grade
+      var gradeHtml = '';
+      if (r.isSegmentRow) {
+        var avgSign = r.uphillAvg > 0 ? '+' : '';
+        gradeHtml = '<div class="stat-primary">' + avgSign + r.uphillAvg.toFixed(1) + '%</div>' +
+          '<div class="stat-secondary">' + (r.maxUphillGrad > 0 ? ('Max +' + r.maxUphillGrad.toFixed(1) + '%') : '-') + '</div>';
+      } else {
+        gradeHtml = '<div class="stat-secondary">-</div>';
+      }
+
+      // Day / Night Vertical Timeline column
+      var isNight = r.dayNight.isNight;
+      var timelineLineClass = isNight ? 'timeline-bar-night' : 'timeline-bar-day';
+      var timelineBadgeClass = 'timeline-badge-' + r.dayNight.type;
+      var segTimeStr = (r.isSegmentRow && r.segTimeMinutes > 0)
+        ? ('⏱ ' + TR.utils.formatTime(r.segTimeMinutes) + (r.stopDuration > 0 ? (' · ⏸' + r.stopDuration + 'm') : ''))
+        : (idx === 0 ? (state.language === 'zh' ? '鸣枪起跑' : 'Start') : '');
+
+      var nodeHtml = '';
+      if (r.showMilestoneBadge) {
+        nodeHtml = '<div class="timeline-node ' + timelineBadgeClass + '" title="' + r.dayNight.type + '">' + r.dayNight.icon + '</div>';
+      }
+
+      var timelineHtml = '<div class="timeline-cell-wrap">' +
+        '  <div class="timeline-v-line ' + timelineLineClass + (idx === 0 ? ' line-start' : (idx === rows.length - 1 ? ' line-end' : '')) + '"></div>' +
+        nodeHtml +
+        '  <div class="timeline-time-info">' +
+        '    <div class="stat-primary font-mono">' + r.passageTimeStr + '</div>' +
+        '    <div class="stat-secondary">' + segTimeStr + '</div>' +
+        '  </div>' +
+        '</div>';
+
+      html += '<tr class="segment-row' + (isSelected ? ' active-seg-row' : '') + '" data-idx="' + idx + '" data-seg-idx="' + segIdx + '">' +
+        '  <td class="col-seg-name">' +
+        '    <div class="cp-name-cell">' +
+        '      <span class="cp-table-badge ' + badgeClass + '">' + badgeText + '</span>' +
+        '      <strong class="cp-title-text">' + esc(r.name) + '</strong>' +
+        '    </div>' +
+        '  </td>' +
+        '  <td class="col-seg-profile">' + profileHtml + '</td>' +
+        '  <td class="col-seg-dist">' + distHtml + '</td>' +
+        '  <td class="col-seg-elev">' + elevHtml + '</td>' +
+        '  <td class="col-seg-alt">' + altHtml + '</td>' +
+        '  <td class="col-seg-grade">' + gradeHtml + '</td>' +
+        '  <td class="col-seg-time">' + timelineHtml + '</td>' +
         '</tr>';
     });
 
     dom.segmentTbody.innerHTML = html;
 
+    // Attach row events
     dom.segmentTbody.querySelectorAll('.segment-row').forEach(function (tr) {
-      tr.addEventListener('click', function () {
-        var idx = parseInt(this.dataset.idx, 10);
-        if (state.activeSegmentIdx === idx) {
-          state.activeSegmentIdx = -1;
-          dom.segmentTbody.querySelectorAll('.segment-row').forEach(function (r) { r.classList.remove('active-seg-row'); });
-          TR.trailMap.clearSegmentHighlight();
-          scheduleRender();
-          return;
+      var rowIdx = parseInt(tr.dataset.idx, 10);
+      var segIdx = parseInt(tr.dataset.segIdx, 10);
+
+      tr.addEventListener('mouseenter', function () {
+        if (segIdx >= 0 && rows[rowIdx] && state.activeSegmentIdx < 0) {
+          var r = rows[rowIdx];
+          TR.trailMap.highlightSegment(r.segStartIdx, r.segEndIdx);
         }
+      });
 
-        state.activeSegmentIdx = idx;
-        dom.segmentTbody.querySelectorAll('.segment-row').forEach(function (r) { r.classList.remove('active-seg-row'); });
-        this.classList.add('active-seg-row');
+      tr.addEventListener('mouseleave', function () {
+        if (state.activeSegmentIdx < 0) {
+          TR.trailMap.clearSegmentHighlight();
+        }
+      });
 
-        var seg = segments[idx];
-        if (seg) {
-          TR.trailMap.highlightSegment(seg.startIdx, seg.endIdx);
-          scheduleRender();
+      tr.addEventListener('click', function () {
+        if (segIdx >= 0) {
+          toggleSegmentActive(segIdx);
         }
       });
     });
