@@ -67,3 +67,15 @@ Every core feature of the roadbook generator was preserved exactly as it was:
 2. **Associated Texts (Custom Chart Annotations)**: Fully adjustable inside the visual config panel, with custom alignments and coordinates.
 3. **JSON Configuration Import/Export**: The import/export buttons in the toolbar correctly serialize and load checkpoints data including the new `startTime` and nutrition fields.
 4. **Mobile Ratio Custom Downloads**: The 19.5:9 (iPhone) and 20:9 aspect ratio options generate beautiful wallpaper downloads at 1x, 2x, or 3x resolutions.
+
+---
+
+## 🔤 Profile Chart Font Unification (v7.7)
+- **Unified Sans-Serif Font**: Replaced `var(--font-mono)` ('IBM Plex Mono') across all profile chart labels with the unified modern sans-serif font `var(--font-sans)` ('Plus Jakarta Sans', system-ui, -apple-system, sans-serif).
+- **Elements Unified**:
+  - ⏱️ **Time Labels**: Cumulative arrival time and segment interval duration `(xx:xx)`.
+  - 📊 **Segment Statistics Boxes**: Segment distance (`xx.x km`), ascent (`▲ xxxm`), and descent (`▼ xxxm`).
+  - 📏 **Distance & Altitude**: Bottom cumulative distance, CP elevation labels, peak altitude labels, and Y-axis scale marks.
+  - 🏷️ **Labels & Tooltips**: Race title, custom associated texts, and interactive hover tooltip (`.chart-tooltip`).
+- **Tabular Figures**: Enabled `font-variant-numeric: tabular-nums` for numeric and time displays to ensure clean visual column and digit alignment without requiring a typewriter/monospace typeface.
+

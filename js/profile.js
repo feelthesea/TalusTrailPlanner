@@ -54,6 +54,9 @@
     return e;
   }
 
+  var FONT_FAMILY = "var(--font-sans), 'Segoe UI', system-ui, -apple-system, sans-serif";
+  var FONT_NUMERIC = "var(--font-sans), 'Segoe UI', system-ui, -apple-system, sans-serif; font-variant-numeric: tabular-nums;";
+
   var C = {
     bg:            '#fcfaf5',
     titleText:     '#1e293b',
@@ -458,7 +461,7 @@
       'text-anchor': 'middle',
       'font-size': String(fontSize + 6), 'font-weight': '700',
       fill: C.titleText, 'letter-spacing': '1.5',
-      style: "font-family: var(--font-display), 'Barlow Condensed', sans-serif"
+      style: "font-family: " + FONT_FAMILY
     }, name.toUpperCase()));
   }
 
@@ -476,7 +479,7 @@
       svg.appendChild(el('text', {
         x: 70 - 8, y: yy + 4,
         'text-anchor': 'end', 'font-size': String(fontSize - 1), fill: C.axisText,
-        style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
+        style: "font-family: " + FONT_NUMERIC
       }, Math.round(e) + 'm'));
     }
   }
@@ -723,7 +726,7 @@
         fill: C.cpName,
         'letter-spacing': '0.5',
         transform: 'rotate(-90, ' + textX + ', ' + yTop + ')',
-        style: "font-family: var(--font-sans), 'Segoe UI', system-ui, -apple-system, sans-serif; paint-order: stroke fill; stroke: " + C.bg + "; stroke-width: 3.5px; stroke-linejoin: round; stroke-linecap: round;"
+        style: "font-family: " + FONT_FAMILY + "; paint-order: stroke fill; stroke: " + C.bg + "; stroke-width: 3.5px; stroke-linejoin: round; stroke-linecap: round;"
       }, name);
 
       svg.appendChild(txtEl);
@@ -753,7 +756,7 @@
         'font-size': String(fontSize),
         'font-weight': '700',
         fill: C.elevLabel,
-        style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace; paint-order: stroke fill; stroke: " + C.bg + "; stroke-width: 3px; stroke-linejoin: round; stroke-linecap: round;"
+        style: "font-family: " + FONT_NUMERIC + " paint-order: stroke fill; stroke: " + C.bg + "; stroke-width: 3px; stroke-linejoin: round; stroke-linecap: round;"
       }, Math.round(elev) + 'm'));
     });
   }
@@ -773,7 +776,7 @@
           'font-size': String(fontSize),
           'font-weight': '700',
           fill: C.timeLabel,
-          style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
+          style: "font-family: " + FONT_NUMERIC
         }, formattedCumul));
       }
 
@@ -788,7 +791,7 @@
           'font-size': String(Math.max(fontSize - 3, 9)),
           'font-weight': '600',
           fill: C.segTimeLabel,
-          style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
+          style: "font-family: " + FONT_NUMERIC
         }, '(' + u().formatTime(segVal) + ')'));
       }
     });
@@ -810,7 +813,7 @@
           'font-weight': '600',
           'font-style': 'italic',
           fill: C.notesText,
-          style: "font-family: var(--font-sans), 'Segoe UI', system-ui, -apple-system, sans-serif"
+          style: "font-family: " + FONT_FAMILY
         }, line.trim()));
       });
     });
@@ -872,21 +875,21 @@
         x: mx, y: Y.segLine1,
         'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '800',
         fill: C.segInfoText,
-        style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
+        style: "font-family: " + FONT_NUMERIC
       }, stats.distance + ' km'));
 
       grp.appendChild(el('text', {
         x: mx, y: Y.segLine2,
         'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '700',
         fill: '#10b981',
-        style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
+        style: "font-family: " + FONT_NUMERIC
       }, '▲ ' + stats.dPlus + 'm'));
 
       grp.appendChild(el('text', {
         x: mx, y: Y.segLine3,
         'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '700',
         fill: '#ef4444',
-        style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
+        style: "font-family: " + FONT_NUMERIC
       }, '▼ ' + stats.dMinus + 'm'));
 
       (function (idxVal, segVal) {
@@ -914,7 +917,7 @@
         x: x, y: Y.cumulBase,
         'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '700',
         fill: C.cumulText,
-        style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace"
+        style: "font-family: " + FONT_NUMERIC
       }, cp.distance.toFixed(1)));
     });
   }
@@ -933,7 +936,7 @@
         x: x, y: yy - 8,
         'text-anchor': 'middle', 'font-size': String(fontSize - 2), 'font-style': 'italic',
         fill: C.peakLabel,
-        style: "font-family: var(--font-mono), 'IBM Plex Mono', monospace; paint-order: stroke fill; stroke: " + C.bg + "; stroke-width: 3px; stroke-linejoin: round;"
+        style: "font-family: " + FONT_NUMERIC + " paint-order: stroke fill; stroke: " + C.bg + "; stroke-width: 3px; stroke-linejoin: round;"
       }, Math.round(pk.elevation) + 'm'));
     });
   }
@@ -985,7 +988,8 @@
           'text-anchor': item.anchor,
           'font-size': size,
           'font-weight': '700',
-          fill: col
+          fill: col,
+          style: "font-family: " + FONT_FAMILY
         };
 
         if (orient === 'Rotated -90°') {
