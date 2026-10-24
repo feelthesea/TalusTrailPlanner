@@ -92,6 +92,7 @@
       hikingOverlay: "徒步路线",
       hikingOverlayTitle: "叠加 Waymarked Trails 标注的徒步路线",
       hikingOverlayUnavailable: "高德地图使用 GCJ-02 坐标，徒步路线叠加层对不齐，切换到其他底图后可用",
+      toastMapAutoSwitched: "地图已切换为{m}",
 
       planTitle: "比赛计划",
       planTip: "悬停或点击一行，可在剖面图和地图上定位该段",
@@ -287,6 +288,7 @@
       hikingOverlay: "Hiking routes",
       hikingOverlayTitle: "Overlay waymarked hiking routes from Waymarked Trails",
       hikingOverlayUnavailable: "Gaode maps use GCJ-02 coordinates, so the hiking overlay can't line up; pick another base map to use it",
+      toastMapAutoSwitched: "map switched to {m}",
 
       planTitle: "Race plan",
       planTip: "Hover or click a row to locate that segment on the profile and map",
@@ -763,6 +765,23 @@
     dom.btnElevSmooth.classList.toggle('active', state.elevationMode === 'smooth');
   }
 
+  // Base maps that cover China well; everything else is OpenStreetMap-based
+  var CHINA_MAP_SOURCES = ['tiandituluwang', 'tiandituweixing', 'tianditudixing', 'gaode_hybrid', 'amaproad'];
+
+  // Follow the track's region: Tianditu road map in China, OpenStreetMap elsewhere. A base map
+  // that already suits the region (e.g. satellite in China, OpenTopoMap abroad) is kept.
+  // Returns the new map's label when it switched, otherwise null.
+  function autoSelectMapForTrack(points) {
+    var inChina = TR.trailMath.isTrackInChina(points);
+    var current = TR.trailMap.getMapSource();
+    if ((CHINA_MAP_SOURCES.indexOf(current) !== -1) === inChina) return null;
+    var target = inChina ? 'tiandituluwang' : 'osm';
+    TR.trailMap.changeMapSource(target);
+    dom.selectMapSource.value = target;
+    syncHikingToggle();
+    return dom.selectMapSource.options[dom.selectMapSource.selectedIndex].textContent;
+  }
+
   // The hiking overlay can't line up with Gaode's GCJ-02 tiles: disable the toggle and say why
   function syncHikingToggle() {
     var available = TR.trailMap.isHikingOverlayAvailable();
@@ -981,7 +1000,7 @@
         }
       }
 
-      // The base map stays whatever the user picked (OpenStreetMap by default)
+      var switchedMapLabel = autoSelectMapForTrack(trackData.points);
 
       var totalDist = trackData.totalDistance;
 
@@ -1017,6 +1036,7 @@
 
       var dict = T[state.language];
       var msg = dict.toastTrackSuccess + totalDist.toFixed(1) + dict.toastTrackSuccessMid + Math.round(trackData.totalAscent) + dict.toastTrackSuccessTail;
+      if (switchedMapLabel) msg += ' · ' + dict.toastMapAutoSwitched.replace('{m}', switchedMapLabel);
       if (importedWaypoints.length) {
         // Waypoints become checkpoints automatically; make that visible and reversible
         toast(msg + ' · ' + dict.toastWaypoints.replace('{n}', importedWaypoints.length), {

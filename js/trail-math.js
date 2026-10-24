@@ -177,17 +177,45 @@
   }
   TM.outOfChina = outOfChina;
 
+  // Rough outline of China (incl. Hong Kong, Macau, Taiwan) used to pick a base map.
+  // outOfChina()'s single box also covers Korea, western Japan and Nepal, which would
+  // wrongly get Chinese base maps. Boxes are [north, west, south, east].
+  var CHINA_REGION_INCLUDE = [
+    [49.2204, 79.4462, 42.8899, 96.3300],
+    [54.1415, 109.6872, 39.3742, 135.0002],
+    [42.8899, 73.1246, 29.5297, 124.1433],
+    [29.5297, 82.9684, 26.7186, 97.0352],
+    [29.5297, 97.0253, 20.4141, 124.3674],
+    [20.4141, 107.9758, 17.8715, 111.7441]
+  ];
+  var CHINA_REGION_EXCLUDE = [
+    [22.2840, 101.8652, 20.0988, 106.6650],  // northern Laos / Vietnam
+    [21.5422, 106.4525, 20.4878, 108.0510],  // northern Vietnam coast
+    [55.8175, 109.0323, 50.3257, 119.1270],  // Russia / Mongolia border
+    [55.8175, 127.4568, 49.5574, 137.0227],  // Russian Far East
+    [44.8922, 131.2662, 42.5692, 137.0227],  // Primorye
+    [28.3000, 80.0000, 26.3000, 88.2000]     // Nepal
+  ];
+
+  function inBox(box, lat, lon) {
+    return lat <= box[0] && lon >= box[1] && lat >= box[2] && lon <= box[3];
+  }
+
+  TM.isInChinaRegion = function (lat, lon) {
+    var inside = CHINA_REGION_INCLUDE.some(function (b) { return inBox(b, lat, lon); });
+    return inside && !CHINA_REGION_EXCLUDE.some(function (b) { return inBox(b, lat, lon); });
+  };
+
+  // True when most of the track lies in China (sampled at ~20 points)
   TM.isTrackInChina = function (points) {
     if (!points || points.length === 0) return true;
     var step = Math.max(1, Math.floor(points.length / 20));
-    var outCount = 0, totalSampled = 0;
+    var inCount = 0, totalSampled = 0;
     for (var i = 0; i < points.length; i += step) {
       totalSampled++;
-      if (outOfChina(points[i].lat, points[i].lon)) {
-        outCount++;
-      }
+      if (TM.isInChinaRegion(points[i].lat, points[i].lon)) inCount++;
     }
-    return (outCount / totalSampled) < 0.5;
+    return (inCount / totalSampled) >= 0.5;
   };
 
   function transformLat(x, y) {
