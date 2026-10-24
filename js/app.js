@@ -18,45 +18,68 @@
   // ── i18n Translation Dictionary ─────────────────────────────────────
   var T = {
     zh: {
-      pageTitle: "🏔️ Talus - Trail Roadbook Generator",
-      headerSubtitle: "越野跑路书与轨迹分析",
       vibeCodedBy: "Vibe coded by",
-      uploadTrack: "上传轨迹 (GPX/KML/KMZ)",
-      uploadTrackTitle: "上传 GPX / KML / KMZ 轨迹文件",
+      footerPrivacy: "轨迹和路书数据只在你的浏览器本地处理",
       raceNameLabel: "比赛名称",
+      raceNamePlaceholder: "未命名赛事",
       raceStartLabel: "出发时间",
-      elevCalcModeLabel: "⚡ 爬升计算",
-      elevModeRaw: "原始数据",
-      elevModeSmooth: "平滑 (4m)",
-      colorModeLabel: "🎨 剖面着色",
-      colorModeClassic: "经典路书柱条",
-      colorModeGradient: "按坡度渐变",
-      colorModeElevation: "按海拔渐变",
-      importJson: "导入 JSON",
-      importJsonTitle: "从 JSON 文件导入检查点与配置",
-      downloadTemplate: "下载模板",
-      downloadTemplateTitle: "下载配置 JSON 模板",
-      exportJson: "导出 JSON",
-      exportJsonTitle: "导出检查点与配置为 JSON 文件",
-      languageLabel: "🌐 语言",
-      exportRatioLabel: "导出比例",
-      ratioAuto: "默认自适应 (无白边)",
-      ratio19_5_9: "19.5:9横屏（iPhone 17/16）",
-      ratio20_9: "20:9（小米、华为、安卓）",
-      downloadPng: "下载图片 ▾",
-      scale1: "1× 标准分辨率",
-      scale2: "2× 高清 (推荐)",
-      scale3: "3× 超高清 (打印)",
-      placeholderText: "上传 GPX / KML / KMZ 文件以生成高程剖面路书",
-      placeholderTextSub: "Upload a GPX/KML/KMZ file to generate the roadbook & map",
 
-      zone1Title: "📈 统一路书高程剖面图 (Unified Roadbook Profile)",
-      zone1Tip: "鼠标或手指滑动可实时在地图上追踪位置，分段及文字直接联动",
-      mapExplorerTitle: "🗺️ 交互式轨迹地图",
+      importMenu: "导入",
+      exportMenu: "导出",
+      uploadTrack: "上传轨迹文件",
+      importJson: "导入路书配置",
+      downloadTemplate: "下载配置模板",
+      exportJson: "导出路书配置",
+      exportPngLabel: "PNG 路书图片",
+      scale1: "标准 1×",
+      scale2: "高清 2×",
+      scale2Tag: "推荐",
+      scale3: "超清 3×",
+      scale3Tag: "打印",
+
+      step1: "上传轨迹",
+      step2: "设置 CP",
+      step3: "目标时间",
+      step4: "微调分段",
+      step5: "导出路书",
+      stepOptional: "可选",
+      hintStep1: "先上传比赛路线：把 GPX / KML / KMZ 文件拖到下方剖面区域，或者点右边的按钮选择文件。",
+      hintStep1Action: "选择文件",
+      hintStep2: "添加途中的 CP / 补给站，并填写它们距起点的距离。",
+      hintStep2Action: "添加 CP",
+      hintStep3: "填写每段的预计用时。没填的段会按默认配速估算（标有 ≈）。",
+      hintStep3Action: "去填写",
+      hintStep5: "可以导出路书了。也可以先在列表里微调某段用时或停留时间。",
+      hintStep5Action: "导出图片",
+      hintAllDone: "路书已导出。之后修改任何内容，都可以随时重新导出。",
+
+      zone1Title: "路书剖面",
+      zone1Tip: "在剖面上移动鼠标或手指，地图会同步显示位置；点击分段可以高亮该段",
+      canvasLabel: "画布",
+      ratioAuto: "自适应",
+      ratio19_5_9Title: "19.5:9 横屏（适配 iPhone 等）",
+      ratio20_9Title: "20:9 横屏（适配小米、华为等安卓手机）",
+      colorModeLabel: "着色",
+      colorModeClassic: "经典",
+      colorModeGradient: "坡度",
+      colorModeElevation: "海拔",
+      elevCalcModeLabel: "爬升",
+      elevModeRaw: "原始",
+      elevModeSmooth: "平滑",
+      elevModeRawTitle: "直接累加原始海拔数据",
+      elevModeSmoothTitle: "过滤 4 m 以内的 GPS 噪点（推荐，更接近手表和官方数据）",
+      btnFontSizes: "字号",
+      btnFontSizesTitle: "配置各元素字号大小",
+      dropTitle: "把 GPX / KML / KMZ 文件拖到这里",
+      dropSub: "文件只在你的浏览器里处理，不会上传到任何服务器",
+      dropChoose: "选择文件",
+      loadSample: "用示例赛道试一试",
+      dropImportJson: "或导入已保存的路书配置 (JSON)",
+
+      mapExplorerTitle: "交互式轨迹地图",
       mapSourceLabel: "底图图层",
       btnFitMap: "居中全景",
       btnFitMapTitle: "自动缩放至全景轨迹",
-
       mapSourceTiandituVec: "天地图路网 (推荐)",
       mapSourceTiandituSat: "天地图卫星",
       mapSourceTiandituTer: "天地图地形",
@@ -66,8 +89,8 @@
       mapSourceOpenTopo: "OpenTopoMap",
       mapSourceCyclOSM: "CyclOSM",
 
-      statsGradientTitle: "📐 坡度分布与实战技术要点",
-      segmentStatsTitle: "📋 赛段分段统计",
+      statsGradientTitle: "坡度分布与实战技术要点",
+      segmentStatsTitle: "赛段分段统计",
       segmentStatsTip: "点击或悬停表格行可与上方剖面图及地图实时联动",
       segColPoint: "点位名称",
       segColProfile: "分段轮廓",
@@ -88,23 +111,20 @@
       statUphillDist: "上坡距离",
       statDownhillDist: "下坡距离",
 
-      cpTableTitle: "📍 CP 点 / 补给站 列表",
-      cpTableTip: "点击「⚙️」打开详细视觉配置浮窗",
+      cpTableTitle: "CP 点 / 补给站",
       colNum: "#",
       colName: "名称",
       colDist: "距起点 (km)",
       colTime: "分段用时",
       colNotes: "备注 (支持回车多行)",
       addCpBtn: "添加 CP 点",
-      poiPanelTitle: "📍 检查点详细视觉配置",
+      poiPanelTitle: "检查点详细视觉配置",
       poiCol1Title: "基本信息",
       poiCol1Pos: "CP位置距离 (公里)",
       poiCol1Intermediate: "用于分段统计点 (划分子赛段)",
       poiCol1FontSizesTitle: "各元素字号大小设置 (像素)",
-      btnFontSizes: "字号设置",
-      btnFontSizesTitle: "配置各元素字号大小",
       btnReset: "重置默认",
-      toastFontSizesSaved: "各元素字号设置已保存并应用！",
+      toastFontSizesSaved: "字号设置已保存并应用",
       fsLabelTitle: "比赛名称",
       fsLabelCpName: "CP点名称",
       fsLabelCpElev: "CP海拔",
@@ -143,19 +163,21 @@
       iconDanger: "⚡ 危险",
 
       toastAddCp: "已添加新CP点，位置为 ",
-      toastAddCpTail: " 公里 ✓",
-      toastTrackSuccess: "轨迹载入成功：全长 ",
+      toastAddCpTail: " 公里",
+      toastTrackSuccess: "轨迹已载入：全长 ",
       toastTrackSuccessMid: " km，累计爬升 +",
-      toastTrackSuccessTail: "m ✓",
+      toastTrackSuccessTail: " m",
       toastTrackError: "轨迹解析错误：",
-      toastImportSuccess: "配置导入成功 ✓",
+      toastImportSuccess: "配置已导入",
       toastImportError: "导入格式错误：",
-      toastExportSuccess: "配置导出成功 ✓",
+      toastExportSuccess: "配置已导出",
       toastGpxFirst: "请先上传比赛路线的 GPX / KML / KMZ 文件。",
       toastExporting: "正在导出 ",
       toastKeepOne: "必须保留至少一个检查点。",
-      toastDeleted: "检查点已删除 ✓",
-      toastTemplateSuccess: "模板 JSON 下载成功 ✓",
+      toastDeleted: "检查点已删除",
+      toastTemplateSuccess: "模板已下载",
+      toastSampleError: "示例赛道加载失败：",
+      toastUnsupportedFile: "不支持的文件类型。请使用 GPX / KML / KMZ 轨迹或 JSON 配置。",
       newCpName: "新检查点",
       deleteCpTitle: "删除此CP",
       settingsCpTitle: "配置此CP视觉属性",
@@ -166,52 +188,75 @@
       placeholderTextNone: "无",
 
       btnCancel: "取消",
-      btnSaveApply: "✓ 保存并应用",
+      btnSaveApply: "保存并应用",
 
-      labelStopDuration: "⏸️ 停留时间 (分钟)",
+      labelStopDuration: "停留时间 (分钟)",
       labelPassage: "通过",
-      toastMapFallback: "天地图图层加载受阻，已自动为您切换至备用地图图层（高德/OSM） ✓"
+      toastMapFallback: "天地图图层加载受阻，已自动切换到备用地图（高德 / OSM）"
     },
     en: {
-      pageTitle: "🏔️ Talus - Trail Roadbook Generator",
-      headerSubtitle: "Trail Roadbook & Track Analytics",
       vibeCodedBy: "Vibe coded by",
-      uploadTrack: "Upload Track (GPX/KML/KMZ)",
-      uploadTrackTitle: "Upload GPX / KML / KMZ route file",
-      raceNameLabel: "Race Name",
-      raceStartLabel: "Start Time",
-      elevCalcModeLabel: "⚡ Elevation Calc",
-      elevModeRaw: "Raw Data",
-      elevModeSmooth: "Smooth (4m)",
-      colorModeLabel: "🎨 Profile Color",
-      colorModeClassic: "Classic Colors",
-      colorModeGradient: "By Grade Gradient",
-      colorModeElevation: "By Elevation Gradient",
-      importJson: "Import JSON",
-      importJsonTitle: "Import checkpoints & settings from JSON",
-      downloadTemplate: "Template",
-      downloadTemplateTitle: "Download JSON template",
-      exportJson: "Export JSON",
-      exportJsonTitle: "Export checkpoints & settings as JSON",
-      languageLabel: "🌐 Language",
-      exportRatioLabel: "Aspect Ratio",
-      ratioAuto: "Auto-fit (No Padding)",
-      ratio19_5_9: "19.5:9 Landscape (iPhone 17/16)",
-      ratio20_9: "20:9 Landscape (Android/Xiaomi)",
-      downloadPng: "Download PNG ▾",
-      scale1: "1× Standard",
-      scale2: "2× HD (Recommended)",
-      scale3: "3× Ultra HD (Print)",
-      placeholderText: "Upload GPX / KML / KMZ file to generate the roadbook",
-      placeholderTextSub: "Upload a GPX/KML/KMZ file to generate the roadbook & map",
+      footerPrivacy: "Your tracks and roadbooks are processed locally in your browser",
+      raceNameLabel: "Race name",
+      raceNamePlaceholder: "Untitled race",
+      raceStartLabel: "Start time",
 
-      zone1Title: "📈 Unified Roadbook Elevation Profile",
-      zone1Tip: "Hover/touch to track real-time position on map, all segments & text linked",
-      mapExplorerTitle: "🗺️ Interactive Trail Map",
-      mapSourceLabel: "Base Map",
-      btnFitMap: "Center Map",
-      btnFitMapTitle: "Auto zoom and fit entire track",
+      importMenu: "Import",
+      exportMenu: "Export",
+      uploadTrack: "Upload track file",
+      importJson: "Import roadbook settings",
+      downloadTemplate: "Download template",
+      exportJson: "Export roadbook settings",
+      exportPngLabel: "PNG roadbook image",
+      scale1: "Standard 1×",
+      scale2: "HD 2×",
+      scale2Tag: "Recommended",
+      scale3: "Ultra HD 3×",
+      scale3Tag: "Print",
 
+      step1: "Upload track",
+      step2: "Set checkpoints",
+      step3: "Target time",
+      step4: "Fine-tune",
+      step5: "Export",
+      stepOptional: "optional",
+      hintStep1: "Start with the race route: drop a GPX / KML / KMZ file on the profile area below, or choose a file.",
+      hintStep1Action: "Choose file",
+      hintStep2: "Add the checkpoints and aid stations along the route, with their distance from the start.",
+      hintStep2Action: "Add checkpoint",
+      hintStep3: "Enter the expected time for each segment. Blank segments use a default pace (marked ≈).",
+      hintStep3Action: "Fill in times",
+      hintStep5: "Your roadbook is ready to export. You can still fine-tune segment or stop times first.",
+      hintStep5Action: "Export image",
+      hintAllDone: "Roadbook exported. Change anything and export again whenever you like.",
+
+      zone1Title: "Roadbook profile",
+      zone1Tip: "Move over the profile to follow the position on the map; click a segment to highlight it",
+      canvasLabel: "Canvas",
+      ratioAuto: "Auto",
+      ratio19_5_9Title: "19.5:9 landscape (iPhone and similar)",
+      ratio20_9Title: "20:9 landscape (most Android phones)",
+      colorModeLabel: "Colors",
+      colorModeClassic: "Classic",
+      colorModeGradient: "Grade",
+      colorModeElevation: "Elevation",
+      elevCalcModeLabel: "Gain",
+      elevModeRaw: "Raw",
+      elevModeSmooth: "Smooth",
+      elevModeRawTitle: "Sum the raw elevation data as recorded",
+      elevModeSmoothTitle: "Filter GPS noise under 4 m (recommended, closer to watches and official figures)",
+      btnFontSizes: "Font sizes",
+      btnFontSizesTitle: "Configure font sizes",
+      dropTitle: "Drop a GPX / KML / KMZ file here",
+      dropSub: "Files are processed in your browser and never uploaded to a server",
+      dropChoose: "Choose file",
+      loadSample: "Try a sample course",
+      dropImportJson: "or import saved roadbook settings (JSON)",
+
+      mapExplorerTitle: "Interactive trail map",
+      mapSourceLabel: "Base map",
+      btnFitMap: "Fit track",
+      btnFitMapTitle: "Zoom to the whole track",
       mapSourceTiandituVec: "Tianditu Road (Recommended)",
       mapSourceTiandituSat: "Tianditu Satellite",
       mapSourceTiandituTer: "Tianditu Terrain",
@@ -221,16 +266,16 @@
       mapSourceOpenTopo: "OpenTopoMap",
       mapSourceCyclOSM: "CyclOSM",
 
-      statsGradientTitle: "📐 Grade Distribution & Technical Tips",
-      segmentStatsTitle: "📋 Segment Statistics",
-      segmentStatsTip: "Click or hover a row to sync with profile & map",
+      statsGradientTitle: "Grade distribution and technique tips",
+      segmentStatsTitle: "Segment statistics",
+      segmentStatsTip: "Click or hover a row to sync with the profile and map",
       segColPoint: "Point",
       segColProfile: "Profile",
       segColDistance: "Distance",
       segColGainLoss: "Gain / Loss",
       segColAltitude: "Altitude",
       segColGrade: "Grade",
-      segColTimeline: "ETA & Timeline",
+      segColTimeline: "ETA and timeline",
 
       statTotalDistance: "Total Distance",
       statTotalAscent: "Elevation Gain (D+)",
@@ -243,23 +288,20 @@
       statUphillDist: "Uphill Dist",
       statDownhillDist: "Downhill Dist",
 
-      cpTableTitle: "📍 Checkpoint / CP List",
-      cpTableTip: "Click「⚙️」to open visual settings popup",
+      cpTableTitle: "Checkpoints",
       colNum: "#",
       colName: "Name",
       colDist: "Distance (km)",
       colTime: "Segment Duration",
       colNotes: "Notes (supports Enter)",
-      addCpBtn: "Add Checkpoint",
-      poiPanelTitle: "📍 Checkpoint Visual Settings",
+      addCpBtn: "Add checkpoint",
+      poiPanelTitle: "Checkpoint visual settings",
       poiCol1Title: "Basic Info",
       poiCol1Pos: "CP Distance (km)",
       poiCol1Intermediate: "Use for segment split stats",
-      poiCol1FontSizesTitle: "Granular Font Sizes (px)",
-      btnFontSizes: "Font Sizes",
-      btnFontSizesTitle: "Configure Granular Font Sizes",
-      btnReset: "Reset Defaults",
-      toastFontSizesSaved: "Font size settings saved and applied!",
+      poiCol1FontSizesTitle: "Font sizes (px)",
+      btnReset: "Reset defaults",
+      toastFontSizesSaved: "Font sizes saved",
       fsLabelTitle: "Race Title",
       fsLabelCpName: "CP Name",
       fsLabelCpElev: "CP Elevation",
@@ -297,20 +339,22 @@
       iconPeak: "🏔️ Peak",
       iconDanger: "⚡ Danger",
 
-      toastAddCp: "Added new Checkpoint at ",
-      toastAddCpTail: " km ✓",
-      toastTrackSuccess: "Track loaded successfully: Total ",
-      toastTrackSuccessMid: " km, Gain +",
-      toastTrackSuccessTail: "m ✓",
-      toastTrackError: "Track Parse Error: ",
-      toastImportSuccess: "Configuration imported successfully ✓",
+      toastAddCp: "Added a checkpoint at ",
+      toastAddCpTail: " km",
+      toastTrackSuccess: "Track loaded: ",
+      toastTrackSuccessMid: " km, gain +",
+      toastTrackSuccessTail: " m",
+      toastTrackError: "Couldn't read the track: ",
+      toastImportSuccess: "Settings imported",
       toastImportError: "Import format error: ",
-      toastExportSuccess: "Configuration exported successfully ✓",
-      toastGpxFirst: "Please upload the GPX / KML / KMZ route file first.",
+      toastExportSuccess: "Settings exported",
+      toastGpxFirst: "Upload the race route (GPX / KML / KMZ) first.",
       toastExporting: "Exporting ",
-      toastKeepOne: "Must keep at least one checkpoint.",
-      toastDeleted: "Checkpoint deleted ✓",
-      toastTemplateSuccess: "Template JSON downloaded successfully ✓",
+      toastKeepOne: "Keep at least one checkpoint.",
+      toastDeleted: "Checkpoint deleted",
+      toastTemplateSuccess: "Template downloaded",
+      toastSampleError: "Couldn't load the sample course: ",
+      toastUnsupportedFile: "Unsupported file type. Use a GPX / KML / KMZ track or a JSON settings file.",
       newCpName: "New Checkpoint",
       deleteCpTitle: "Delete Checkpoint",
       settingsCpTitle: "Configure Checkpoint Visuals",
@@ -321,11 +365,11 @@
       placeholderTextNone: "None",
 
       btnCancel: "Cancel",
-      btnSaveApply: "✓ Save & Apply",
+      btnSaveApply: "Save and apply",
 
-      labelStopDuration: "⏸️ Stop Duration (min)",
+      labelStopDuration: "Stop Duration (min)",
       labelPassage: "Passage",
-      toastMapFallback: "Tianditu tiles failed to load, automatically switched to backup map (Gaode/OSM) ✓"
+      toastMapFallback: "Tianditu tiles failed to load, switched to a backup map (Gaode / OSM)"
     }
   };
 
@@ -360,8 +404,9 @@
     activeCPIndex: 0,
     elevationMode: 'smooth',  // 'smooth' | 'raw'
     colorMode: 'classic',     // 'classic' | 'gradient' | 'elevation'
-    segmentMode: 'waypoint',  // 'waypoint' | 'auto' | '1000' | '5000'
+    exportRatio: '20-9',      // 'auto' | '19.5-9' | '20-9' — shapes the on-screen profile too
     activeSegmentIdx: -1,
+    hasExported: false,
     fontSizeTitle: 18,
     fontSizeCPName: 20,
     fontSizeCPElev: 11,
@@ -376,31 +421,50 @@
   TR.state = state;
   TR.elevationMode = state.elevationMode;
 
+  var SAMPLE_TRACK_URL = 'samples/sample-trail.gpx';
+
   // ── DOM References ──────────────────────────────────────────────────
   var dom = {};
 
   function init() {
-    // Toolbar Elements
+    // App bar: race name, import / export menus, language
+    dom.inputName         = document.getElementById('input-name');
+    dom.btnImportMenu     = document.getElementById('btn-import-menu');
+    dom.importMenu        = document.getElementById('import-menu');
     dom.btnGpx            = document.getElementById('btn-gpx');
     dom.inputGpx          = document.getElementById('input-gpx');
-    dom.inputName         = document.getElementById('input-name');
-    dom.inputStartTime    = document.getElementById('input-start-time');
-    dom.btnElevRaw        = document.getElementById('btn-elev-raw');
-    dom.btnElevSmooth     = document.getElementById('btn-elev-smooth');
-    dom.selectColorMode   = document.getElementById('select-color-mode');
     dom.btnImport         = document.getElementById('btn-import');
     dom.inputJson         = document.getElementById('input-json');
     dom.btnTemplateJson   = document.getElementById('btn-template-json');
-    dom.btnExportJson     = document.getElementById('btn-export-json');
     dom.btnExportImg      = document.getElementById('btn-export-img');
     dom.exportMenu        = document.getElementById('export-menu');
-    dom.exportRatio       = document.getElementById('export-ratio');
-    dom.selectLang        = document.getElementById('select-lang');
+    dom.btnExportJson     = document.getElementById('btn-export-json');
+    dom.langButtons       = document.querySelectorAll('.lang-toggle [data-lang]');
     dom.toast             = document.getElementById('toast');
+    dom.toastText         = document.getElementById('toast-text');
+    dom.toastAction       = document.getElementById('toast-action');
 
-    // Zone 1: Profile & Font Sizes Modal
+    // Step bar
+    dom.stepBar           = document.getElementById('step-bar');
+    dom.stepButtons       = document.querySelectorAll('#step-bar .step');
+    dom.stepHint          = document.getElementById('step-hint');
+    dom.stepHintText      = document.getElementById('step-hint-text');
+    dom.stepHintAction    = document.getElementById('step-hint-action');
+
+    // Sections (scroll targets for the step bar)
+    dom.sectionProfile    = document.getElementById('section-profile');
+    dom.sectionPlan       = document.getElementById('section-plan');
+
+    // Zone 1: Profile, view settings & Font Sizes Modal
     dom.profileContainer  = document.getElementById('profile-container');
     dom.placeholder       = document.getElementById('profile-placeholder');
+    dom.btnDropChoose     = document.getElementById('btn-drop-choose');
+    dom.btnLoadSample     = document.getElementById('btn-load-sample');
+    dom.btnDropImportJson = document.getElementById('btn-drop-import-json');
+    dom.ratioButtons      = document.querySelectorAll('#ratio-control [data-ratio]');
+    dom.colorModeButtons  = document.querySelectorAll('#color-mode-control [data-color-mode]');
+    dom.btnElevRaw        = document.getElementById('btn-elev-raw');
+    dom.btnElevSmooth     = document.getElementById('btn-elev-smooth');
     dom.btnOpenFontSizes  = document.getElementById('btn-open-font-sizes');
     dom.fsModalBackdrop   = document.getElementById('fs-modal-backdrop');
     dom.btnFsModalClose   = document.getElementById('btn-fs-modal-close');
@@ -415,16 +479,17 @@
     dom.fsSegment         = document.getElementById('fs-segment');
     dom.fsCumulDist       = document.getElementById('fs-cumuldist');
 
-    // Zone 2: Map & Gradient Distribution
+    // Plan: start time, CP Table & Segment Statistics
+    dom.inputStartTime    = document.getElementById('input-start-time');
+    dom.cpTbody           = document.getElementById('cp-tbody');
+    dom.btnAddCp          = document.getElementById('btn-add-cp');
+    dom.segmentTbody      = document.getElementById('segment-tbody');
+
+    // Analysis: Map & Gradient Distribution
     dom.selectMapSource   = document.getElementById('select-map-source');
     dom.btnFitMap         = document.getElementById('btn-fit-map');
     dom.trailStatCards    = document.getElementById('trail-stat-cards');
     dom.gradientDistContent = document.getElementById('gradient-distribution-content');
-
-    // Zone 3: CP Table & Segment Statistics
-    dom.cpTbody           = document.getElementById('cp-tbody');
-    dom.btnAddCp          = document.getElementById('btn-add-cp');
-    dom.segmentTbody      = document.getElementById('segment-tbody');
 
     // Floating Modal Elements
     dom.modalBackdrop     = document.getElementById('cp-modal-backdrop');
@@ -460,7 +525,6 @@
     TR.trailMap.initMap('leafletMap');
 
     state.language = detectLanguage();
-    if (dom.selectLang) dom.selectLang.value = state.language;
 
     if (state.checkpoints.length === 0) {
       var isZH = (state.language === 'zh');
@@ -476,6 +540,7 @@
     normalizeAllCPs();
     bindEvents();
     bindModalEvents();
+    bindDragAndDrop();
     applyLanguage();
   }
 
@@ -498,15 +563,23 @@
       });
     }
 
+    // View settings in the profile header
     dom.btnElevRaw.addEventListener('click', function () { setElevationMode('raw'); });
     dom.btnElevSmooth.addEventListener('click', function () { setElevationMode('smooth'); });
-
-    if (dom.selectColorMode) {
-      dom.selectColorMode.addEventListener('change', function () {
-        state.colorMode = this.value;
+    dom.colorModeButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.colorMode = this.dataset.colorMode;
+        syncViewControls();
         renderAllComponents();
       });
-    }
+    });
+    dom.ratioButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.exportRatio = this.dataset.ratio;
+        syncViewControls();
+        scheduleRender();
+      });
+    });
 
     if (dom.selectMapSource) {
       dom.selectMapSource.addEventListener('change', function () {
@@ -531,27 +604,48 @@
     dom.btnTemplateJson.addEventListener('click', handleJsonTemplateDownload);
     dom.btnExportJson.addEventListener('click', handleJsonExport);
 
-    dom.selectLang.addEventListener('change', function () {
-      state.language = this.value;
-      applyLanguage();
+    dom.langButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (state.language === this.dataset.lang) return;
+        state.language = this.dataset.lang;
+        applyLanguage();
+      });
     });
 
-    dom.btnExportImg.addEventListener('click', function (e) {
-      e.stopPropagation();
-      dom.exportMenu.classList.toggle('open');
-    });
-    dom.exportMenu.querySelectorAll('button').forEach(function (btn) {
+    // Import / export menus
+    bindDropdown(dom.btnImportMenu, dom.importMenu);
+    bindDropdown(dom.btnExportImg, dom.exportMenu);
+    dom.exportMenu.querySelectorAll('[data-scale]').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        dom.exportMenu.classList.remove('open');
         handleImageExport(parseInt(this.dataset.scale, 10));
       });
     });
-    document.addEventListener('click', function () {
-      dom.exportMenu.classList.remove('open');
+    document.addEventListener('click', closeMenus);
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      closeMenus();
+      closeCPModal();
+      closeFontSizesModal();
+    });
+
+    // Empty state (drop zone) actions
+    dom.btnDropChoose.addEventListener('click', function () { dom.inputGpx.click(); });
+    dom.btnLoadSample.addEventListener('click', loadSampleTrack);
+    dom.btnDropImportJson.addEventListener('click', function () { dom.inputJson.click(); });
+
+    // Step bar
+    dom.stepButtons.forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation(); // step 5 opens the export menu; keep the document handler from closing it
+        goToStep(parseInt(this.dataset.step, 10));
+      });
+    });
+    dom.stepHintAction.addEventListener('click', function (e) {
+      e.stopPropagation();
+      runStepAction(parseInt(this.dataset.step, 10));
     });
 
     dom.btnAddCp.addEventListener('click', handleAddCP);
-    dom.exportRatio.addEventListener('change', scheduleRender);
 
     // CP Table Event Delegation
     if (dom.cpTbody) {
@@ -571,6 +665,163 @@
       dom.fsModalBackdrop.addEventListener('click', function (e) {
         if (e.target === dom.fsModalBackdrop) closeFontSizesModal();
       });
+    }
+  }
+
+  // ── Dropdown Menus ──────────────────────────────────────────────────
+  function bindDropdown(button, menu) {
+    button.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var willOpen = !menu.classList.contains('open');
+      closeMenus();
+      if (willOpen) openMenu(button, menu);
+    });
+    // Picking an item closes the menu (the document handler would too, but items stop nothing)
+    menu.addEventListener('click', function (e) {
+      if (e.target.closest('button')) closeMenus();
+    });
+  }
+
+  function openMenu(button, menu) {
+    menu.classList.add('open');
+    button.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeMenus() {
+    document.querySelectorAll('.dropdown-menu.open').forEach(function (menu) { menu.classList.remove('open'); });
+    document.querySelectorAll('[aria-expanded="true"]').forEach(function (btn) { btn.setAttribute('aria-expanded', 'false'); });
+  }
+
+  // Segmented controls and the language toggle mirror state (also after a JSON import)
+  function syncViewControls() {
+    dom.langButtons.forEach(function (btn) { btn.classList.toggle('active', btn.dataset.lang === state.language); });
+    dom.colorModeButtons.forEach(function (btn) { btn.classList.toggle('active', btn.dataset.colorMode === state.colorMode); });
+    dom.ratioButtons.forEach(function (btn) { btn.classList.toggle('active', btn.dataset.ratio === state.exportRatio); });
+    dom.btnElevRaw.classList.toggle('active', state.elevationMode === 'raw');
+    dom.btnElevSmooth.classList.toggle('active', state.elevationMode === 'smooth');
+  }
+
+  // ── Drag & Drop Upload ──────────────────────────────────────────────
+  function bindDragAndDrop() {
+    var depth = 0;
+    function hasFiles(e) {
+      return e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') !== -1;
+    }
+    document.addEventListener('dragenter', function (e) {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      depth++;
+      document.body.classList.add('drag-over');
+    });
+    document.addEventListener('dragover', function (e) {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+    });
+    document.addEventListener('dragleave', function (e) {
+      if (!hasFiles(e)) return;
+      depth = Math.max(0, depth - 1);
+      if (depth === 0) document.body.classList.remove('drag-over');
+    });
+    document.addEventListener('drop', function (e) {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      depth = 0;
+      document.body.classList.remove('drag-over');
+      var file = e.dataTransfer.files[0];
+      if (!file) return;
+      var ext = file.name.split('.').pop().toLowerCase();
+      if (ext === 'gpx' || ext === 'kml' || ext === 'kmz') {
+        loadTrackFile(file);
+      } else if (ext === 'json') {
+        importJsonFile(file);
+      } else {
+        toast(T[state.language].toastUnsupportedFile);
+      }
+    });
+  }
+
+  // ── Step Bar (workflow guidance) ────────────────────────────────────
+  // Progress is derived from the data rather than enforced: every step stays clickable.
+  function getStepStatus() {
+    var hasTrack = !!state.trackData;
+    var plan = TR.trailAnalysis.computeTimePlan(state.trackpoints, state.checkpoints, state.elevationMode);
+    var timesSet = plan.length > 1 && plan.every(function (entry) { return !entry.segEstimated; });
+    var tuned = state.checkpoints.some(function (cp) { return cp.stopDuration > 0; });
+    var done = {
+      1: hasTrack,
+      2: hasTrack && state.checkpoints.length > 2,
+      3: hasTrack && timesSet,
+      4: hasTrack && tuned,
+      5: state.hasExported
+    };
+    // Step 4 is optional fine-tuning, so the guidance skips from 3 to 5
+    var current = !done[1] ? 1 : (!done[2] ? 2 : (!done[3] ? 3 : (!done[5] ? 5 : 0)));
+    return { done: done, current: current };
+  }
+
+  function updateStepBar() {
+    if (!dom.stepBar) return;
+    var dict = T[state.language];
+    var status = getStepStatus();
+
+    dom.stepButtons.forEach(function (btn) {
+      var n = parseInt(btn.dataset.step, 10);
+      var isCurrent = (n === status.current);
+      var isDone = !!status.done[n] && !isCurrent;
+      btn.classList.toggle('current', isCurrent);
+      btn.classList.toggle('done', isDone);
+      btn.parentNode.classList.toggle('is-current', isCurrent);
+      if (isCurrent) btn.setAttribute('aria-current', 'step'); else btn.removeAttribute('aria-current');
+      btn.querySelector('.step-num').innerHTML = isDone
+        ? '<svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>'
+        : String(n);
+    });
+
+    var cur = status.current;
+    dom.stepHint.classList.toggle('all-done', !cur);
+    dom.stepHintText.textContent = cur ? dict['hintStep' + cur] : dict.hintAllDone;
+    var actionLabel = cur ? dict['hintStep' + cur + 'Action'] : '';
+    dom.stepHintAction.textContent = actionLabel || '';
+    dom.stepHintAction.dataset.step = String(cur);
+    dom.stepHintAction.classList.toggle('hidden', !actionLabel);
+  }
+
+  function scrollToSection(el) {
+    if (!el) return;
+    var appBar = document.getElementById('app-bar');
+    var offset = (appBar ? appBar.offsetHeight : 0) + 12;
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - offset, behavior: 'smooth' });
+  }
+
+  function goToStep(n) {
+    if (n === 1) {
+      if (state.trackData) scrollToSection(dom.sectionProfile);
+      else dom.inputGpx.click();
+    } else if (n === 5) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      openMenu(dom.btnExportImg, dom.exportMenu);
+    } else {
+      scrollToSection(dom.sectionPlan);
+      if (n === 3) focusFirstBlankTime();
+    }
+  }
+
+  function runStepAction(n) {
+    if (n === 1) {
+      dom.inputGpx.click();
+    } else if (n === 2) {
+      handleAddCP();
+      scrollToSection(dom.sectionPlan);
+    } else {
+      goToStep(n);
+    }
+  }
+
+  function focusFirstBlankTime() {
+    var inputs = dom.cpTbody.querySelectorAll('input[data-field="segmentTime"]:not([disabled])');
+    for (var i = 0; i < inputs.length; i++) {
+      if (!inputs[i].value) { inputs[i].focus({ preventScroll: true }); return; }
     }
   }
 
@@ -618,7 +869,29 @@
   // ── Track Upload (GPX / KML / KMZ) ──────────────────────────────────
   function handleTrackUpload() {
     var file = dom.inputGpx.files[0];
-    if (!file) return;
+    dom.inputGpx.value = '';
+    if (file) loadTrackFile(file);
+  }
+
+  function loadSampleTrack() {
+    fetch(SAMPLE_TRACK_URL)
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.text();
+      })
+      .then(function (text) {
+        if (!state.raceName) {
+          state.raceName = (state.language === 'zh') ? '示例赛道' : 'Sample course';
+          dom.inputName.value = state.raceName;
+        }
+        loadTrackFile(new File([text], 'sample-trail.gpx', { type: 'application/gpx+xml' }));
+      })
+      .catch(function (err) {
+        toast(T[state.language].toastSampleError + err.message);
+      });
+  }
+
+  function loadTrackFile(file) {
     state.trackFileName = file.name;
 
     TR.gpxParser.parseFile(file, state.elevationMode).then(function (trackData) {
@@ -681,8 +954,6 @@
     }).catch(function (err) {
       toast(T[state.language].toastTrackError + err.message);
     });
-
-    dom.inputGpx.value = '';
   }
 
   // ── Elevation Calculation Mode Switch ───────────────────────────────
@@ -708,10 +979,12 @@
   function renderAllComponents() {
     if (!state.trackData) return;
     renderProfile();
-    TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints);
     renderTrailSummaryStats();
     renderGradientDistribution();
     renderSegmentTable();
+    // Draw (and fit) the map last, once the panels around it have their final size
+    TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints);
+    updateStepBar();
   }
 
   // ── 1. Zone 1: Unified Profile Rendering ────────────────────────────
@@ -749,7 +1022,7 @@
         segment: state.fontSizeSegment,
         cumulDist: state.fontSizeCumulDist
       },
-      dom.exportRatio.value,
+      state.exportRatio,
       {
         colorMode: state.colorMode,
         activeSegment: activeSeg,
@@ -1207,14 +1480,15 @@
         '<td class="col-dist"><input type="number" data-idx="' + globalIdx + '" data-field="distance" value="' + cp.distance + '" step="0.1" min="0"></td>' +
         '<td class="col-time"><input type="text" data-idx="' + globalIdx + '" data-field="segmentTime" value="' + esc(cp.segmentTime || '') + '" placeholder="' + esc(timePlaceholder) + '"' + (idx === 0 ? ' disabled' : '') + '></td>' +
         '<td class="col-action">' +
-        '  <button type="button" class="btn-settings" data-idx="' + globalIdx + '" title="' + T[lang].settingsCpTitle + '">⚙️</button>' +
-        '  <button type="button" class="btn-delete" data-idx="' + globalIdx + '" title="' + T[lang].deleteCpTitle + '">✕</button>' +
+        '  <button type="button" class="btn-settings" data-idx="' + globalIdx + '" title="' + T[lang].settingsCpTitle + '" aria-label="' + T[lang].settingsCpTitle + '"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg></button>' +
+        '  <button type="button" class="btn-delete" data-idx="' + globalIdx + '" title="' + T[lang].deleteCpTitle + '" aria-label="' + T[lang].deleteCpTitle + '"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>' +
         '</td>' +
         detailsHtml +
         '</tr>';
     });
 
     dom.cpTbody.innerHTML = html;
+    updateStepBar();
   }
 
   function handleCPTableClick(e) {
@@ -1386,7 +1660,7 @@
     var cp = state.checkpoints[cpIndex];
     if (!cp) return;
 
-    dom.modalCpTitle.textContent = '📍 ' + (cp.name || 'CP' + cpIndex) + ' — ' + T[state.language].poiPanelTitle;
+    dom.modalCpTitle.textContent = (cp.name || 'CP' + cpIndex) + ' — ' + T[state.language].poiPanelTitle;
 
     dom.poiNameDetail.value = cp.name || '';
     dom.poiPosition.value = cp.distance;
@@ -1600,7 +1874,11 @@
   // ── JSON Import / Export / Template ─────────────────────────────────
   function handleJsonImport() {
     var file = dom.inputJson.files[0];
-    if (!file) return;
+    dom.inputJson.value = '';
+    if (file) importJsonFile(file);
+  }
+
+  function importJsonFile(file) {
     var reader = new FileReader();
     reader.onload = function (e) {
       try {
@@ -1613,12 +1891,10 @@
         if (data.fontSizeCPNotes) state.fontSizeCPNotes = parseInt(data.fontSizeCPNotes, 10);
         if (data.fontSizeSegment) state.fontSizeSegment = parseInt(data.fontSizeSegment, 10);
         if (data.fontSizeCumulDist) state.fontSizeCumulDist = parseInt(data.fontSizeCumulDist, 10);
-        if (data.language) state.language = data.language;
-        if (data.colorMode) {
-          state.colorMode = data.colorMode;
-          if (dom.selectColorMode) dom.selectColorMode.value = data.colorMode;
-        }
-        if (data.elevationMode) setElevationMode(data.elevationMode);
+        if (data.language === 'zh' || data.language === 'en') state.language = data.language;
+        if (['classic', 'gradient', 'elevation'].indexOf(data.colorMode) !== -1) state.colorMode = data.colorMode;
+        if (['auto', '19.5-9', '20-9'].indexOf(data.exportRatio) !== -1) state.exportRatio = data.exportRatio;
+        if (data.elevationMode === 'raw' || data.elevationMode === 'smooth') setElevationMode(data.elevationMode);
         if (data.startTime) {
           state.startTime = data.startTime;
           if (dom.inputStartTime) dom.inputStartTime.value = data.startTime;
@@ -1634,7 +1910,6 @@
       }
     };
     reader.readAsText(file);
-    dom.inputJson.value = '';
   }
 
   function handleJsonExport() {
@@ -1642,6 +1917,7 @@
       raceName: state.raceName,
       elevationMode: state.elevationMode,
       colorMode: state.colorMode,
+      exportRatio: state.exportRatio,
       fontSizeTitle: state.fontSizeTitle,
       fontSizeCPName: state.fontSizeCPName,
       fontSizeCPElev: state.fontSizeCPElev,
@@ -1710,17 +1986,32 @@
       return;
     }
     var filename = (state.raceName || 'roadbook').replace(/[^a-zA-Z0-9_\-\u4e00-\u9fff]/g, '_');
-    var ratio = dom.exportRatio.value;
+    var ratio = state.exportRatio;
     TR.exporter.exportToPNG(svgEl, scale, filename, ratio);
     toast(T[state.language].toastExporting + scale + '× PNG (' + ratio + ')…');
+    state.hasExported = true;
+    updateStepBar();
   }
 
+  // options: { actionLabel, onAction } adds a button (e.g. "Undo") and keeps the toast up longer
   var toastTimer = null;
-  function toast(msg) {
-    dom.toast.textContent = msg;
+  function toast(msg, options) {
+    options = options || {};
+    dom.toastText.textContent = msg;
+    dom.toastAction.onclick = null;
+    if (options.actionLabel && options.onAction) {
+      dom.toastAction.textContent = options.actionLabel;
+      dom.toastAction.onclick = function () {
+        dom.toast.classList.remove('show');
+        options.onAction();
+      };
+      dom.toastAction.classList.remove('hidden');
+    } else {
+      dom.toastAction.classList.add('hidden');
+    }
     dom.toast.classList.add('show');
     if (toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { dom.toast.classList.remove('show'); }, 3000);
+    toastTimer = setTimeout(function () { dom.toast.classList.remove('show'); }, options.onAction ? 7000 : 3000);
   }
 
   function applyLanguage() {
@@ -1742,6 +2033,13 @@
       if (dict[key] !== undefined) el.title = dict[key];
     });
 
+    document.querySelectorAll('[data-i18n-aria]').forEach(function (el) {
+      var key = el.dataset.i18nAria;
+      if (dict[key] !== undefined) el.setAttribute('aria-label', dict[key]);
+    });
+
+    document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
+    syncViewControls();
     renderCPTable();
     if (state.trackData) {
       TR.trailAnalysis.resetSegmentCache();

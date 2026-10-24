@@ -136,6 +136,12 @@
 
     TM_Map.changeMapSource('tiandituluwang');
 
+    // Leaflet only re-measures on window resize; the panel also grows when the
+    // analysis next to it fills in, which leaves tiles and fitBounds misaligned.
+    if (window.ResizeObserver) {
+      new ResizeObserver(function () { leafletMap.invalidateSize(); }).observe(container);
+    }
+
     leafletMap.on('click', function () {
       if (segmentHighlightLayer) {
         leafletMap.removeLayer(segmentHighlightLayer);
@@ -321,6 +327,7 @@
 
   TM_Map.fitMapToTrack = function () {
     if (!leafletMap || !trackDataRef || !trackDataRef.points || trackDataRef.points.length === 0) return;
+    leafletMap.invalidateSize();
     var bounds = L.latLngBounds(trackDataRef.points.map(function (p) { return displayLatLng(p); }));
     leafletMap.fitBounds(bounds, { padding: [30, 30] });
   };
