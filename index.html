@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Talus - Trail Roadbook Generator & Trail Analytics — 越野跑路书与轨迹分析</title>
   <meta name="description" content="Upload GPX/KML/KMZ tracks and create a beautiful interactive trail roadbook with synchronized map, gradient distribution, and segment statistics.">
-  <link rel="stylesheet" href="fonts/fonts.css?v=8.0">
+  <link rel="stylesheet" href="fonts/fonts.css?v=8.1">
   <link rel="stylesheet" href="css/leaflet.css">
-  <link rel="stylesheet" href="style.css?v=8.0">
+  <link rel="stylesheet" href="style.css?v=8.1">
 </head>
 <body>
 
@@ -256,15 +256,21 @@
           </h3>
           <div class="map-controls-group">
             <select id="select-map-source" class="input-field" aria-label="底图图层" data-i18n-aria="mapSourceLabel">
-              <option value="tiandituluwang" data-i18n="mapSourceTiandituVec">天地图路网 (推荐)</option>
+              <option value="osm" data-i18n="mapSourceOSM">OpenStreetMap</option>
+              <option value="osm_hot" data-i18n="mapSourceOSMHot">OSM Humanitarian</option>
+              <option value="opentopomap" data-i18n="mapSourceOpenTopo">OpenTopoMap</option>
+              <option value="cyclosm" data-i18n="mapSourceCyclOSM">CyclOSM</option>
+              <option value="tiandituluwang" data-i18n="mapSourceTiandituVec">天地图路网</option>
               <option value="tiandituweixing" data-i18n="mapSourceTiandituSat">天地图卫星</option>
               <option value="tianditudixing" data-i18n="mapSourceTiandituTer">天地图地形</option>
               <option value="gaode_hybrid" data-i18n="mapSourceGaodeSat">高德混合图</option>
               <option value="amaproad" data-i18n="mapSourceGaodeRoad">高德路网图</option>
-              <option value="osm" data-i18n="mapSourceOSM">OpenStreetMap</option>
-              <option value="opentopomap" data-i18n="mapSourceOpenTopo">OpenTopoMap</option>
-              <option value="cyclosm" data-i18n="mapSourceCyclOSM">CyclOSM</option>
             </select>
+            <label class="map-overlay-toggle" id="hiking-overlay-label" title="叠加 Waymarked Trails 标注的徒步路线" data-i18n-title="hikingOverlayTitle">
+              <input type="checkbox" id="toggle-hiking-overlay">
+              <svg class="icon icon-sm" aria-hidden="true"><use href="#i-route"/></svg>
+              <span data-i18n="hikingOverlay">徒步路线</span>
+            </label>
             <button type="button" class="btn btn-sm" id="btn-fit-map" title="适应全图" data-i18n-title="btnFitMapTitle">
               <svg class="icon" aria-hidden="true"><use href="#i-target"/></svg>
               <span data-i18n="btnFitMap">居中全景</span>
@@ -508,13 +514,13 @@
 
   <!-- ═══ Scripts ═══ -->
   <script src="js/leaflet.js"></script>
-  <script src="js/utils.js?v=8.0"></script>
-  <script src="js/trail-math.js?v=8.0"></script>
-  <script src="js/gpx-parser.js?v=8.0"></script>
-  <script src="js/trail-analysis.js?v=8.0"></script>
-  <script src="js/trail-map.js?v=8.0"></script>
-  <script src="js/profile.js?v=8.0"></script>
-  <script src="js/export.js?v=8.0"></script>
-  <script src="js/app.js?v=8.0"></script>
+  <script src="js/utils.js?v=8.1"></script>
+  <script src="js/trail-math.js?v=8.1"></script>
+  <script src="js/gpx-parser.js?v=8.1"></script>
+  <script src="js/trail-analysis.js?v=8.1"></script>
+  <script src="js/trail-map.js?v=8.1"></script>
+  <script src="js/profile.js?v=8.1"></script>
+  <script src="js/export.js?v=8.1"></script>
+  <script src="js/app.js?v=8.1"></script>
 </body>
 </html>

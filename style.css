@@ -597,8 +597,26 @@ body.drag-over .drop-zone {
 .map-controls-group {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
+.map-overlay-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--border-accent);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.map-overlay-toggle input { accent-color: var(--accent); margin: 0; }
+.map-overlay-toggle.is-disabled { opacity: 0.5; cursor: not-allowed; }
 .map-container-wrap {
   flex: 1;
   min-height: 380px;

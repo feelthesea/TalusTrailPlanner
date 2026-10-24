@@ -22,7 +22,7 @@ Load a GPX / KML / KMZ route, mark your checkpoints on the elevation profile, en
 - 📈 **Interactive roadbook profile**: Move over the profile to see distance, altitude, and grade while the map marker follows. Clicking a table row or a profile segment highlights it on the profile, map, and table at once.
 - 🎨 **3 color modes**: Classic bars, grade gradient, elevation gradient.
 - ⚡ **2 gain algorithms**: Smooth (4 m hysteresis, filters GPS / barometer noise and is closer to watch and official figures) and raw data.
-- 🗺️ **Multi-source map**: Tianditu (road / satellite / terrain), Gaode (hybrid / road, with automatic WGS-84 → GCJ-02 correction), OpenStreetMap, OpenTopoMap, CyclOSM. The base map is picked from the track's location (Tianditu in China, OSM elsewhere) and falls back automatically if Tianditu tiles fail.
+- 🗺️ **Multi-source map**: OpenStreetMap (default), OSM Humanitarian, OpenTopoMap (contour/topographic), CyclOSM, plus Tianditu (road / satellite / terrain) and Gaode (hybrid / road, with automatic WGS-84 → GCJ-02 correction); switch at any time. Tick "Hiking routes" to overlay waymarked hiking routes from [Waymarked Trails](https://hiking.waymarkedtrails.org) (not available on Gaode, whose coordinate system doesn't line up). If you pick Tianditu and its tiles fail to load, the map falls back automatically.
 - 📐 **6-level grade distribution and tips**: Uphill and downhill split into 6 levels (≤5%, 5–10%, 10–15%, 15–25%, 25–35%, >35%) with cadence, pole, posture, and shock-absorption advice.
 - 🖌️ **Checkpoint styling**: 9 aid-station icons, guide line color and thickness, custom labels at 6 positions inside the chart (with rotation), and multi-line notes.
 - 📱 **Wallpaper-ready export**: Canvas ratio Auto, 19.5:9 (iPhone and similar), or 20:9 (most Android phones), at 1× / 2× / 3×. Exported images embed the web fonts, so they match what you see on screen.
@@ -39,8 +39,7 @@ The page reads top to bottom in workflow order: **Roadbook profile → Race plan
 2. On load, Talus automatically:
    - draws the elevation profile and places the finish at the end of the track;
    - turns GPX waypoints into checkpoints (Undo is in the notification);
-   - uses the first point's timestamp as the start time, if the track has one;
-   - picks a suitable base map for the track's location.
+   - uses the first point's timestamp as the start time, if the track has one.
 3. Just exploring? Click "Try a sample course" to load a synthetic ~42 km demo course.
 
 ### Step 2: Set checkpoints

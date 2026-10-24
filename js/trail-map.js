@@ -23,7 +23,8 @@
 
   var leafletMap = null;
   var currentTileLayer = null;
-  var currentMapSource = 'tiandituluwang';
+  var DEFAULT_MAP_SOURCE = 'osm';
+  var currentMapSource = DEFAULT_MAP_SOURCE;
   var useGCJ02Display = false;
   var trackLayers = [];
   var waypointMarkers = [];
@@ -31,6 +32,12 @@
   var segmentHighlightLayer = null;
   var trackDataRef = null;
   var colorModeRef = 'gradient';
+  var checkpointsRef = null;
+
+  // OSM-based tile servers require visible attribution (see their tile usage policies)
+  var OSM_CREDIT = '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
+  var TIANDITU_CREDIT = '© <a href="https://www.tianditu.gov.cn/" target="_blank" rel="noopener">天地图</a>';
+  var GAODE_CREDIT = '© 高德地图';
 
   var mapSources = {
     tiandituluwang: {
@@ -54,30 +61,45 @@
       url: 'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
       subdomains: ['1', '2', '3', '4'],
       maxZoom: 18,
-      attribution: '© 高德地图'
+      attribution: GAODE_CREDIT
     },
     osm: {
       name: 'OpenStreetMap',
-      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      maxZoom: 19,
+      attribution: OSM_CREDIT
+    },
+    osm_hot: {
+      name: 'OSM Humanitarian',
+      url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
       subdomains: 'abc',
       maxZoom: 19,
-      attribution: '© OpenStreetMap'
+      attribution: OSM_CREDIT + ' | Tiles style by <a href="https://www.hotosm.org/" target="_blank" rel="noopener">HOT</a>, hosted by <a href="https://openstreetmap.fr/" target="_blank" rel="noopener">OSM France</a>'
     },
     opentopomap: {
       name: 'OpenTopoMap',
       url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
       subdomains: 'abc',
       maxZoom: 17,
-      attribution: '© OpenTopoMap'
+      attribution: OSM_CREDIT + ', SRTM | © <a href="https://opentopomap.org" target="_blank" rel="noopener">OpenTopoMap</a> (CC-BY-SA)'
     },
     cyclosm: {
       name: 'CyclOSM',
       url: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
       subdomains: 'abc',
       maxZoom: 19,
-      attribution: '© CyclOSM'
+      attribution: '© <a href="https://www.cyclosm.org" target="_blank" rel="noopener">CyclOSM</a> | ' + OSM_CREDIT
     }
   };
+
+  // Transparent overlay of waymarked hiking routes, drawn on top of any WGS-84 base map
+  var HIKING_OVERLAY = {
+    url: 'https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png',
+    maxNativeZoom: 18,
+    attribution: '© <a href="https://hiking.waymarkedtrails.org" target="_blank" rel="noopener">Waymarked Trails</a> (CC-BY-SA)'
+  };
+  var hikingOverlayLayer = null;
+  var hikingOverlayWanted = false;
 
   function escapeHtml(s) {
     return String(s == null ? '' : s)
@@ -129,12 +151,13 @@
 
     leafletMap = L.map(container, {
       zoomControl: true,
-      attributionControl: false,
+      attributionControl: true,
       scrollWheelZoom: true,
       preferCanvas: true
     }).setView([30.0, 102.0], 12);
+    leafletMap.attributionControl.setPrefix(false);
 
-    TM_Map.changeMapSource('tiandituluwang');
+    TM_Map.changeMapSource(DEFAULT_MAP_SOURCE);
 
     // Leaflet only re-measures on window resize; the panel also grows when the
     // analysis next to it fills in, which leaves tiles and fitBounds misaligned.
@@ -154,7 +177,7 @@
 
   TM_Map.changeMapSource = function (sourceKey) {
     if (!leafletMap) return;
-    if (!sourceKey || !mapSources[sourceKey]) sourceKey = 'tiandituluwang';
+    if (!sourceKey || !mapSources[sourceKey]) sourceKey = DEFAULT_MAP_SOURCE;
     currentMapSource = sourceKey;
 
     var prevGCJ = useGCJ02Display;
@@ -187,28 +210,28 @@
 
     if (config.type === 'tianditu_vec') {
       var r = L.tileLayer('https://t{s}.tianditu.gov.cn/cva_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cva&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tiandituKey, { subdomains: ['0','1','2','3','4','5','6','7'], maxZoom: 18 });
-      var v = L.tileLayer('https://t{s}.tianditu.gov.cn/vec_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tiandituKey, { subdomains: ['0','1','2','3','4','5','6','7'], maxZoom: 18 });
+      var v = L.tileLayer('https://t{s}.tianditu.gov.cn/vec_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tiandituKey, { subdomains: ['0','1','2','3','4','5','6','7'], maxZoom: 18, attribution: TIANDITU_CREDIT });
       v.on('tileerror', handleTiandituError);
       r.on('tileerror', handleTiandituError);
       v.setZIndex(5); r.setZIndex(10);
       currentTileLayer = L.layerGroup([v, r]).addTo(leafletMap);
     } else if (config.type === 'tianditu_img') {
       var r2 = L.tileLayer('https://t{s}.tianditu.gov.cn/cia_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cia&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tiandituKey, { subdomains: ['0','1','2','3','4','5','6','7'], maxZoom: 18 });
-      var s2 = L.tileLayer('https://t{s}.tianditu.gov.cn/img_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tiandituKey, { subdomains: ['0','1','2','3','4','5','6','7'], maxZoom: 18 });
+      var s2 = L.tileLayer('https://t{s}.tianditu.gov.cn/img_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tiandituKey, { subdomains: ['0','1','2','3','4','5','6','7'], maxZoom: 18, attribution: TIANDITU_CREDIT });
       s2.on('tileerror', handleTiandituError);
       r2.on('tileerror', handleTiandituError);
       s2.setZIndex(5); r2.setZIndex(10);
       currentTileLayer = L.layerGroup([s2, r2]).addTo(leafletMap);
     } else if (config.type === 'tianditu_ter') {
       var r3 = L.tileLayer('https://t{s}.tianditu.gov.cn/cta_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cta&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tiandituKey, { subdomains: ['0','1','2','3','4','5','6','7'], maxZoom: 14 });
-      var t3 = L.tileLayer('https://t{s}.tianditu.gov.cn/ter_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ter&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tiandituKey, { subdomains: ['0','1','2','3','4','5','6','7'], maxZoom: 14 });
+      var t3 = L.tileLayer('https://t{s}.tianditu.gov.cn/ter_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ter&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tiandituKey, { subdomains: ['0','1','2','3','4','5','6','7'], maxZoom: 14, attribution: TIANDITU_CREDIT });
       t3.on('tileerror', handleTiandituError);
       r3.on('tileerror', handleTiandituError);
       t3.setZIndex(5); r3.setZIndex(10);
       currentTileLayer = L.layerGroup([t3, r3]).addTo(leafletMap);
     } else if (config.type === 'gaode_hybrid') {
       var gRoad = L.tileLayer('https://wprd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=8&x={x}&y={y}&z={z}', { subdomains: ['1','2','3','4'], maxZoom: 18 });
-      var gSat = L.tileLayer('https://wprd0{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}', { subdomains: ['1','2','3','4'], maxZoom: 18 });
+      var gSat = L.tileLayer('https://wprd0{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}', { subdomains: ['1','2','3','4'], maxZoom: 18, attribution: GAODE_CREDIT });
       gSat.setZIndex(5); gRoad.setZIndex(10);
       currentTileLayer = L.layerGroup([gSat, gRoad]).addTo(leafletMap);
     } else {
@@ -220,19 +243,48 @@
     }
 
     if (trackDataRef && prevGCJ !== useGCJ02Display) {
-      TM_Map.drawMap(trackDataRef, colorModeRef, null, true);
+      TM_Map.drawMap(trackDataRef, colorModeRef, checkpointsRef, true);
     }
+    syncHikingOverlay();
   };
 
   TM_Map.getMapSource = function () {
     return currentMapSource;
   };
 
+  // Gaode tiles are in GCJ-02, so a WGS-84 overlay would sit a few hundred metres off there
+  TM_Map.isHikingOverlayAvailable = function () {
+    return !useGCJ02Display;
+  };
+
+  TM_Map.setHikingOverlay = function (on) {
+    hikingOverlayWanted = !!on;
+    syncHikingOverlay();
+  };
+
+  function syncHikingOverlay() {
+    if (!leafletMap) return;
+    var show = hikingOverlayWanted && !useGCJ02Display;
+    if (show && !hikingOverlayLayer) {
+      hikingOverlayLayer = L.tileLayer(HIKING_OVERLAY.url, {
+        maxNativeZoom: HIKING_OVERLAY.maxNativeZoom,
+        maxZoom: 19,
+        opacity: 0.9,
+        zIndex: 20,
+        attribution: HIKING_OVERLAY.attribution
+      }).addTo(leafletMap);
+    } else if (!show && hikingOverlayLayer) {
+      leafletMap.removeLayer(hikingOverlayLayer);
+      hikingOverlayLayer = null;
+    }
+  }
+
   // ── Track & Markers Drawing ──────────────────────────────────────────
   TM_Map.drawMap = function (trackData, colorMode, customCPs, skipFit) {
     if (!leafletMap || !trackData || !trackData.points || trackData.points.length === 0) return;
     trackDataRef = trackData;
     colorModeRef = colorMode || 'gradient';
+    checkpointsRef = customCPs || null;
 
     trackLayers.forEach(function (l) { leafletMap.removeLayer(l); });
     trackLayers = [];

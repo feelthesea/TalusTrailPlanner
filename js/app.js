@@ -80,14 +80,18 @@
       mapSourceLabel: "底图图层",
       btnFitMap: "居中全景",
       btnFitMapTitle: "自动缩放至全景轨迹",
-      mapSourceTiandituVec: "天地图路网 (推荐)",
+      mapSourceTiandituVec: "天地图路网",
       mapSourceTiandituSat: "天地图卫星",
       mapSourceTiandituTer: "天地图地形",
       mapSourceGaodeSat: "高德混合图",
       mapSourceGaodeRoad: "高德路网图",
       mapSourceOSM: "OpenStreetMap",
+      mapSourceOSMHot: "OSM 人道主义风格",
       mapSourceOpenTopo: "OpenTopoMap",
       mapSourceCyclOSM: "CyclOSM",
+      hikingOverlay: "徒步路线",
+      hikingOverlayTitle: "叠加 Waymarked Trails 标注的徒步路线",
+      hikingOverlayUnavailable: "高德地图使用 GCJ-02 坐标，徒步路线叠加层对不齐，切换到其他底图后可用",
 
       planTitle: "比赛计划",
       planTip: "悬停或点击一行，可在剖面图和地图上定位该段",
@@ -271,14 +275,18 @@
       mapSourceLabel: "Base map",
       btnFitMap: "Fit track",
       btnFitMapTitle: "Zoom to the whole track",
-      mapSourceTiandituVec: "Tianditu Road (Recommended)",
+      mapSourceTiandituVec: "Tianditu Road",
       mapSourceTiandituSat: "Tianditu Satellite",
       mapSourceTiandituTer: "Tianditu Terrain",
       mapSourceGaodeSat: "Gaode Hybrid",
       mapSourceGaodeRoad: "Gaode Road",
       mapSourceOSM: "OpenStreetMap",
+      mapSourceOSMHot: "OSM Humanitarian",
       mapSourceOpenTopo: "OpenTopoMap",
       mapSourceCyclOSM: "CyclOSM",
+      hikingOverlay: "Hiking routes",
+      hikingOverlayTitle: "Overlay waymarked hiking routes from Waymarked Trails",
+      hikingOverlayUnavailable: "Gaode maps use GCJ-02 coordinates, so the hiking overlay can't line up; pick another base map to use it",
 
       planTitle: "Race plan",
       planTip: "Hover or click a row to locate that segment on the profile and map",
@@ -517,6 +525,8 @@
 
     // Analysis: Map & Gradient Distribution
     dom.selectMapSource   = document.getElementById('select-map-source');
+    dom.toggleHiking      = document.getElementById('toggle-hiking-overlay');
+    dom.hikingLabel       = document.getElementById('hiking-overlay-label');
     dom.btnFitMap         = document.getElementById('btn-fit-map');
     dom.trailStatCards    = document.getElementById('trail-stat-cards');
     dom.gradientDistContent = document.getElementById('gradient-distribution-content');
@@ -621,12 +631,18 @@
     if (dom.selectMapSource) {
       dom.selectMapSource.addEventListener('change', function () {
         TR.trailMap.changeMapSource(this.value);
+        syncHikingToggle();
       });
     }
+
+    dom.toggleHiking.addEventListener('change', function () {
+      TR.trailMap.setHikingOverlay(this.checked);
+    });
 
     // Auto Fallback callback for Map Tiles
     TR.trailMap.onFallback = function (fallbackSource, oldSource) {
       if (dom.selectMapSource) dom.selectMapSource.value = fallbackSource;
+      syncHikingToggle();
       toast(T[state.language].toastMapFallback);
     };
 
@@ -745,6 +761,15 @@
     dom.ratioButtons.forEach(function (btn) { btn.classList.toggle('active', btn.dataset.ratio === state.exportRatio); });
     dom.btnElevRaw.classList.toggle('active', state.elevationMode === 'raw');
     dom.btnElevSmooth.classList.toggle('active', state.elevationMode === 'smooth');
+  }
+
+  // The hiking overlay can't line up with Gaode's GCJ-02 tiles: disable the toggle and say why
+  function syncHikingToggle() {
+    var available = TR.trailMap.isHikingOverlayAvailable();
+    var dict = T[state.language];
+    dom.toggleHiking.disabled = !available;
+    dom.hikingLabel.classList.toggle('is-disabled', !available);
+    dom.hikingLabel.title = available ? dict.hikingOverlayTitle : dict.hikingOverlayUnavailable;
   }
 
   // ── Drag & Drop Upload ──────────────────────────────────────────────
@@ -956,13 +981,7 @@
         }
       }
 
-      // Auto-detect base map layer: if outside China, default to OpenStreetMap ('osm')
-      var inChina = TR.trailMath.isTrackInChina(trackData.points);
-      var autoMapSource = inChina ? 'tiandituluwang' : 'osm';
-      if (dom.selectMapSource) {
-        dom.selectMapSource.value = autoMapSource;
-      }
-      TR.trailMap.changeMapSource(autoMapSource);
+      // The base map stays whatever the user picked (OpenStreetMap by default)
 
       var totalDist = trackData.totalDistance;
 
@@ -2075,6 +2094,7 @@
 
     document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
     syncViewControls();
+    syncHikingToggle();
     if (state.trackData) {
       TR.trailAnalysis.resetSegmentCache();
       renderAllComponents();
