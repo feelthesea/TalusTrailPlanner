@@ -48,7 +48,13 @@
       return h2 * 60 + m2;
     }
 
-    // Handle strings like "1h30", "1h 30m", "1h30min", "2h", "45m", "1小时30分", "45分钟"
+    // Handle "1h30" / "1h 30" / "1小时30" (minutes without a unit after the hours)
+    var hm = str.match(/^(\d+)\s*(?:h|hr|hrs|hours?|小时|时)\s*(\d{1,2})$/i);
+    if (hm) {
+      return parseInt(hm[1], 10) * 60 + parseInt(hm[2], 10);
+    }
+
+    // Handle strings like "1h 30m", "1h30min", "2h", "45m", "1小时30分", "45分钟"
     var hMatch = str.match(/(\d+(?:\.\d+)?)\s*(?:h|hr|hrs|hours?|小时|时)/i);
     var mMatch = str.match(/(\d+)\s*(?:m|min|mins|minutes?|分钟|分)/i);
     if (hMatch || mMatch) {

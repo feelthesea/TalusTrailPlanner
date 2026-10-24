@@ -246,41 +246,77 @@
     return Math.round((Math.max(0, distKm) / 5) * 60 + (Math.max(0, ascentM) / 100) * 10);
   };
 
+  // ITRA-style "effort distance": 100 m of climbing costs about as much as 1 km on the flat
+  TA.effortKm = function (distKm, ascentM) {
+    return Math.max(0, distKm) + Math.max(0, ascentM) / 100;
+  };
+
+  // Splits `budget` minutes in proportion to `weights`, rounding so the parts still add up exactly
+  function splitMinutes(budget, weights) {
+    var total = weights.reduce(function (s, w) { return s + w; }, 0);
+    var exact = weights.map(function (w) { return total > 0 ? budget * w / total : budget / weights.length; });
+    var parts = exact.map(Math.floor);
+    var left = budget - parts.reduce(function (s, p) { return s + p; }, 0);
+    exact.map(function (x, i) { return { i: i, frac: x - parts[i] }; })
+      .sort(function (a, b) { return b.frac - a.frac; })
+      .slice(0, left)
+      .forEach(function (r) { parts[r.i]++; });
+    return parts;
+  }
+
   /**
-   * Single source of truth for race timing, shared by the profile, CP table and segment table.
+   * Single source of truth for race timing, shared by the profile and the plan table.
    * Entries follow the checkpoints sorted by distance. All values are minutes since the start:
    *  - arrivalMinutes   = Σ segment times up to this CP + Σ stops at *previous* CPs
    *  - departureMinutes = arrivalMinutes + this CP's stop
-   * Blank segment times are estimated (segEstimated) and flag every later arrival (arrivalEstimated).
+   * Each segment time comes from (segSource):
+   *  - 'manual'  — typed by the user, i.e. locked;
+   *  - 'target'  — its share of the target finish time left after manual segments and stops,
+   *                split by effort distance;
+   *  - 'default' — no target: the default pace estimate (segEstimated, flags later arrivals).
    */
-  TA.computeTimePlan = function (points, checkpoints, elevationMode) {
+  TA.computeTimePlan = function (points, checkpoints, elevationMode, targetMinutes) {
     var u = window.TrailRoadbook.utils;
     var sorted = (checkpoints || []).slice().sort(function (a, b) { return a.distance - b.distance; });
+    var hasPoints = points && points.length > 1;
+
+    var segs = sorted.map(function (cp, i) {
+      if (i === 0) return { source: 'manual', minutes: 0 };
+      var raw = (cp.segmentTime === null || cp.segmentTime === undefined) ? '' : String(cp.segmentTime).trim();
+      if (raw !== '') return { source: 'manual', minutes: u.parseTime(raw) };
+      var prev = sorted[i - 1];
+      var dist = cp.distance - prev.distance;
+      var ascent = hasPoints ? u.segmentStats(points, prev.distance, cp.distance, elevationMode).dPlus : 0;
+      return { source: 'default', minutes: TA.estimateSegmentMinutes(dist, ascent), effort: TA.effortKm(dist, ascent) };
+    });
+
+    var autoSegs = segs.filter(function (s) { return s.source !== 'manual'; });
+    if (targetMinutes > 0 && autoSegs.length > 0) {
+      var fixed = 0;
+      segs.forEach(function (s, i) {
+        if (s.source === 'manual') fixed += s.minutes;
+        if (i < sorted.length - 1) fixed += sorted[i].stopDuration || 0; // the finish's own stop doesn't count
+      });
+      var shares = splitMinutes(Math.max(0, targetMinutes - fixed), autoSegs.map(function (s) { return s.effort; }));
+      autoSegs.forEach(function (s, k) {
+        s.source = 'target';
+        s.minutes = shares[k];
+      });
+    }
+
     var plan = [];
     var clock = 0;
     var estimatedCount = 0;
-
     sorted.forEach(function (cp, i) {
-      var segMinutes = 0;
-      var segEstimated = false;
-      if (i > 0) {
-        var raw = (cp.segmentTime === null || cp.segmentTime === undefined) ? '' : String(cp.segmentTime).trim();
-        if (raw !== '') {
-          segMinutes = u.parseTime(raw);
-        } else {
-          var prev = sorted[i - 1];
-          var ascent = (points && points.length > 1) ? u.segmentStats(points, prev.distance, cp.distance, elevationMode).dPlus : 0;
-          segMinutes = TA.estimateSegmentMinutes(cp.distance - prev.distance, ascent);
-          segEstimated = true;
-          estimatedCount++;
-        }
-      }
-      clock += segMinutes;
+      var seg = segs[i];
+      if (seg.source === 'default') estimatedCount++;
+      clock += seg.minutes;
       var stop = cp.stopDuration || 0;
       plan.push({
         cp: cp,
-        segMinutes: segMinutes,
-        segEstimated: segEstimated,
+        segMinutes: seg.minutes,
+        segSource: seg.source,
+        segEstimated: seg.source === 'default',
         arrivalMinutes: clock,
         arrivalEstimated: estimatedCount > 0,
         estimatedCount: estimatedCount,
@@ -376,207 +412,6 @@
     allSegments = segments;
 
     return segments;
-  };
-
-  /**
-   * Generates full rows for the UTMB OCC-Style Checkpoint Table (Start -> CPs -> Finish)
-   */
-  TA.generateUTMBTableRows = function (trackData, customWaypoints, elevationMode, startTimeStr, lang) {
-    if (!trackData || !trackData.points || trackData.points.length === 0) return [];
-    var tm = getTM();
-    var points = trackData.points;
-    var isZH = (lang !== 'en');
-    var currentElevationMode = elevationMode || 'smooth';
-
-    // Timing covers every CP (split or not); the table only lists split CPs
-    var planByCp = new Map();
-    TA.computeTimePlan(points, customWaypoints, currentElevationMode).forEach(function (entry) {
-      planByCp.set(entry.cp, entry);
-    });
-    var prevTiming = null;
-
-    var wps = (customWaypoints || []).filter(function (cp) {
-      return cp.useForIntermediateDistances !== false;
-    }).slice().sort(function (a, b) {
-      return a.distance - b.distance;
-    });
-
-    if (wps.length === 0) {
-      wps = [
-        { name: isZH ? '起点' : 'Start', distance: 0, icon: 'start' },
-        { name: isZH ? '终点' : 'Finish', distance: trackData.totalDistance || points[points.length - 1].distance, icon: 'finish' }
-      ];
-    } else if (wps.length === 1) {
-      if (wps[0].distance > 0) {
-        wps.unshift({ name: isZH ? '起点' : 'Start', distance: 0, icon: 'start' });
-      } else {
-        wps.push({ name: isZH ? '终点' : 'Finish', distance: trackData.totalDistance || points[points.length - 1].distance, icon: 'finish' });
-      }
-    }
-
-    // Base start date / time
-    var baseDate = null;
-    if (startTimeStr) {
-      var d = new Date(startTimeStr);
-      if (!isNaN(d.getTime())) baseDate = d;
-    }
-    if (!baseDate) {
-      baseDate = new Date();
-      baseDate.setHours(8, 0, 0, 0); // Default 08:00
-    }
-
-    var rows = [];
-    var cumulDist = 0;
-    var cumulAscent = 0;
-    var cumulDescent = 0;
-
-    for (var idx = 0; idx < wps.length; idx++) {
-      var cp = wps[idx];
-      var ptIdx = tm.findNearestPointIndexByDistance(points, cp.distance);
-      var pt = points[ptIdx] || points[0];
-      var elevation = Math.round(pt.elevation);
-
-      var segDist = 0;
-      var segAscent = 0;
-      var segDescent = 0;
-      var uphillAvg = 0;
-      var maxUphillGrad = 0;
-      var segAvgGrade = 0;
-      var segStartIdx = 0;
-      var segEndIdx = ptIdx;
-
-      if (idx > 0) {
-        var prevCp = wps[idx - 1];
-        var prevPtIdx = tm.findNearestPointIndexByDistance(points, prevCp.distance);
-        segStartIdx = prevPtIdx;
-        segDist = Math.max(0, cp.distance - prevCp.distance);
-
-        var elevResult = tm.ElevationCalculator.computeSegment(points, prevPtIdx, ptIdx, currentElevationMode);
-        segAscent = elevResult.ascent;
-        segDescent = elevResult.descent;
-
-        cumulDist += segDist;
-        cumulAscent += segAscent;
-        cumulDescent += segDescent;
-
-        // compute gradient specifics for segment
-        var maxUp = 0;
-        var hDist = 0;
-        var upAsc = 0;
-        for (var k = prevPtIdx + 1; k <= ptIdx; k++) {
-          var g = points[k].smoothedGradient !== undefined ? points[k].smoothedGradient : (points[k].gradient || 0);
-          var hd = (points[k].horizontalDistance || 0) - (points[k - 1].horizontalDistance || 0);
-          if (g > 1) {
-            maxUp = Math.max(maxUp, g);
-            upAsc += Math.max(0, points[k].elevation - points[k - 1].elevation);
-            hDist += hd;
-          }
-        }
-        maxUphillGrad = maxUp;
-        uphillAvg = hDist > 0 ? (upAsc / (hDist * 1000)) * 100 : 0;
-        segAvgGrade = segDist > 0 ? ((pt.elevation - points[prevPtIdx].elevation) / (segDist * 1000)) * 100 : 0;
-      } else {
-        cumulDist = cp.distance;
-        cumulAscent = 0;
-        cumulDescent = 0;
-      }
-
-      // Timing comes from the shared plan; rows synthesized above (no user CP) are estimated
-      var timing = planByCp.get(cp);
-      if (!timing) {
-        var synthArrival = prevTiming ? prevTiming.departureMinutes + TA.estimateSegmentMinutes(segDist, segAscent) : 0;
-        timing = {
-          arrivalMinutes: synthArrival,
-          departureMinutes: synthArrival,
-          stopMinutes: 0,
-          estimatedCount: (prevTiming ? prevTiming.estimatedCount : 0) + (idx > 0 ? 1 : 0)
-        };
-        timing.arrivalEstimated = timing.estimatedCount > 0;
-      }
-      // A row may span non-split CPs, so measure from the previous row's departure
-      var segTimeMinutes = idx > 0 ? Math.max(0, timing.arrivalMinutes - prevTiming.departureMinutes) : 0;
-      var segEstimated = idx > 0 && timing.estimatedCount > prevTiming.estimatedCount;
-      var cumulElapsedMinutes = timing.arrivalMinutes;
-      prevTiming = timing;
-
-      // Calculate passage datetime
-      var passageDate = new Date(baseDate.getTime() + cumulElapsedMinutes * 60000);
-      var dayNight = TA.getDayNightStatus(passageDate);
-
-      // Formatting time string
-      var dayNamesZh = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-      var dayNamesEn = ['Sun.', 'Mon.', 'Tue.', 'Wed.', 'Thu.', 'Fri.', 'Sat.'];
-      var dayStr = isZH ? dayNamesZh[passageDate.getDay()] : dayNamesEn[passageDate.getDay()];
-      var hh = String(passageDate.getHours()).padStart(2, '0');
-      var mm = String(passageDate.getMinutes()).padStart(2, '0');
-      var passageTimeStr = dayStr + ' ' + hh + ':' + mm;
-
-      var nameStr = (cp.name || '').trim();
-      if (!nameStr) {
-        nameStr = (idx === 0 ? (isZH ? '起点' : 'Start') : (idx === wps.length - 1 ? (isZH ? '终点' : 'Finish') : ('CP ' + idx)));
-      }
-
-      rows.push({
-        index: idx,
-        cp: cp,
-        name: nameStr,
-        icon: cp.icon || (idx === 0 ? 'start' : (idx === wps.length - 1 ? 'finish' : 'checkpoint')),
-        cumulDist: cumulDist,
-        segDist: segDist,
-        cumulAscent: Math.round(cumulAscent),
-        cumulDescent: Math.round(cumulDescent),
-        segAscent: Math.round(segAscent),
-        segDescent: Math.round(segDescent),
-        elevation: elevation,
-        uphillAvg: uphillAvg,
-        maxUphillGrad: maxUphillGrad,
-        segAvgGrade: segAvgGrade,
-        segStartIdx: segStartIdx,
-        segEndIdx: segEndIdx,
-        segStartDist: idx > 0 ? wps[idx - 1].distance : 0,
-        segEndDist: cp.distance,
-        segTimeMinutes: segTimeMinutes,
-        segEstimated: segEstimated,
-        stopDuration: timing.stopMinutes,
-        cumulElapsedMinutes: cumulElapsedMinutes,
-        arrivalEstimated: timing.arrivalEstimated,
-        passageTimeStr: passageTimeStr,
-        passageDate: passageDate,
-        dayNight: dayNight,
-        isSegmentRow: idx > 0
-      });
-    }
-
-    // Determine milestone celestial badges (avoiding duplicate/repeating suns)
-    var stateTransitions = [];
-    for (var r = 0; r < rows.length; r++) {
-      rows[r].showMilestoneBadge = false;
-      if (r > 0 && rows[r].dayNight.type !== rows[r - 1].dayNight.type) {
-        // Transition point detected (day -> sunset, sunset -> night, night -> sunrise, sunrise -> day)
-        rows[r].showMilestoneBadge = true;
-        stateTransitions.push(r);
-      }
-    }
-
-    // If NO transition occurred across all checkpoints:
-    // Place a single milestone badge at the checkpoint closest to midday (13:00) or midnight (00:00)
-    if (stateTransitions.length === 0 && rows.length > 0) {
-      var targetHour = rows[0].dayNight.isNight ? 0 : 13;
-      var bestIdx = 0;
-      var bestDiff = Infinity;
-      for (var b = 0; b < rows.length; b++) {
-        var h = rows[b].passageDate.getHours() + rows[b].passageDate.getMinutes() / 60;
-        var diff = Math.abs(h - targetHour);
-        if (diff > 12) diff = 24 - diff;
-        if (diff < bestDiff) {
-          bestDiff = diff;
-          bestIdx = b;
-        }
-      }
-      rows[bestIdx].showMilestoneBadge = true;
-    }
-
-    return rows;
   };
 
   window.TrailRoadbook.trailAnalysis = TA;

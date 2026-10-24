@@ -144,7 +144,7 @@
       return String(idx);
     });
 
-    var cumulTimes = computeCumulTimes(cps, pts);
+    var cumulTimes = computeCumulTimes(cps, pts, options.targetMinutes);
     var smoothPts  = u().smoothElevation(pts, 7);
 
     var totalDist = pts[pts.length - 1].distance;
@@ -260,9 +260,11 @@
     var onHoverCallback = options.onHover || null;
     var onSegmentHover = options.onSegmentHover || null;
     var onSegmentClick = options.onSegmentClick || null;
+    var onAddCheckpoint = options.onAddCheckpoint || null;
     var segments = options.segments || [];
 
     var lastSegIdx = -1;
+    var clickTimer = null;
 
     function esc(s) {
       return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -346,7 +348,10 @@
           '<div style="font-weight:700; margin-bottom:2px; font-size:0.85rem;">' + pt.distance.toFixed(2) + ' km</div>' +
           '<div>' + (isZH ? '海拔: ' : 'Elevation: ') + '<strong>' + Math.round(pt.elevation) + ' m</strong></div>' +
           '<div>' + (isZH ? '坡度: ' : 'Grade: ') + '<strong style="color:' + gradColor + '">' + gradSign + grad.toFixed(1) + '% (' + gradLabel + ')</strong></div>' +
-          segInfoHtml;
+          segInfoHtml +
+          (onAddCheckpoint
+            ? '<div style="margin-top:5px; font-size:0.7rem; color:#c4d4c6;">' + (isZH ? '双击在此添加 CP' : 'Double-click to add a checkpoint here') + '</div>'
+            : '');
 
         tooltipEl.classList.add('visible');
 
@@ -375,14 +380,37 @@
       }
     }
 
-    function handleClick(e) {
+    function distanceAtEvent(e) {
       var rect = svg.getBoundingClientRect();
-      var clientX = e.clientX;
-      var svgX = ((clientX - rect.left) / rect.width) * svg.viewBox.baseVal.width - margin;
-      if (svgX < 50 || svgX > 70 + m.chartW + 30) return;
+      var svgX = ((e.clientX - rect.left) / rect.width) * svg.viewBox.baseVal.width - margin;
+      if (svgX < 50 || svgX > 70 + m.chartW + 30) return null;
+      return Math.max(0, Math.min(1, (svgX - 70) / m.chartW)) * totalDist;
+    }
 
-      var distRatio = Math.max(0, Math.min(1, (svgX - 70) / m.chartW));
-      var targetDist = distRatio * totalDist;
+    // A single click selects a segment; wait briefly so a double click (add CP) can cancel it
+    function handleClick(e) {
+      var targetDist = distanceAtEvent(e);
+      if (targetDist === null) return;
+      if (clickTimer) clearTimeout(clickTimer);
+      clickTimer = setTimeout(function () {
+        clickTimer = null;
+        selectSegmentAt(targetDist);
+      }, onAddCheckpoint ? 250 : 0);
+    }
+
+    function handleDblClick(e) {
+      if (clickTimer) {
+        clearTimeout(clickTimer);
+        clickTimer = null;
+      }
+      var targetDist = distanceAtEvent(e);
+      if (targetDist === null || !onAddCheckpoint) return;
+      if (e.target.closest && e.target.closest('[data-seg-idx]')) return; // segment info boxes
+      e.preventDefault();
+      onAddCheckpoint(Math.max(0.1, Math.min(totalDist - 0.1, targetDist)));
+    }
+
+    function selectSegmentAt(targetDist) {
       var clickedSegIdx = -1;
       var clickedSeg = null;
 
@@ -402,6 +430,7 @@
     svg.addEventListener('mousemove', handlePointer);
     svg.addEventListener('mouseleave', hideCursor);
     svg.addEventListener('click', handleClick);
+    svg.addEventListener('dblclick', handleDblClick);
     svg.addEventListener('touchstart', handlePointer, { passive: true });
     svg.addEventListener('touchmove', handlePointer, { passive: true });
     svg.addEventListener('touchend', hideCursor);
@@ -459,10 +488,10 @@
     });
   }
 
-  // Only user-entered times are drawn: estimated segments (blank inputs) and arrivals
-  // that depend on them are left off the roadbook rather than shown as fake values.
-  function computeCumulTimes(cps, pts) {
-    var plan = window.TrailRoadbook.trailAnalysis.computeTimePlan(pts, cps, window.TrailRoadbook.elevationMode);
+  // Only planned times are drawn (typed by the user or split from their target): default-pace
+  // guesses and arrivals that depend on them are left off the roadbook rather than shown as fake values.
+  function computeCumulTimes(cps, pts, targetMinutes) {
+    var plan = window.TrailRoadbook.trailAnalysis.computeTimePlan(pts, cps, window.TrailRoadbook.elevationMode, targetMinutes);
     return plan.map(function (entry) {
       return {
         segment: entry.segEstimated ? 0 : entry.segMinutes,

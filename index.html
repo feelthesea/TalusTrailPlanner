@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Talus - Trail Roadbook Generator & Trail Analytics — 越野跑路书与轨迹分析</title>
   <meta name="description" content="Upload GPX/KML/KMZ tracks and create a beautiful interactive trail roadbook with synchronized map, gradient distribution, and segment statistics.">
-  <link rel="stylesheet" href="fonts/fonts.css?v=7.9">
+  <link rel="stylesheet" href="fonts/fonts.css?v=8.0">
   <link rel="stylesheet" href="css/leaflet.css">
-  <link rel="stylesheet" href="style.css?v=7.9">
+  <link rel="stylesheet" href="style.css?v=8.0">
 </head>
 <body>
 
@@ -32,7 +32,7 @@
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
     <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
-    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V3M5 4h14l-4.5 4.5L19 13H5"/></symbol>
     <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
     <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></symbol>
     <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
@@ -192,72 +192,57 @@
       </div>
     </section>
 
-    <!-- 比赛计划 (steps 2–4) -->
-    <section class="zone-3-grid" id="section-plan">
-      <div class="panel-card cp-list-panel-card">
-        <div class="panel-card-header">
-          <h3>
-            <svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>
-            <span data-i18n="cpTableTitle">CP 点 / 补给站</span>
-          </h3>
-          <label class="field-inline" for="input-start-time">
-            <svg class="icon icon-sm" aria-hidden="true"><use href="#i-calendar"/></svg>
-            <span data-i18n="raceStartLabel">出发时间</span>
-            <input type="datetime-local" id="input-start-time" class="input-field input-datetime">
-          </label>
-        </div>
-
-        <div class="cp-table-wrap">
-          <table class="cp-table" id="cp-table">
-            <thead>
-              <tr>
-                <th class="col-num" data-i18n="colNum">#</th>
-                <th class="col-name" data-i18n="colName">名称</th>
-                <th class="col-dist" data-i18n="colDist">距起点 (km)</th>
-                <th class="col-time" data-i18n="colTime">分段用时</th>
-                <th class="col-action"></th>
-              </tr>
-            </thead>
-            <tbody id="cp-tbody">
-              <!-- Injected dynamically -->
-            </tbody>
-          </table>
-          <div class="add-row-bar">
-            <button type="button" class="btn" id="btn-add-cp">
-              <svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>
-              <span data-i18n="addCpBtn">添加 CP 点</span>
-            </button>
-          </div>
-        </div>
+    <!-- 比赛计划 (steps 2–4): checkpoints, target time and segment times in one table -->
+    <section class="panel-card plan-panel-card" id="section-plan">
+      <div class="panel-card-header">
+        <h3>
+          <svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>
+          <span data-i18n="planTitle">比赛计划</span>
+        </h3>
+        <span class="panel-tip" data-i18n="planTip">悬停或点击一行，可在剖面图和地图上定位该段</span>
       </div>
 
-      <div class="panel-card segment-stats-panel-card">
-        <div class="panel-card-header">
-          <h3>
-            <svg class="icon" aria-hidden="true"><use href="#i-table"/></svg>
-            <span data-i18n="segmentStatsTitle">赛段分段统计</span>
-          </h3>
-          <span class="panel-tip" data-i18n="segmentStatsTip">点击或悬停表格行可与上方剖面图及地图实时联动</span>
-        </div>
+      <div class="plan-targets">
+        <label class="field-inline" for="input-start-time">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="#i-calendar"/></svg>
+          <span data-i18n="raceStartLabel">出发时间</span>
+          <input type="datetime-local" id="input-start-time" class="input-field input-datetime">
+        </label>
+        <label class="field-inline" for="input-target-time">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="#i-flag"/></svg>
+          <span data-i18n="targetTimeLabel">目标完赛</span>
+          <input type="text" id="input-target-time" class="input-field input-target" placeholder="如 14:00" data-i18n-placeholder="targetTimePlaceholder" inputmode="decimal" autocomplete="off">
+        </label>
+        <span class="plan-summary" id="plan-summary" aria-live="polite"></span>
+      </div>
 
-        <div class="segment-table-wrap">
-          <table class="segment-table utmb-segment-table">
-            <thead>
-              <tr>
-                <th class="col-seg-name" data-i18n="segColPoint">点位名称</th>
-                <th class="col-seg-profile" data-i18n="segColProfile">分段轮廓</th>
-                <th class="col-seg-dist" data-i18n="segColDistance">距离</th>
-                <th class="col-seg-elev" data-i18n="segColGainLoss">爬升 / 下降</th>
-                <th class="col-seg-alt" data-i18n="segColAltitude">海拔</th>
-                <th class="col-seg-grade" data-i18n="segColGrade">坡度</th>
-                <th class="col-seg-time" data-i18n="segColTimeline">预计抵达与时间轴</th>
-              </tr>
-            </thead>
-            <tbody id="segment-tbody">
-              <!-- Injected dynamically -->
-            </tbody>
-          </table>
-        </div>
+      <div class="plan-table-wrap">
+        <table class="plan-table">
+          <thead>
+            <tr>
+              <th class="col-plan-num" data-i18n="colNum">#</th>
+              <th class="col-plan-name" data-i18n="colName">名称</th>
+              <th class="col-plan-dist" data-i18n="colDist">距起点 (km)</th>
+              <th class="col-plan-profile" data-i18n="segColProfile">分段剖面</th>
+              <th class="col-plan-elev" data-i18n="segColGainLoss">爬升 / 下降</th>
+              <th class="col-plan-time" data-i18n="colTime">分段用时</th>
+              <th class="col-plan-stop" data-i18n="colStop">停留 (分)</th>
+              <th class="col-plan-eta" data-i18n="colEta">预计抵达</th>
+              <th class="col-plan-actions"><span class="sr-only" data-i18n="colActions">操作</span></th>
+            </tr>
+          </thead>
+          <tbody id="plan-tbody">
+            <!-- Injected dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="plan-footer">
+        <button type="button" class="btn btn-sm" id="btn-add-cp">
+          <svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>
+          <span data-i18n="addCpBtn">添加 CP</span>
+        </button>
+        <span class="panel-tip" data-i18n="addCpTip">也可以在剖面图上双击，直接在该位置添加 CP</span>
       </div>
     </section>
 
@@ -523,13 +508,13 @@
 
   <!-- ═══ Scripts ═══ -->
   <script src="js/leaflet.js"></script>
-  <script src="js/utils.js?v=7.9"></script>
-  <script src="js/trail-math.js?v=7.9"></script>
-  <script src="js/gpx-parser.js?v=7.9"></script>
-  <script src="js/trail-analysis.js?v=7.9"></script>
-  <script src="js/trail-map.js?v=7.9"></script>
-  <script src="js/profile.js?v=7.9"></script>
-  <script src="js/export.js?v=7.9"></script>
-  <script src="js/app.js?v=7.9"></script>
+  <script src="js/utils.js?v=8.0"></script>
+  <script src="js/trail-math.js?v=8.0"></script>
+  <script src="js/gpx-parser.js?v=8.0"></script>
+  <script src="js/trail-analysis.js?v=8.0"></script>
+  <script src="js/trail-map.js?v=8.0"></script>
+  <script src="js/profile.js?v=8.0"></script>
+  <script src="js/export.js?v=8.0"></script>
+  <script src="js/app.js?v=8.0"></script>
 </body>
 </html>

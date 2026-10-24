@@ -45,11 +45,11 @@
       stepOptional: "可选",
       hintStep1: "先上传比赛路线：把 GPX / KML / KMZ 文件拖到下方剖面区域，或者点右边的按钮选择文件。",
       hintStep1Action: "选择文件",
-      hintStep2: "添加途中的 CP / 补给站，并填写它们距起点的距离。",
+      hintStep2: "在剖面图上双击添加 CP，或点「添加 CP」；距离可以在计划表里直接修改。",
       hintStep2Action: "添加 CP",
-      hintStep3: "填写每段的预计用时。没填的段会按默认配速估算（标有 ≈）。",
-      hintStep3Action: "去填写",
-      hintStep5: "可以导出路书了。也可以先在列表里微调某段用时或停留时间。",
+      hintStep3: "填写目标完赛时间，系统会按每段的距离和爬升自动分配用时。",
+      hintStep3Action: "填写目标时间",
+      hintStep5: "可以导出路书了。也可以先锁定某段用时或填写停留时间来微调。",
       hintStep5Action: "导出图片",
       hintAllDone: "路书已导出。之后修改任何内容，都可以随时重新导出。",
 
@@ -89,16 +89,34 @@
       mapSourceOpenTopo: "OpenTopoMap",
       mapSourceCyclOSM: "CyclOSM",
 
+      planTitle: "比赛计划",
+      planTip: "悬停或点击一行，可在剖面图和地图上定位该段",
+      targetTimeLabel: "目标完赛",
+      targetTimePlaceholder: "如 14:00",
+      colStop: "停留 (分)",
+      colEta: "预计抵达",
+      colActions: "操作",
+      addCpTip: "也可以在剖面图上双击，直接在该位置添加 CP",
+      altitudeShort: "海拔",
+      cumulShort: "累计",
+      departShort: "离站",
+      timeLocked: "已锁定",
+      timeAutoTarget: "按目标分配",
+      timeAutoDefault: "默认配速估算",
+      lockTitle: "锁定这段用时（其余分段自动重新分配）",
+      unlockTitle: "已锁定，点击改回自动分配",
+      summaryOnTarget: "已按目标分配，完赛用时 {t}",
+      summaryStops: "（含停留 {t}）",
+      summaryOver: "锁定的分段和停留已比目标多 {t}：放宽目标，或解锁某段",
+      summaryUnder: "所有分段都已锁定，合计比目标少 {t}",
+      summaryEstimate: "还没设目标：按默认配速估算，完赛约 {t}",
+      summaryFinish: "预计完赛用时 {t}",
+      toastCpAddedAt: "已在 {d} km 添加 CP",
+      toastWaypoints: "已把 GPX 中的 {n} 个航点设为 CP",
+      undo: "撤销",
       statsGradientTitle: "坡度分布与实战技术要点",
-      segmentStatsTitle: "赛段分段统计",
-      segmentStatsTip: "点击或悬停表格行可与上方剖面图及地图实时联动",
-      segColPoint: "点位名称",
-      segColProfile: "分段轮廓",
-      segColDistance: "距离",
+      segColProfile: "分段剖面",
       segColGainLoss: "爬升 / 下降",
-      segColAltitude: "海拔",
-      segColGrade: "坡度",
-      segColTimeline: "预计抵达与时间轴",
 
       statTotalDistance: "总里程",
       statTotalAscent: "累计爬升 (D+)",
@@ -111,13 +129,12 @@
       statUphillDist: "上坡距离",
       statDownhillDist: "下坡距离",
 
-      cpTableTitle: "CP 点 / 补给站",
       colNum: "#",
       colName: "名称",
       colDist: "距起点 (km)",
       colTime: "分段用时",
       colNotes: "备注 (支持回车多行)",
-      addCpBtn: "添加 CP 点",
+      addCpBtn: "添加 CP",
       poiPanelTitle: "检查点详细视觉配置",
       poiCol1Title: "基本信息",
       poiCol1Pos: "CP位置距离 (公里)",
@@ -162,8 +179,6 @@
       iconPeak: "🏔️ 山峰",
       iconDanger: "⚡ 危险",
 
-      toastAddCp: "已添加新CP点，位置为 ",
-      toastAddCpTail: " 公里",
       toastTrackSuccess: "轨迹已载入：全长 ",
       toastTrackSuccessMid: " km，累计爬升 +",
       toastTrackSuccessTail: " m",
@@ -191,7 +206,6 @@
       btnSaveApply: "保存并应用",
 
       labelStopDuration: "停留时间 (分钟)",
-      labelPassage: "通过",
       toastMapFallback: "天地图图层加载受阻，已自动切换到备用地图（高德 / OSM）"
     },
     en: {
@@ -222,11 +236,11 @@
       stepOptional: "optional",
       hintStep1: "Start with the race route: drop a GPX / KML / KMZ file on the profile area below, or choose a file.",
       hintStep1Action: "Choose file",
-      hintStep2: "Add the checkpoints and aid stations along the route, with their distance from the start.",
+      hintStep2: "Double-click the profile to add a checkpoint, or use Add checkpoint; edit distances right in the plan.",
       hintStep2Action: "Add checkpoint",
-      hintStep3: "Enter the expected time for each segment. Blank segments use a default pace (marked ≈).",
-      hintStep3Action: "Fill in times",
-      hintStep5: "Your roadbook is ready to export. You can still fine-tune segment or stop times first.",
+      hintStep3: "Enter your target finish time; it is split across segments by distance and climb.",
+      hintStep3Action: "Set target time",
+      hintStep5: "Your roadbook is ready to export. You can still lock a segment time or add stop times first.",
       hintStep5Action: "Export image",
       hintAllDone: "Roadbook exported. Change anything and export again whenever you like.",
 
@@ -266,16 +280,34 @@
       mapSourceOpenTopo: "OpenTopoMap",
       mapSourceCyclOSM: "CyclOSM",
 
+      planTitle: "Race plan",
+      planTip: "Hover or click a row to locate that segment on the profile and map",
+      targetTimeLabel: "Target finish",
+      targetTimePlaceholder: "e.g. 14:00",
+      colStop: "Stop (min)",
+      colEta: "ETA",
+      colActions: "Actions",
+      addCpTip: "You can also double-click the profile to add a checkpoint right there",
+      altitudeShort: "Alt.",
+      cumulShort: "Total",
+      departShort: "Leave",
+      timeLocked: "Locked",
+      timeAutoTarget: "From target",
+      timeAutoDefault: "Default pace",
+      lockTitle: "Lock this time (the other segments are re-balanced)",
+      unlockTitle: "Locked; click to go back to automatic",
+      summaryOnTarget: "Split across segments: finish in {t}",
+      summaryStops: " (incl. {t} of stops)",
+      summaryOver: "Locked segments and stops exceed the target by {t}: relax the target or unlock a segment",
+      summaryUnder: "All segments are locked and add up to {t} less than the target",
+      summaryEstimate: "No target yet: the default pace gives about {t}",
+      summaryFinish: "Expected finish time {t}",
+      toastCpAddedAt: "Checkpoint added at {d} km",
+      toastWaypoints: "{n} GPX waypoints added as checkpoints",
+      undo: "Undo",
       statsGradientTitle: "Grade distribution and technique tips",
-      segmentStatsTitle: "Segment statistics",
-      segmentStatsTip: "Click or hover a row to sync with the profile and map",
-      segColPoint: "Point",
       segColProfile: "Profile",
-      segColDistance: "Distance",
       segColGainLoss: "Gain / Loss",
-      segColAltitude: "Altitude",
-      segColGrade: "Grade",
-      segColTimeline: "ETA and timeline",
 
       statTotalDistance: "Total Distance",
       statTotalAscent: "Elevation Gain (D+)",
@@ -288,7 +320,6 @@
       statUphillDist: "Uphill Dist",
       statDownhillDist: "Downhill Dist",
 
-      cpTableTitle: "Checkpoints",
       colNum: "#",
       colName: "Name",
       colDist: "Distance (km)",
@@ -339,8 +370,6 @@
       iconPeak: "🏔️ Peak",
       iconDanger: "⚡ Danger",
 
-      toastAddCp: "Added a checkpoint at ",
-      toastAddCpTail: " km",
       toastTrackSuccess: "Track loaded: ",
       toastTrackSuccessMid: " km, gain +",
       toastTrackSuccessTail: " m",
@@ -368,7 +397,6 @@
       btnSaveApply: "Save and apply",
 
       labelStopDuration: "Stop Duration (min)",
-      labelPassage: "Passage",
       toastMapFallback: "Tianditu tiles failed to load, switched to a backup map (Gaode / OSM)"
     }
   };
@@ -405,7 +433,8 @@
     elevationMode: 'smooth',  // 'smooth' | 'raw'
     colorMode: 'classic',     // 'classic' | 'gradient' | 'elevation'
     exportRatio: '20-9',      // 'auto' | '19.5-9' | '20-9' — shapes the on-screen profile too
-    activeSegmentIdx: -1,
+    targetTime: '',           // target finish, split over segments without a locked time
+    activeRange: null,        // { startDist, endDist } of the clicked segment
     hasExported: false,
     fontSizeTitle: 18,
     fontSizeCPName: 20,
@@ -481,9 +510,10 @@
 
     // Plan: start time, CP Table & Segment Statistics
     dom.inputStartTime    = document.getElementById('input-start-time');
-    dom.cpTbody           = document.getElementById('cp-tbody');
+    dom.inputTargetTime   = document.getElementById('input-target-time');
+    dom.planSummary       = document.getElementById('plan-summary');
+    dom.planTbody         = document.getElementById('plan-tbody');
     dom.btnAddCp          = document.getElementById('btn-add-cp');
-    dom.segmentTbody      = document.getElementById('segment-tbody');
 
     // Analysis: Map & Gradient Distribution
     dom.selectMapSource   = document.getElementById('select-map-source');
@@ -557,11 +587,18 @@
     if (dom.inputStartTime) {
       dom.inputStartTime.addEventListener('change', function () {
         state.startTime = this.value;
-        renderCPTable();
-        renderSegmentTable(); // passage times and day/night timeline
+        renderPlanTable(); // passage times and day/night
         scheduleRender();
       });
     }
+
+    dom.inputTargetTime.addEventListener('change', function () {
+      var minutes = parseTargetTime(this.value);
+      state.targetTime = minutes > 0 ? TR.utils.formatTime(minutes) : '';
+      this.value = state.targetTime;
+      updateArrivalTimes();
+      refreshAfterPlanChange(false);
+    });
 
     // View settings in the profile header
     dom.btnElevRaw.addEventListener('click', function () { setElevationMode('raw'); });
@@ -647,13 +684,22 @@
 
     dom.btnAddCp.addEventListener('click', handleAddCP);
 
-    // CP Table Event Delegation
-    if (dom.cpTbody) {
-      dom.cpTbody.addEventListener('input', handleCPTableInput);
-      dom.cpTbody.addEventListener('change', handleCPTableChange);
-      dom.cpTbody.addEventListener('click', handleCPTableClick);
-      dom.cpTbody.addEventListener('dblclick', handleCPTableDblClick);
-    }
+    // Plan table event delegation
+    dom.planTbody.addEventListener('input', handlePlanInput);
+    dom.planTbody.addEventListener('change', handlePlanChange);
+    dom.planTbody.addEventListener('click', handlePlanClick);
+    dom.planTbody.addEventListener('dblclick', handlePlanDblClick);
+    var hoveredRow = null;
+    dom.planTbody.addEventListener('mouseover', function (e) {
+      var row = e.target.closest('tr.plan-row');
+      if (row === hoveredRow) return;
+      hoveredRow = row;
+      if (!state.activeRange) highlightRangeOnMap(rowRange(row));
+    });
+    dom.planTbody.addEventListener('mouseleave', function () {
+      hoveredRow = null;
+      if (!state.activeRange) TR.trailMap.clearSegmentHighlight();
+    });
 
     // Font Sizes Modal Events
     if (dom.btnOpenFontSizes) dom.btnOpenFontSizes.addEventListener('click', openFontSizesModal);
@@ -745,9 +791,12 @@
   // Progress is derived from the data rather than enforced: every step stays clickable.
   function getStepStatus() {
     var hasTrack = !!state.trackData;
-    var plan = TR.trailAnalysis.computeTimePlan(state.trackpoints, state.checkpoints, state.elevationMode);
-    var timesSet = plan.length > 1 && plan.every(function (entry) { return !entry.segEstimated; });
-    var tuned = state.checkpoints.some(function (cp) { return cp.stopDuration > 0; });
+    var plan = computePlan();
+    var hasTarget = getTargetMinutes() > 0;
+    // Step 3 is met by a target time, or by typing every segment time by hand
+    var timesSet = hasTarget || (plan.length > 1 && plan.every(function (entry) { return entry.segSource === 'manual'; }));
+    var tuned = state.checkpoints.some(function (cp) { return cp.stopDuration > 0; }) ||
+      (hasTarget && plan.some(function (entry, i) { return i > 0 && entry.segSource === 'manual'; }));
     var done = {
       1: hasTrack,
       2: hasTrack && state.checkpoints.length > 2,
@@ -803,7 +852,7 @@
       openMenu(dom.btnExportImg, dom.exportMenu);
     } else {
       scrollToSection(dom.sectionPlan);
-      if (n === 3) focusFirstBlankTime();
+      if (n === 3) dom.inputTargetTime.focus({ preventScroll: true });
     }
   }
 
@@ -818,12 +867,6 @@
     }
   }
 
-  function focusFirstBlankTime() {
-    var inputs = dom.cpTbody.querySelectorAll('input[data-field="segmentTime"]:not([disabled])');
-    for (var i = 0; i < inputs.length; i++) {
-      if (!inputs[i].value) { inputs[i].focus({ preventScroll: true }); return; }
-    }
-  }
 
   // ── Font Sizes Modal Functions ──────────────────────────────────────
   function openFontSizesModal() {
@@ -929,28 +972,46 @@
         }
       });
 
+      var importedWaypoints = [];
       if (trackData.waypoints && trackData.waypoints.length > 0 && state.checkpoints.length <= 2) {
         trackData.waypoints.forEach(function (wp) {
           if (wp.distance > 0.5 && wp.distance < totalDist - 0.5) {
-            state.checkpoints.push(normalizeCP({
+            var wpCp = normalizeCP({
               name: wp.name || 'CP',
               distance: Math.round(wp.distance * 10) / 10,
               icon: 'classic',
               arrivalTime: '',
               segmentTime: '',
               notes: wp.desc || ''
-            }, state.checkpoints.length));
+            }, state.checkpoints.length);
+            state.checkpoints.push(wpCp);
+            importedWaypoints.push(wpCp);
           }
         });
       }
 
+      state.activeRange = null;
       sortCheckpoints();
       normalizeAllCPs();
       TR.trailAnalysis.resetSegmentCache();
-      renderCPTable();
       renderAllComponents();
 
-      toast(T[state.language].toastTrackSuccess + totalDist.toFixed(1) + T[state.language].toastTrackSuccessMid + Math.round(trackData.totalAscent) + T[state.language].toastTrackSuccessTail);
+      var dict = T[state.language];
+      var msg = dict.toastTrackSuccess + totalDist.toFixed(1) + dict.toastTrackSuccessMid + Math.round(trackData.totalAscent) + dict.toastTrackSuccessTail;
+      if (importedWaypoints.length) {
+        // Waypoints become checkpoints automatically; make that visible and reversible
+        toast(msg + ' · ' + dict.toastWaypoints.replace('{n}', importedWaypoints.length), {
+          actionLabel: dict.undo,
+          onAction: function () {
+            state.checkpoints = state.checkpoints.filter(function (cp) { return importedWaypoints.indexOf(cp) === -1; });
+            state.activeCPIndex = 0;
+            normalizeAllCPs();
+            refreshAfterPlanChange(true);
+          }
+        });
+      } else {
+        toast(msg);
+      }
     }).catch(function (err) {
       toast(T[state.language].toastTrackError + err.message);
     });
@@ -970,7 +1031,7 @@
       state.trackData.totalAscent = totals.ascent;
       state.trackData.totalDescent = totals.descent;
       TR.trailAnalysis.resetSegmentCache();
-      renderCPTable(); // segment D+/D- and time estimates depend on the mode
+      updateArrivalTimes(); // segment D+ drives the time split
       renderAllComponents();
     }
   }
@@ -981,7 +1042,7 @@
     renderProfile();
     renderTrailSummaryStats();
     renderGradientDistribution();
-    renderSegmentTable();
+    renderPlanTable();
     // Draw (and fit) the map last, once the panels around it have their final size
     TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints);
     updateStepBar();
@@ -1006,8 +1067,6 @@
       state.language,
       state.startTime
     );
-    var activeSeg = (state.activeSegmentIdx >= 0 && segments[state.activeSegmentIdx]) ? segments[state.activeSegmentIdx] : null;
-
     TR.profile.render(
       dom.profileContainer,
       state.trackpoints,
@@ -1025,21 +1084,22 @@
       state.exportRatio,
       {
         colorMode: state.colorMode,
-        activeSegment: activeSeg,
+        activeSegment: state.activeRange,
         segments: segments,
+        targetMinutes: getTargetMinutes(),
         onHover: function (ptIdx, pt, segIdx, seg) {
           TR.trailMap.updateMapCurrentPoint(ptIdx);
         },
         onSegmentHover: function (segIdx, seg) {
-          highlightTableRow(segIdx, true);
-          if (segIdx >= 0 && seg && state.activeSegmentIdx < 0) {
-            TR.trailMap.highlightSegment(seg.startIdx, seg.endIdx);
-          } else if (state.activeSegmentIdx < 0) {
-            TR.trailMap.clearSegmentHighlight();
-          }
+          var range = seg ? { startDist: seg.startDist, endDist: seg.endDist } : null;
+          markPlanRows(range);
+          if (!state.activeRange) highlightRangeOnMap(range);
         },
         onSegmentClick: function (segIdx, seg) {
-          toggleSegmentActive(segIdx);
+          toggleActiveRange({ startDist: seg.startDist, endDist: seg.endDist });
+        },
+        onAddCheckpoint: function (distKm) {
+          addCheckpointAt(Math.round(distKm * 10) / 10);
         }
       }
     );
@@ -1242,393 +1302,358 @@
       '</svg>';
   }
 
-  // ── Segment Active Selection & Hover Linkage Helpers ────────────────
-  function toggleSegmentActive(segIdx) {
-    var segments = TR.trailAnalysis.analyzeSegments(
-      state.trackData,
-      'waypoint',
-      state.checkpoints,
-      state.elevationMode,
-      state.language,
-      state.startTime
-    );
+  // ── Segment Linkage (profile ⇄ plan table ⇄ map) ────────────────────
+  // A segment is a distance range: the profile's split segments and the plan
+  // table's CP-to-CP rows both resolve to one.
+  function sameRange(a, b) {
+    return !!(a && b) && Math.abs(a.startDist - b.startDist) < 1e-6 && Math.abs(a.endDist - b.endDist) < 1e-6;
+  }
 
-    if (state.activeSegmentIdx === segIdx) {
-      state.activeSegmentIdx = -1;
-      if (dom.segmentTbody) {
-        dom.segmentTbody.querySelectorAll('.segment-row').forEach(function (r) { r.classList.remove('active-seg-row'); });
-      }
+  function rowRange(row) {
+    if (!row || row.dataset.segStart === undefined) return null;
+    return { startDist: parseFloat(row.dataset.segStart), endDist: parseFloat(row.dataset.segEnd) };
+  }
+
+  function highlightRangeOnMap(range) {
+    if (!state.trackpoints || !range) {
       TR.trailMap.clearSegmentHighlight();
-      scheduleRender();
       return;
     }
-
-    state.activeSegmentIdx = segIdx;
-    if (dom.segmentTbody) {
-      dom.segmentTbody.querySelectorAll('.segment-row').forEach(function (r) { r.classList.remove('active-seg-row'); });
-      var targetRow = dom.segmentTbody.querySelector('.segment-row[data-seg-idx="' + segIdx + '"]');
-      if (targetRow) {
-        targetRow.classList.add('active-seg-row');
-        targetRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    }
-
-    var seg = segments[segIdx];
-    if (seg) {
-      TR.trailMap.highlightSegment(seg.startIdx, seg.endIdx);
-      scheduleRender();
-    }
-  }
-
-  function highlightTableRow(segIdx, isFromHover) {
-    if (!dom.segmentTbody) return;
-    dom.segmentTbody.querySelectorAll('.segment-row').forEach(function (r) {
-      r.classList.remove('hover-seg-row');
-    });
-
-    if (segIdx >= 0) {
-      var row = dom.segmentTbody.querySelector('.segment-row[data-seg-idx="' + segIdx + '"]');
-      if (row) {
-        row.classList.add('hover-seg-row');
-      }
-    }
-  }
-
-  // ── 3. Zone 3: UTMB OCC-Style Segment Table Rendering ──────────────
-  function renderSegmentTable() {
-    if (!dom.segmentTbody || !state.trackData) return;
-    var rows = TR.trailAnalysis.generateUTMBTableRows(
-      state.trackData,
-      state.checkpoints,
-      state.elevationMode,
-      state.startTime,
-      state.language
+    TR.trailMap.highlightSegment(
+      TR.trailMath.findNearestPointIndexByDistance(state.trackpoints, range.startDist),
+      TR.trailMath.findNearestPointIndexByDistance(state.trackpoints, range.endDist)
     );
+  }
 
-    if (rows.length === 0) {
-      dom.segmentTbody.innerHTML = '';
-      return;
-    }
+  function toggleActiveRange(range) {
+    state.activeRange = sameRange(state.activeRange, range) ? null : range;
+    if (state.activeRange) highlightRangeOnMap(state.activeRange);
+    else TR.trailMap.clearSegmentHighlight();
+    markPlanRows(null);
+    scheduleRender();
+  }
 
-    var html = '';
-    rows.forEach(function (r, idx) {
-      var isSelected = (idx > 0 && state.activeSegmentIdx === (idx - 1));
-      var segIdx = idx - 1;
-
-      // Checkpoint badge
-      var badgeClass = 'cp-badge-default';
-      var badgeText = String(idx);
-      if (idx === 0) {
-        badgeClass = 'cp-badge-start';
-        badgeText = 'S';
-      } else if (idx === rows.length - 1) {
-        badgeClass = 'cp-badge-finish';
-        badgeText = 'F';
+  // Rows lying inside the active (clicked) or hovered range get a highlight
+  function markPlanRows(hoverRange) {
+    if (!dom.planTbody) return;
+    dom.planTbody.querySelectorAll('tr.plan-row').forEach(function (tr) {
+      var r = rowRange(tr);
+      function inside(range) {
+        return !!(r && range) && r.startDist >= range.startDist - 1e-6 && r.endDist <= range.endDist + 1e-6;
       }
-
-      // Mini profile column
-      var profileHtml = '';
-      if (idx === 0) {
-        profileHtml = '<div class="mini-profile-start-placeholder"><span>🟢</span></div>';
-      } else {
-        profileHtml = generateMiniProfileSvg(state.trackData, r.segStartDist, r.segEndDist);
-      }
-
-      // Distance column: Top = Cumul, Bottom = Segment Delta
-      var distHtml = '<div class="stat-primary">' + r.cumulDist.toFixed(1) + ' km</div>' +
-        '<div class="stat-secondary">' + (r.isSegmentRow ? (r.segDist.toFixed(1) + ' km') : '-') + '</div>';
-
-      // Dénivelé column: Top = Cumul +Ascent, Bottom = +Delta / -Delta
-      var elevHtml = '<div class="stat-primary gain">+' + r.cumulAscent + ' m</div>' +
-        '<div class="stat-secondary">' + (r.isSegmentRow ? ('+' + r.segAscent + ' m | -' + r.segDescent + ' m') : '-') + '</div>';
-
-      // Altitude column
-      var altHtml = '<div class="stat-primary font-mono">' + r.elevation + ' m</div>';
-
-      // Grade column: Top = Avg Grade, Bottom = Max Grade
-      var gradeHtml = '';
-      if (r.isSegmentRow) {
-        var avgSign = r.uphillAvg > 0 ? '+' : '';
-        gradeHtml = '<div class="stat-primary">' + avgSign + r.uphillAvg.toFixed(1) + '%</div>' +
-          '<div class="stat-secondary">' + (r.maxUphillGrad > 0 ? ('Max +' + r.maxUphillGrad.toFixed(1) + '%') : '-') + '</div>';
-      } else {
-        gradeHtml = '<div class="stat-secondary">-</div>';
-      }
-
-      // Day / Night Vertical Timeline column
-      var isNight = r.dayNight.isNight;
-      var timelineLineClass = isNight ? 'timeline-bar-night' : 'timeline-bar-day';
-      var timelineBadgeClass = 'timeline-badge-' + r.dayNight.type;
-      // "≈" marks values that rely on estimated (blank) segment times
-      var segTimeStr = (r.isSegmentRow && r.segTimeMinutes > 0)
-        ? ('⏱ ' + (r.segEstimated ? '≈' : '') + TR.utils.formatTime(r.segTimeMinutes) + (r.stopDuration > 0 ? (' · ⏸' + r.stopDuration + 'm') : ''))
-        : (idx === 0 ? (state.language === 'zh' ? '鸣枪起跑' : 'Start') : '');
-
-      var nodeHtml = '';
-      if (r.showMilestoneBadge) {
-        nodeHtml = '<div class="timeline-node ' + timelineBadgeClass + '" title="' + r.dayNight.type + '">' + r.dayNight.icon + '</div>';
-      }
-
-      var timelineHtml = '<div class="timeline-cell-wrap">' +
-        '  <div class="timeline-v-line ' + timelineLineClass + (idx === 0 ? ' line-start' : (idx === rows.length - 1 ? ' line-end' : '')) + '"></div>' +
-        nodeHtml +
-        '  <div class="timeline-time-info">' +
-        '    <div class="stat-primary font-mono">' + (r.arrivalEstimated ? '≈ ' : '') + r.passageTimeStr + '</div>' +
-        '    <div class="stat-secondary">' + segTimeStr + '</div>' +
-        '  </div>' +
-        '</div>';
-
-      html += '<tr class="segment-row' + (isSelected ? ' active-seg-row' : '') + '" data-idx="' + idx + '" data-seg-idx="' + segIdx + '">' +
-        '  <td class="col-seg-name">' +
-        '    <div class="cp-name-cell">' +
-        '      <span class="cp-table-badge ' + badgeClass + '">' + badgeText + '</span>' +
-        '      <strong class="cp-title-text">' + esc(r.name) + '</strong>' +
-        '    </div>' +
-        '  </td>' +
-        '  <td class="col-seg-profile">' + profileHtml + '</td>' +
-        '  <td class="col-seg-dist">' + distHtml + '</td>' +
-        '  <td class="col-seg-elev">' + elevHtml + '</td>' +
-        '  <td class="col-seg-alt">' + altHtml + '</td>' +
-        '  <td class="col-seg-grade">' + gradeHtml + '</td>' +
-        '  <td class="col-seg-time">' + timelineHtml + '</td>' +
-        '</tr>';
-    });
-
-    dom.segmentTbody.innerHTML = html;
-
-    // Attach row events
-    dom.segmentTbody.querySelectorAll('.segment-row').forEach(function (tr) {
-      var rowIdx = parseInt(tr.dataset.idx, 10);
-      var segIdx = parseInt(tr.dataset.segIdx, 10);
-
-      tr.addEventListener('mouseenter', function () {
-        if (segIdx >= 0 && rows[rowIdx] && state.activeSegmentIdx < 0) {
-          var r = rows[rowIdx];
-          TR.trailMap.highlightSegment(r.segStartIdx, r.segEndIdx);
-        }
-      });
-
-      tr.addEventListener('mouseleave', function () {
-        if (state.activeSegmentIdx < 0) {
-          TR.trailMap.clearSegmentHighlight();
-        }
-      });
-
-      tr.addEventListener('click', function () {
-        if (segIdx >= 0) {
-          toggleSegmentActive(segIdx);
-        }
-      });
+      tr.classList.toggle('active-seg-row', inside(state.activeRange));
+      tr.classList.toggle('hover-seg-row', inside(hoverRange));
     });
   }
 
-  // ── 3. Zone 3: CP Table Rendering & Event Delegation ───────────────
-  function renderCPTable() {
-    if (!dom.cpTbody) return;
-    var sortedCps = state.checkpoints.slice();
+  // ── Plan Table: checkpoints, segment stats and timing in one table ───
+  // A bare number in the target field means hours ("14" → 14:00)
+  function parseTargetTime(str) {
+    str = String(str || '').trim();
+    if (!str) return 0;
+    if (/^\d+(\.\d+)?$/.test(str)) return Math.round(parseFloat(str) * 60);
+    return TR.utils.parseTime(str);
+  }
+
+  function getTargetMinutes() {
+    return parseTargetTime(state.targetTime);
+  }
+
+  function computePlan() {
+    return TR.trailAnalysis.computeTimePlan(state.trackpoints, state.checkpoints, state.elevationMode, getTargetMinutes());
+  }
+
+  function renderPlanTable() {
+    if (!dom.planTbody) return;
+    var dict = T[state.language];
     var lang = state.language;
-    var html = '';
-    var planByCp = new Map();
-    TR.trailAnalysis.computeTimePlan(state.trackpoints, sortedCps, state.elevationMode).forEach(function (entry) {
-      planByCp.set(entry.cp, entry);
-    });
+    var u = TR.utils;
+    var pts = state.trackpoints;
+    var plan = computePlan();
     var startInfo = parseStartTime(state.startTime);
+    var cumulAscent = 0;
+    var html = '';
 
-    sortedCps.forEach(function (cp, idx) {
-      var globalIdx = state.checkpoints.indexOf(cp);
-      var isSelected = (globalIdx === state.activeCPIndex);
-      var seqLabel = (idx === 0) ? 'S' : (idx === sortedCps.length - 1 ? 'F' : idx);
-      var detailsHtml = '';
-      var timing = planByCp.get(cp);
-      // Blank segment times show their estimate as the input placeholder
-      var timePlaceholder = (idx > 0 && timing.segEstimated)
-        ? '≈' + TR.utils.formatTime(timing.segMinutes)
-        : T[lang].placeholderTimeInput;
+    // Re-rendering replaces the inputs and buttons; remember which one had focus to restore it
+    var focused = document.activeElement;
+    var focusSelector = null;
+    if (focused && dom.planTbody.contains(focused) && focused.dataset.idx !== undefined) {
+      focusSelector = '[data-idx="' + focused.dataset.idx + '"]' + (focused.dataset.field
+        ? '[data-field="' + focused.dataset.field + '"]'
+        : '.' + focused.className.split(' ')[0]);
+    }
 
-      if (idx > 0) {
-        var cpPrev = sortedCps[idx - 1];
-        var cpCurr = cp;
-        var segDist = cpCurr.distance - cpPrev.distance;
-        var segDPlus = 0, segDMinus = 0;
+    plan.forEach(function (entry, idx) {
+      var cp = entry.cp;
+      var gi = state.checkpoints.indexOf(cp);
+      var isFirst = (idx === 0);
+      var isLast = (idx === plan.length - 1);
+      var prev = isFirst ? null : plan[idx - 1].cp;
+      var badgeClass = isFirst ? 'cp-badge-start' : (isLast ? 'cp-badge-finish' : 'cp-badge-default');
+      var badgeText = isFirst ? 'S' : (isLast ? 'F' : String(idx));
+      var stats = (!isFirst && pts) ? u.segmentStats(pts, prev.distance, cp.distance, state.elevationMode) : null;
+      if (stats) cumulAscent += stats.dPlus;
 
-        if (state.trackpoints && state.trackpoints.length > 0) {
-          var stats = TR.utils.segmentStats(state.trackpoints, cpPrev.distance, cpCurr.distance, state.elevationMode);
-          segDPlus = stats.dPlus;
-          segDMinus = stats.dMinus;
-        }
+      var nameCell =
+        '<input type="text" class="plan-input plan-input-name" data-idx="' + gi + '" data-field="name" value="' + esc(cp.name) + '" placeholder="' + esc(dict.placeholderCpNameInput) + '" aria-label="' + esc(dict.colName) + '">' +
+        (pts ? '<div class="stat-secondary">' + dict.altitudeShort + ' ' + Math.round(u.interpolateElevation(pts, cp.distance)) + ' m</div>' : '');
 
-        var targetTimeStr = (timing.segEstimated ? '≈' : '') + TR.utils.formatTime(timing.segMinutes);
-        var passageStr = (timing.arrivalEstimated ? '≈ ' : '') + formatArrivalTime(startInfo, timing.arrivalMinutes, lang);
-        var stopStr = (cpCurr.stopDuration > 0) ? ' · ⏸ ' + cpCurr.stopDuration + 'min' : '';
+      var distCell =
+        '<input type="number" class="plan-input plan-input-num" data-idx="' + gi + '" data-field="distance" value="' + cp.distance + '" step="0.1" min="0" aria-label="' + esc(dict.colDist) + '">' +
+        (isFirst ? '' : '<div class="stat-secondary">+' + (cp.distance - prev.distance).toFixed(1) + ' km</div>');
 
-        detailsHtml =
-          '<td class="col-details">' +
-          '  <div class="seg-stats-row">' +
-          '    <span>' + segDist.toFixed(1) + ' km</span> · ' +
-          '    <span class="gain">+' + Math.round(segDPlus) + 'm</span> · ' +
-          '    <span class="loss">-' + Math.round(segDMinus) + 'm</span> · ' +
-          '    <span>⏱ ' + targetTimeStr + '</span>' + stopStr +
-          '  </div>' +
-          '  <div class="seg-passage">' + T[lang].labelPassage + ' ' + passageStr + '</div>' +
-          '</td>';
+      var profileCell = (stats && state.trackData) ? generateMiniProfileSvg(state.trackData, prev.distance, cp.distance) : '';
+
+      var elevCell = stats
+        ? '<div class="stat-primary"><span class="gain">+' + stats.dPlus + '</span> / <span class="loss">−' + stats.dMinus + '</span> m</div>' +
+          '<div class="stat-secondary">' + dict.cumulShort + ' +' + cumulAscent + ' m</div>'
+        : '<div class="stat-secondary">–</div>';
+
+      var timeCell = '<div class="stat-secondary">–</div>';
+      if (!isFirst) {
+        var manual = (entry.segSource === 'manual');
+        var sourceLabel = manual ? dict.timeLocked : (entry.segSource === 'target' ? dict.timeAutoTarget : dict.timeAutoDefault);
+        timeCell =
+          '<div class="time-cell">' +
+          '<input type="text" class="plan-input plan-input-time' + (manual ? ' is-manual' : '') + '" data-idx="' + gi + '" data-field="segmentTime" value="' + (manual ? esc(cp.segmentTime) : '') + '" placeholder="' + (entry.segEstimated ? '≈' : '') + u.formatTime(entry.segMinutes) + '" aria-label="' + esc(dict.colTime) + '" autocomplete="off">' +
+          '<button type="button" class="btn-lock' + (manual ? ' locked' : '') + '" data-idx="' + gi + '" title="' + esc(manual ? dict.unlockTitle : dict.lockTitle) + '" aria-label="' + esc(manual ? dict.unlockTitle : dict.lockTitle) + '" aria-pressed="' + manual + '">' +
+          '<svg class="icon" aria-hidden="true"><use href="#i-' + (manual ? 'lock' : 'unlock') + '"/></svg></button>' +
+          '</div>' +
+          '<div class="stat-secondary' + (manual ? ' is-locked' : '') + '">' + sourceLabel + '</div>';
       }
+
+      var stopCell = (isFirst || isLast)
+        ? '<div class="stat-secondary">–</div>'
+        : '<input type="number" class="plan-input plan-input-stop" data-idx="' + gi + '" data-field="stopDuration" value="' + (cp.stopDuration || 0) + '" min="0" max="1440" step="1" aria-label="' + esc(dict.colStop) + '">';
+
+      var dayNight = startInfo.isDate
+        ? TR.trailAnalysis.getDayNightStatus(new Date(startInfo.dateObj.getTime() + entry.arrivalMinutes * 60000))
+        : null;
+      var etaCell =
+        '<div class="stat-primary eta">' +
+        (dayNight ? '<span class="daynight" title="' + dayNight.type + '">' + dayNight.icon + '</span>' : '') +
+        (entry.arrivalEstimated ? '≈ ' : '') + formatArrivalTime(startInfo, entry.arrivalMinutes, lang) +
+        '</div>' +
+        ((entry.stopMinutes > 0 && !isLast)
+          ? '<div class="stat-secondary">' + dict.departShort + ' ' + formatArrivalTime(startInfo, entry.departureMinutes, lang).split(' ').pop() + '</div>'
+          : '');
+
+      var actionsCell =
+        '<button type="button" class="btn-settings" data-idx="' + gi + '" title="' + esc(dict.settingsCpTitle) + '" aria-label="' + esc(dict.settingsCpTitle) + '"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg></button>' +
+        '<button type="button" class="btn-delete" data-idx="' + gi + '" title="' + esc(dict.deleteCpTitle) + '" aria-label="' + esc(dict.deleteCpTitle) + '"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>';
 
       html +=
-        '<tr class="cp-table-row' + (isSelected ? ' selected-row' : '') + '" data-global-idx="' + globalIdx + '">' +
-        '<td class="col-num">' + seqLabel + '</td>' +
-        '<td class="col-name"><input type="text" data-idx="' + globalIdx + '" data-field="name" value="' + esc(cp.name) + '" placeholder="' + T[lang].placeholderCpNameInput + '"></td>' +
-        '<td class="col-dist"><input type="number" data-idx="' + globalIdx + '" data-field="distance" value="' + cp.distance + '" step="0.1" min="0"></td>' +
-        '<td class="col-time"><input type="text" data-idx="' + globalIdx + '" data-field="segmentTime" value="' + esc(cp.segmentTime || '') + '" placeholder="' + esc(timePlaceholder) + '"' + (idx === 0 ? ' disabled' : '') + '></td>' +
-        '<td class="col-action">' +
-        '  <button type="button" class="btn-settings" data-idx="' + globalIdx + '" title="' + T[lang].settingsCpTitle + '" aria-label="' + T[lang].settingsCpTitle + '"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg></button>' +
-        '  <button type="button" class="btn-delete" data-idx="' + globalIdx + '" title="' + T[lang].deleteCpTitle + '" aria-label="' + T[lang].deleteCpTitle + '"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>' +
-        '</td>' +
-        detailsHtml +
+        '<tr class="plan-row' + (gi === state.activeCPIndex ? ' selected-row' : '') + (cp.useForIntermediateDistances === false ? ' is-minor' : '') + '" data-global-idx="' + gi + '"' +
+        (isFirst ? '' : ' data-seg-start="' + prev.distance + '" data-seg-end="' + cp.distance + '"') + '>' +
+        '<td class="col-plan-num"><span class="cp-table-badge ' + badgeClass + '">' + badgeText + '</span></td>' +
+        '<td class="col-plan-name">' + nameCell + '</td>' +
+        '<td class="col-plan-dist" data-label="' + esc(dict.colDist) + '">' + distCell + '</td>' +
+        '<td class="col-plan-profile">' + profileCell + '</td>' +
+        '<td class="col-plan-elev" data-label="' + esc(dict.segColGainLoss) + '">' + elevCell + '</td>' +
+        '<td class="col-plan-time" data-label="' + esc(dict.colTime) + '">' + timeCell + '</td>' +
+        '<td class="col-plan-stop" data-label="' + esc(dict.colStop) + '">' + stopCell + '</td>' +
+        '<td class="col-plan-eta" data-label="' + esc(dict.colEta) + '">' + etaCell + '</td>' +
+        '<td class="col-plan-actions">' + actionsCell + '</td>' +
         '</tr>';
     });
 
-    dom.cpTbody.innerHTML = html;
+    dom.planTbody.innerHTML = html;
+    renderPlanSummary(plan);
+    markPlanRows(null);
     updateStepBar();
+
+    if (focusSelector) {
+      var again = dom.planTbody.querySelector(focusSelector);
+      if (again) again.focus({ preventScroll: true });
+    }
   }
 
-  function handleCPTableClick(e) {
-    var settingsBtn = e.target.closest('.btn-settings');
-    if (settingsBtn) {
-      e.stopPropagation();
-      var idx = parseInt(settingsBtn.dataset.idx, 10);
-      openCPModal(idx);
-      return;
-    }
-
-    var delBtn = e.target.closest('.btn-delete');
-    if (delBtn) {
-      e.stopPropagation();
-      var delIdx = parseInt(delBtn.dataset.idx, 10);
-      handleDeleteCP(delIdx);
-      return;
-    }
-
-    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
-      var row = e.target.closest('tr');
-      if (row && row.dataset.globalIdx !== undefined) {
-        state.activeCPIndex = parseInt(row.dataset.globalIdx, 10);
-        dom.cpTbody.querySelectorAll('tr').forEach(function (r) { r.classList.remove('selected-row'); });
-        row.classList.add('selected-row');
+  function renderPlanSummary(plan) {
+    if (!dom.planSummary) return;
+    var dict = T[state.language];
+    var u = TR.utils;
+    var last = plan[plan.length - 1];
+    var cls = 'plan-summary';
+    var text = '';
+    if (state.trackData && last && plan.length > 1) {
+      var finish = last.arrivalMinutes;
+      var stops = plan.slice(0, -1).reduce(function (sum, e) { return sum + e.stopMinutes; }, 0);
+      var stopsText = stops > 0 ? dict.summaryStops.replace('{t}', u.formatTime(stops)) : '';
+      var target = getTargetMinutes();
+      if (target > 0) {
+        var diff = finish - target;
+        if (diff > 0) {
+          cls += ' over';
+          text = dict.summaryOver.replace('{t}', u.formatTime(diff));
+        } else if (diff < 0) {
+          cls += ' under';
+          text = dict.summaryUnder.replace('{t}', u.formatTime(-diff));
+        } else {
+          cls += ' ok';
+          text = dict.summaryOnTarget.replace('{t}', u.formatTime(finish)) + stopsText;
+        }
+      } else {
+        text = (last.arrivalEstimated ? dict.summaryEstimate : dict.summaryFinish).replace('{t}', u.formatTime(finish)) + stopsText;
       }
     }
+    dom.planSummary.className = cls;
+    dom.planSummary.textContent = text;
   }
 
-  function handleCPTableDblClick(e) {
-    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
-      var row = e.target.closest('tr');
-      if (row && row.dataset.globalIdx !== undefined) {
-        openCPModal(parseInt(row.dataset.globalIdx, 10));
-      }
+  // Re-render everything a plan edit can affect
+  function refreshAfterPlanChange(redrawMap) {
+    TR.trailAnalysis.resetSegmentCache();
+    renderPlanTable();
+    scheduleRender();
+    if (redrawMap && state.trackData) {
+      TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
     }
   }
 
-  function handleCPTableInput(e) {
-    if (!e.target.matches('input')) return;
-    var idx = parseInt(e.target.dataset.idx, 10);
-    var field = e.target.dataset.field;
-    if (isNaN(idx) || !state.checkpoints[idx]) return;
-
-    if (field === 'name') {
-      state.checkpoints[idx].name = e.target.value;
-      scheduleRender();
+  function handlePlanClick(e) {
+    var btn = e.target.closest('button');
+    if (btn) {
+      var idx = parseInt(btn.dataset.idx, 10);
+      if (btn.classList.contains('btn-settings')) openCPModal(idx);
+      else if (btn.classList.contains('btn-delete')) handleDeleteCP(idx);
+      else if (btn.classList.contains('btn-lock')) toggleSegmentLock(idx);
+      return;
     }
+    if (e.target.closest('input')) return;
+    var row = e.target.closest('tr.plan-row');
+    if (!row) return;
+    state.activeCPIndex = parseInt(row.dataset.globalIdx, 10);
+    dom.planTbody.querySelectorAll('tr.selected-row').forEach(function (r) { r.classList.remove('selected-row'); });
+    row.classList.add('selected-row');
+    var range = rowRange(row);
+    if (range) toggleActiveRange(range);
   }
 
-  function handleCPTableChange(e) {
-    if (!e.target.matches('input')) return;
-    var idx = parseInt(e.target.dataset.idx, 10);
+  function handlePlanDblClick(e) {
+    if (e.target.closest('input, button')) return;
+    var row = e.target.closest('tr.plan-row');
+    if (row) openCPModal(parseInt(row.dataset.globalIdx, 10));
+  }
+
+  function handlePlanInput(e) {
+    if (!e.target.matches('input[data-field="name"]')) return;
+    var cp = state.checkpoints[parseInt(e.target.dataset.idx, 10)];
+    if (!cp) return;
+    cp.name = e.target.value;
+    scheduleRender();
+  }
+
+  function handlePlanChange(e) {
+    if (!e.target.matches('input[data-field]')) return;
+    var cp = state.checkpoints[parseInt(e.target.dataset.idx, 10)];
+    if (!cp) return;
     var field = e.target.dataset.field;
     var val = e.target.value;
-    if (isNaN(idx) || !state.checkpoints[idx]) return;
+    var redrawMap = false;
 
     if (field === 'distance') {
-      var numVal = parseFloat(val);
-      if (isNaN(numVal) || numVal < 0) numVal = 0;
-      state.checkpoints[idx].distance = Math.round(numVal * 100) / 100;
-      var curCP = state.checkpoints[idx];
+      var km = parseFloat(val);
+      cp.distance = (isFinite(km) && km >= 0) ? Math.round(km * 100) / 100 : 0;
       sortCheckpoints();
-      state.activeCPIndex = state.checkpoints.indexOf(curCP);
-      updateArrivalTimes();
-      renderCPTable();
+      state.activeCPIndex = state.checkpoints.indexOf(cp);
+      redrawMap = true;
     } else if (field === 'segmentTime') {
-      state.checkpoints[idx].segmentTime = val.trim();
-      updateArrivalTimes();
-      renderCPTable();
+      // Normalise "1h30" / "90" to H:MM; anything unparseable goes back to automatic
+      var minutes = TR.utils.parseTime(val);
+      cp.segmentTime = minutes > 0 ? TR.utils.formatTime(minutes) : '';
+    } else if (field === 'stopDuration') {
+      var stop = parseInt(val, 10);
+      cp.stopDuration = (isFinite(stop) && stop >= 0) ? Math.min(stop, 1440) : 0;
     } else if (field === 'name') {
-      state.checkpoints[idx].name = val.trim();
+      cp.name = val.trim();
+      redrawMap = true;
     }
 
-    TR.trailAnalysis.resetSegmentCache();
-    scheduleRender();
-    if (state.trackData) {
-      TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
-      renderSegmentTable();
-    }
+    updateArrivalTimes();
+    // Wait for the focus to move (Tab / click) so the re-render restores it on the new field
+    setTimeout(function () { refreshAfterPlanChange(redrawMap); }, 0);
   }
 
-  function handleAddCP() {
-    var activeCP = state.checkpoints[state.activeCPIndex];
-    var newDist = 0;
-    if (activeCP) {
-      var sorted = state.checkpoints.slice().sort(function (a, b) { return a.distance - b.distance; });
-      var activeIdxInSorted = sorted.indexOf(activeCP);
-      if (activeIdxInSorted !== -1 && activeIdxInSorted < sorted.length - 1) {
-        newDist = Math.round(((activeCP.distance + sorted[activeIdxInSorted + 1].distance) / 2) * 100) / 100;
-      } else {
-        newDist = Math.round((activeCP.distance + 2.0) * 100) / 100;
-      }
+  // Locked = the user's own time; unlocked = share of the target (or default pace)
+  function toggleSegmentLock(idx) {
+    var cp = state.checkpoints[idx];
+    if (!cp) return;
+    if (String(cp.segmentTime || '').trim() !== '') {
+      cp.segmentTime = '';
     } else {
-      newDist = 1.0;
+      var entry = computePlan().filter(function (e) { return e.cp === cp; })[0];
+      cp.segmentTime = entry ? TR.utils.formatTime(entry.segMinutes) : '';
     }
+    updateArrivalTimes();
+    refreshAfterPlanChange(false);
+  }
 
-    var newCP = normalizeCP({
+  function insertCheckpoint(cp) {
+    state.checkpoints.push(cp);
+    sortCheckpoints();
+    normalizeAllCPs();
+    state.activeCPIndex = state.checkpoints.indexOf(cp);
+    refreshAfterPlanChange(true);
+  }
+
+  function removeCheckpoint(cp) {
+    var i = state.checkpoints.indexOf(cp);
+    if (i === -1) return;
+    state.checkpoints.splice(i, 1);
+    if (state.activeCPIndex >= state.checkpoints.length) state.activeCPIndex = state.checkpoints.length - 1;
+    normalizeAllCPs();
+    refreshAfterPlanChange(true);
+  }
+
+  function newCheckpoint(distance) {
+    return normalizeCP({
       name: T[state.language].newCpName,
-      distance: newDist,
+      distance: distance,
       icon: 'classic',
       arrivalTime: '',
       segmentTime: '',
       notes: ''
     }, state.checkpoints.length);
+  }
 
-    state.checkpoints.push(newCP);
-    sortCheckpoints();
-    normalizeAllCPs();
-    state.activeCPIndex = state.checkpoints.indexOf(newCP);
-
-    TR.trailAnalysis.resetSegmentCache();
-    renderCPTable();
-    scheduleRender();
-    if (state.trackData) {
-      TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
-      renderSegmentTable();
+  // "Add checkpoint" button: halfway between the selected CP and the next one
+  function handleAddCP() {
+    var activeCP = state.checkpoints[state.activeCPIndex];
+    var newDist = 1.0;
+    if (activeCP) {
+      var sorted = state.checkpoints.slice().sort(function (a, b) { return a.distance - b.distance; });
+      var at = sorted.indexOf(activeCP);
+      newDist = (at !== -1 && at < sorted.length - 1)
+        ? (activeCP.distance + sorted[at + 1].distance) / 2
+        : activeCP.distance + 2.0;
     }
-    toast(T[state.language].toastAddCp + newDist + T[state.language].toastAddCpTail);
+    addCheckpointAt(Math.round(newDist * 100) / 100);
+  }
+
+  // Also used by double-clicking the profile
+  function addCheckpointAt(distance) {
+    var dict = T[state.language];
+    var cp = newCheckpoint(distance);
+    insertCheckpoint(cp);
+    toast(dict.toastCpAddedAt.replace('{d}', distance.toFixed(1)), {
+      actionLabel: dict.undo,
+      onAction: function () { removeCheckpoint(cp); }
+    });
   }
 
   function handleDeleteCP(idx) {
+    var dict = T[state.language];
     if (state.checkpoints.length <= 1) {
-      toast(T[state.language].toastKeepOne);
+      toast(dict.toastKeepOne);
       return;
     }
-    state.checkpoints.splice(idx, 1);
-    if (state.activeCPIndex >= state.checkpoints.length) {
-      state.activeCPIndex = state.checkpoints.length - 1;
-    }
-    sortCheckpoints();
-    normalizeAllCPs();
-    TR.trailAnalysis.resetSegmentCache();
-    renderCPTable();
-    scheduleRender();
-    if (state.trackData) {
-      TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
-      renderSegmentTable();
-    }
-    toast(T[state.language].toastDeleted);
+    var cp = state.checkpoints[idx];
+    if (!cp) return;
+    removeCheckpoint(cp);
+    toast(dict.toastDeleted, {
+      actionLabel: dict.undo,
+      onAction: function () { insertCheckpoint(cp); }
+    });
   }
 
   // ── Floating Modal: Checkpoint Visual Configuration ────────────────
@@ -1703,8 +1728,8 @@
     cp.name = dom.poiNameDetail.value.trim() || 'CP';
     var rawDist = parseFloat(dom.poiPosition.value);
     cp.distance = (!isNaN(rawDist) && rawDist >= 0) ? Math.round(rawDist * 100) / 100 : 0;
-    cp.segmentTime = dom.poiTimeDetail.value.trim();
-    cp.arrivalTime = ''; // derived; recomputed below so a cleared time is not restored from it
+    var segMinutes = TR.utils.parseTime(dom.poiTimeDetail.value); // blank or unparseable → automatic
+    cp.segmentTime = segMinutes > 0 ? TR.utils.formatTime(segMinutes) : '';
     var rawStop = parseInt(dom.poiStopDuration.value, 10);
     cp.stopDuration = (!isNaN(rawStop) && rawStop >= 0) ? Math.min(rawStop, 1440) : 0;
     cp.notes = dom.poiNotesDetail.value;
@@ -1730,15 +1755,7 @@
     sortCheckpoints();
     normalizeAllCPs();
     state.activeCPIndex = state.checkpoints.indexOf(cp);
-
-    TR.trailAnalysis.resetSegmentCache();
-    renderCPTable();
-    scheduleRender();
-    if (state.trackData) {
-      TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
-      renderSegmentTable();
-    }
-
+    refreshAfterPlanChange(true);
     closeCPModal();
   }
 
@@ -1769,31 +1786,38 @@
 
   // cp.arrivalTime mirrors the shared time plan (map popup, JSON export). Arrivals that
   // depend on an estimated segment stay blank so they are never re-read as user input.
+  // cp.arrivalTime mirrors the shared time plan (map popup, JSON export). Arrivals that
+  // depend on a default-pace guess stay blank; only segmentTime is ever read back as input.
   function updateArrivalTimes() {
     if (state.checkpoints[0]) state.checkpoints[0].segmentTime = '0:00';
-    TR.trailAnalysis.computeTimePlan(state.trackpoints, state.checkpoints, state.elevationMode).forEach(function (entry) {
+    computePlan().forEach(function (entry) {
       entry.cp.arrivalTime = entry.arrivalEstimated ? '' : TR.utils.formatTime(entry.arrivalMinutes);
     });
   }
 
   function normalizeAllCPs() {
-    var prevDeparture = 0;
     state.checkpoints.forEach(function (cp, idx) {
       normalizeCP(cp, idx);
+    });
+    updateArrivalTimes();
+  }
+
+  // JSON from before segment times existed only has cumulative arrival times
+  // (no segmentTime key at all); turn those into locked segment times.
+  function migrateLegacyArrivalTimes(checkpoints) {
+    var prevDeparture = 0;
+    checkpoints.slice().sort(function (a, b) { return a.distance - b.distance; }).forEach(function (cp, idx) {
       var arrival = prevDeparture;
       if (idx === 0) {
-        cp.segmentTime = '0:00';
         arrival = 0;
-      } else if (String(cp.segmentTime).trim() !== '') {
+      } else if (cp.segmentTime !== undefined && String(cp.segmentTime).trim() !== '') {
         arrival = prevDeparture + TR.utils.parseTime(cp.segmentTime);
-      } else if (cp.arrivalTime) {
-        // Legacy JSON carrying only cumulative arrival times
+      } else if (cp.segmentTime === undefined && cp.arrivalTime) {
         arrival = TR.utils.parseTime(cp.arrivalTime);
         cp.segmentTime = TR.utils.formatTime(Math.max(0, arrival - prevDeparture));
       }
-      prevDeparture = arrival + (cp.stopDuration || 0);
+      prevDeparture = arrival + (parseInt(cp.stopDuration, 10) || 0);
     });
-    updateArrivalTimes();
   }
 
   function sortCheckpoints() {
@@ -1899,10 +1923,17 @@
           state.startTime = data.startTime;
           if (dom.inputStartTime) dom.inputStartTime.value = data.startTime;
         }
-        if (Array.isArray(data.checkpoints)) state.checkpoints = data.checkpoints;
+        var target = parseTargetTime(data.targetTime);
+        state.targetTime = target > 0 ? TR.utils.formatTime(target) : '';
+        dom.inputTargetTime.value = state.targetTime;
+        if (Array.isArray(data.checkpoints)) {
+          migrateLegacyArrivalTimes(data.checkpoints);
+          state.checkpoints = data.checkpoints;
+        }
         sortCheckpoints();
         normalizeAllCPs();
         state.activeCPIndex = 0;
+        state.activeRange = null;
         applyLanguage();
         toast(T[state.language].toastImportSuccess);
       } catch (err) {
@@ -1927,6 +1958,7 @@
       fontSizeCumulDist: state.fontSizeCumulDist,
       language: state.language,
       startTime: state.startTime || '',
+      targetTime: state.targetTime || '',
       checkpoints: state.checkpoints
     };
     var json = JSON.stringify(data, null, 2);
@@ -1956,10 +1988,13 @@
       fontSizeCumulDist: 17,
       language: state.language,
       startTime: "2026-08-28T06:00",
+      targetTime: "14:00",
+      // segmentTime "" = split automatically from targetTime; a value locks that segment
       checkpoints: [
-        { name: isZH ? "起点" : "Start", distance: 0.0, arrivalTime: "0:00", segmentTime: "0:00", icon: "start" },
-        { name: "CP1", distance: 15.0, arrivalTime: "1:45", segmentTime: "1:45", icon: "classic" },
-        { name: isZH ? "终点" : "Finish", distance: 100.0, arrivalTime: "14:00", segmentTime: "12:15", icon: "finish" }
+        { name: isZH ? "起点" : "Start", distance: 0.0, segmentTime: "0:00", stopDuration: 0, icon: "start" },
+        { name: "CP1", distance: 15.0, segmentTime: "1:45", stopDuration: 5, icon: "classic" },
+        { name: "CP2", distance: 52.0, segmentTime: "", stopDuration: 15, icon: "dropbag" },
+        { name: isZH ? "终点" : "Finish", distance: 100.0, segmentTime: "", icon: "finish" }
       ]
     };
     var json = JSON.stringify(template, null, 2);
@@ -2040,10 +2075,11 @@
 
     document.documentElement.lang = (lang === 'zh') ? 'zh-CN' : 'en';
     syncViewControls();
-    renderCPTable();
     if (state.trackData) {
       TR.trailAnalysis.resetSegmentCache();
       renderAllComponents();
+    } else {
+      renderPlanTable();
     }
   }
 
