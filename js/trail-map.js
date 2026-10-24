@@ -79,6 +79,12 @@
     }
   };
 
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
   function displayLatLng(pt) {
     var tm = getTM();
     if (!useGCJ02Display) return [pt.lat, pt.lon];
@@ -299,9 +305,9 @@
         );
         var marker = L.marker(pos, { icon: cpIcon, zIndexOffset: 300 }).addTo(leafletMap);
         var popupContent = '<div style="font-size:12px; line-height:1.5; color:#1a2e1f; padding:4px 2px;">' +
-          '<strong>' + (cp.name || ('CP ' + idx)) + '</strong><br>' +
+          '<strong>' + escapeHtml(cp.name || ('CP ' + idx)) + '</strong><br>' +
           '<span>' + (isZH ? '距离: ' : 'Dist: ') + cp.distance.toFixed(1) + ' km</span> | <span>' + (isZH ? '海拔: ' : 'Elev: ') + Math.round(pt.elevation) + ' m</span>' +
-          (cp.arrivalTime ? ('<br><span>' + (isZH ? '预计抵达: ' : 'ETA: ') + cp.arrivalTime + '</span>') : '') +
+          (cp.arrivalTime ? ('<br><span>' + (isZH ? '预计抵达: ' : 'ETA: ') + escapeHtml(cp.arrivalTime) + '</span>') : '') +
           '</div>';
         marker.bindPopup(popupContent, { offset: [0, -8] });
         waypointMarkers.push(marker);

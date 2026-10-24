@@ -106,44 +106,20 @@
     return ((ele2 - ele1) / (span * 1000)) * 100; // %
   }
 
+  // Snaps both ends to the nearest track point — the same rule the segment table
+  // (trail-analysis.js) uses — so every view reports identical D+/D- for a segment.
   function segmentStats(pts, startKm, endKm, elevationMode) {
     if (!pts || pts.length < 2) return { distance: 0, dPlus: 0, dMinus: 0 };
     var tm = window.TrailRoadbook.trailMath;
     var mode = elevationMode || (window.TrailRoadbook.elevationMode || 'smooth');
 
-    var si = 0;
-    for (var i = 0; i < pts.length; i++) {
-      if (pts[i].distance >= startKm) { si = i; break; }
-    }
-    var ei = pts.length - 1;
-    for (var j = pts.length - 1; j >= 0; j--) {
-      if (pts[j].distance <= endKm) { ei = j; break; }
-    }
-
-    if (tm && tm.ElevationCalculator) {
-      var res = tm.ElevationCalculator.computeSegment(pts, si, ei, mode);
-      return {
-        distance: Math.round((endKm - startKm) * 10) / 10,
-        dPlus: res.ascent,
-        dMinus: res.descent
-      };
-    }
-
-    var dPlus = 0, dMinus = 0;
-    var prevEle = interpolateElevation(pts, startKm);
-    for (var k = si; k <= ei; k++) {
-      var diff = pts[k].elevation - prevEle;
-      if (diff > 0) dPlus += diff; else dMinus += Math.abs(diff);
-      prevEle = pts[k].elevation;
-    }
-    var endEle = interpolateElevation(pts, endKm);
-    var tail = endEle - prevEle;
-    if (tail > 0) dPlus += tail; else dMinus += Math.abs(tail);
-
+    var si = tm.findNearestPointIndexByDistance(pts, startKm);
+    var ei = tm.findNearestPointIndexByDistance(pts, endKm);
+    var res = tm.ElevationCalculator.computeSegment(pts, si, ei, mode);
     return {
       distance: Math.round((endKm - startKm) * 10) / 10,
-      dPlus: Math.round(dPlus),
-      dMinus: Math.round(dMinus)
+      dPlus: res.ascent,
+      dMinus: res.descent
     };
   }
 

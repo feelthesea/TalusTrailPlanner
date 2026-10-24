@@ -241,6 +241,57 @@
     }
   };
 
+  // Default pace when a segment time is left blank: 12 min/km + 10 min per 100 m D+
+  TA.estimateSegmentMinutes = function (distKm, ascentM) {
+    return Math.round((Math.max(0, distKm) / 5) * 60 + (Math.max(0, ascentM) / 100) * 10);
+  };
+
+  /**
+   * Single source of truth for race timing, shared by the profile, CP table and segment table.
+   * Entries follow the checkpoints sorted by distance. All values are minutes since the start:
+   *  - arrivalMinutes   = Σ segment times up to this CP + Σ stops at *previous* CPs
+   *  - departureMinutes = arrivalMinutes + this CP's stop
+   * Blank segment times are estimated (segEstimated) and flag every later arrival (arrivalEstimated).
+   */
+  TA.computeTimePlan = function (points, checkpoints, elevationMode) {
+    var u = window.TrailRoadbook.utils;
+    var sorted = (checkpoints || []).slice().sort(function (a, b) { return a.distance - b.distance; });
+    var plan = [];
+    var clock = 0;
+    var estimatedCount = 0;
+
+    sorted.forEach(function (cp, i) {
+      var segMinutes = 0;
+      var segEstimated = false;
+      if (i > 0) {
+        var raw = (cp.segmentTime === null || cp.segmentTime === undefined) ? '' : String(cp.segmentTime).trim();
+        if (raw !== '') {
+          segMinutes = u.parseTime(raw);
+        } else {
+          var prev = sorted[i - 1];
+          var ascent = (points && points.length > 1) ? u.segmentStats(points, prev.distance, cp.distance, elevationMode).dPlus : 0;
+          segMinutes = TA.estimateSegmentMinutes(cp.distance - prev.distance, ascent);
+          segEstimated = true;
+          estimatedCount++;
+        }
+      }
+      clock += segMinutes;
+      var stop = cp.stopDuration || 0;
+      plan.push({
+        cp: cp,
+        segMinutes: segMinutes,
+        segEstimated: segEstimated,
+        arrivalMinutes: clock,
+        arrivalEstimated: estimatedCount > 0,
+        estimatedCount: estimatedCount,
+        stopMinutes: stop,
+        departureMinutes: clock + stop
+      });
+      clock += stop;
+    });
+    return plan;
+  };
+
   /**
    * Checkpoint Segment Analysis & UTMB OCC Table Data Generator
    */
@@ -333,10 +384,16 @@
   TA.generateUTMBTableRows = function (trackData, customWaypoints, elevationMode, startTimeStr, lang) {
     if (!trackData || !trackData.points || trackData.points.length === 0) return [];
     var tm = getTM();
-    var u = window.TrailRoadbook.utils;
     var points = trackData.points;
     var isZH = (lang !== 'en');
     var currentElevationMode = elevationMode || 'smooth';
+
+    // Timing covers every CP (split or not); the table only lists split CPs
+    var planByCp = new Map();
+    TA.computeTimePlan(points, customWaypoints, currentElevationMode).forEach(function (entry) {
+      planByCp.set(entry.cp, entry);
+    });
+    var prevTiming = null;
 
     var wps = (customWaypoints || []).filter(function (cp) {
       return cp.useForIntermediateDistances !== false;
@@ -372,7 +429,6 @@
     var cumulDist = 0;
     var cumulAscent = 0;
     var cumulDescent = 0;
-    var cumulElapsedMinutes = 0;
 
     for (var idx = 0; idx < wps.length; idx++) {
       var cp = wps[idx];
@@ -388,7 +444,6 @@
       var segAvgGrade = 0;
       var segStartIdx = 0;
       var segEndIdx = ptIdx;
-      var segTimeMinutes = 0;
 
       if (idx > 0) {
         var prevCp = wps[idx - 1];
@@ -420,24 +475,29 @@
         maxUphillGrad = maxUp;
         uphillAvg = hDist > 0 ? (upAsc / (hDist * 1000)) * 100 : 0;
         segAvgGrade = segDist > 0 ? ((pt.elevation - points[prevPtIdx].elevation) / (segDist * 1000)) * 100 : 0;
-
-        // Segment time from user input or Naismith
-        if (cp.segmentTime) {
-          segTimeMinutes = u.parseTime(cp.segmentTime);
-        } else if (cp.arrivalTime) {
-          var arrMins = u.parseTime(cp.arrivalTime);
-          segTimeMinutes = Math.max(0, arrMins - cumulElapsedMinutes);
-        } else {
-          // Default estimation
-          segTimeMinutes = Math.round((segDist / 5) * 60 + (segAscent / 100) * 10);
-        }
-        cumulElapsedMinutes += segTimeMinutes + (cp.stopDuration || 0);
       } else {
         cumulDist = cp.distance;
         cumulAscent = 0;
         cumulDescent = 0;
-        cumulElapsedMinutes = 0;
       }
+
+      // Timing comes from the shared plan; rows synthesized above (no user CP) are estimated
+      var timing = planByCp.get(cp);
+      if (!timing) {
+        var synthArrival = prevTiming ? prevTiming.departureMinutes + TA.estimateSegmentMinutes(segDist, segAscent) : 0;
+        timing = {
+          arrivalMinutes: synthArrival,
+          departureMinutes: synthArrival,
+          stopMinutes: 0,
+          estimatedCount: (prevTiming ? prevTiming.estimatedCount : 0) + (idx > 0 ? 1 : 0)
+        };
+        timing.arrivalEstimated = timing.estimatedCount > 0;
+      }
+      // A row may span non-split CPs, so measure from the previous row's departure
+      var segTimeMinutes = idx > 0 ? Math.max(0, timing.arrivalMinutes - prevTiming.departureMinutes) : 0;
+      var segEstimated = idx > 0 && timing.estimatedCount > prevTiming.estimatedCount;
+      var cumulElapsedMinutes = timing.arrivalMinutes;
+      prevTiming = timing;
 
       // Calculate passage datetime
       var passageDate = new Date(baseDate.getTime() + cumulElapsedMinutes * 60000);
@@ -476,8 +536,10 @@
         segStartDist: idx > 0 ? wps[idx - 1].distance : 0,
         segEndDist: cp.distance,
         segTimeMinutes: segTimeMinutes,
-        stopDuration: cp.stopDuration || 0,
+        segEstimated: segEstimated,
+        stopDuration: timing.stopMinutes,
         cumulElapsedMinutes: cumulElapsedMinutes,
+        arrivalEstimated: timing.arrivalEstimated,
         passageTimeStr: passageTimeStr,
         passageDate: passageDate,
         dayNight: dayNight,

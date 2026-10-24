@@ -234,6 +234,7 @@
       lon: rawPoints[0].lon,
       elevation: rawPoints[0].ele,
       ele: rawPoints[0].ele,
+      time: rawPoints[0].time || null,
       distance: 0,
       horizontalDistance: 0,
       gradient: 0,

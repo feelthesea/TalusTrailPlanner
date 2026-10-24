@@ -493,6 +493,7 @@
       dom.inputStartTime.addEventListener('change', function () {
         state.startTime = this.value;
         renderCPTable();
+        renderSegmentTable(); // passage times and day/night timeline
         scheduleRender();
       });
     }
@@ -698,6 +699,7 @@
       state.trackData.totalAscent = totals.ascent;
       state.trackData.totalDescent = totals.descent;
       TR.trailAnalysis.resetSegmentCache();
+      renderCPTable(); // segment D+/D- and time estimates depend on the mode
       renderAllComponents();
     }
   }
@@ -1084,8 +1086,9 @@
       var isNight = r.dayNight.isNight;
       var timelineLineClass = isNight ? 'timeline-bar-night' : 'timeline-bar-day';
       var timelineBadgeClass = 'timeline-badge-' + r.dayNight.type;
+      // "≈" marks values that rely on estimated (blank) segment times
       var segTimeStr = (r.isSegmentRow && r.segTimeMinutes > 0)
-        ? ('⏱ ' + TR.utils.formatTime(r.segTimeMinutes) + (r.stopDuration > 0 ? (' · ⏸' + r.stopDuration + 'm') : ''))
+        ? ('⏱ ' + (r.segEstimated ? '≈' : '') + TR.utils.formatTime(r.segTimeMinutes) + (r.stopDuration > 0 ? (' · ⏸' + r.stopDuration + 'm') : ''))
         : (idx === 0 ? (state.language === 'zh' ? '鸣枪起跑' : 'Start') : '');
 
       var nodeHtml = '';
@@ -1097,7 +1100,7 @@
         '  <div class="timeline-v-line ' + timelineLineClass + (idx === 0 ? ' line-start' : (idx === rows.length - 1 ? ' line-end' : '')) + '"></div>' +
         nodeHtml +
         '  <div class="timeline-time-info">' +
-        '    <div class="stat-primary font-mono">' + r.passageTimeStr + '</div>' +
+        '    <div class="stat-primary font-mono">' + (r.arrivalEstimated ? '≈ ' : '') + r.passageTimeStr + '</div>' +
         '    <div class="stat-secondary">' + segTimeStr + '</div>' +
         '  </div>' +
         '</div>';
@@ -1152,12 +1155,22 @@
     var sortedCps = state.checkpoints.slice();
     var lang = state.language;
     var html = '';
+    var planByCp = new Map();
+    TR.trailAnalysis.computeTimePlan(state.trackpoints, sortedCps, state.elevationMode).forEach(function (entry) {
+      planByCp.set(entry.cp, entry);
+    });
+    var startInfo = parseStartTime(state.startTime);
 
     sortedCps.forEach(function (cp, idx) {
       var globalIdx = state.checkpoints.indexOf(cp);
       var isSelected = (globalIdx === state.activeCPIndex);
       var seqLabel = (idx === 0) ? 'S' : (idx === sortedCps.length - 1 ? 'F' : idx);
       var detailsHtml = '';
+      var timing = planByCp.get(cp);
+      // Blank segment times show their estimate as the input placeholder
+      var timePlaceholder = (idx > 0 && timing.segEstimated)
+        ? '≈' + TR.utils.formatTime(timing.segMinutes)
+        : T[lang].placeholderTimeInput;
 
       if (idx > 0) {
         var cpPrev = sortedCps[idx - 1];
@@ -1171,15 +1184,8 @@
           segDMinus = stats.dMinus;
         }
 
-        var segTimeMins = TR.utils.parseTime(cpCurr.segmentTime || '');
-        var targetTimeStr = TR.utils.formatTime(segTimeMins);
-
-        var cumulMins = 0;
-        for (var ci = 1; ci <= idx; ci++) {
-          cumulMins += TR.utils.parseTime(sortedCps[ci].segmentTime || '') + (sortedCps[ci].stopDuration || 0);
-        }
-        var startInfo = parseStartTime(state.startTime);
-        var passageStr = formatArrivalTime(startInfo, cumulMins, lang);
+        var targetTimeStr = (timing.segEstimated ? '≈' : '') + TR.utils.formatTime(timing.segMinutes);
+        var passageStr = (timing.arrivalEstimated ? '≈ ' : '') + formatArrivalTime(startInfo, timing.arrivalMinutes, lang);
         var stopStr = (cpCurr.stopDuration > 0) ? ' · ⏸ ' + cpCurr.stopDuration + 'min' : '';
 
         detailsHtml =
@@ -1199,7 +1205,7 @@
         '<td class="col-num">' + seqLabel + '</td>' +
         '<td class="col-name"><input type="text" data-idx="' + globalIdx + '" data-field="name" value="' + esc(cp.name) + '" placeholder="' + T[lang].placeholderCpNameInput + '"></td>' +
         '<td class="col-dist"><input type="number" data-idx="' + globalIdx + '" data-field="distance" value="' + cp.distance + '" step="0.1" min="0"></td>' +
-        '<td class="col-time"><input type="text" data-idx="' + globalIdx + '" data-field="segmentTime" value="' + esc(cp.segmentTime || '') + '" placeholder="' + T[lang].placeholderTimeInput + '"' + (idx === 0 ? ' disabled' : '') + '></td>' +
+        '<td class="col-time"><input type="text" data-idx="' + globalIdx + '" data-field="segmentTime" value="' + esc(cp.segmentTime || '') + '" placeholder="' + esc(timePlaceholder) + '"' + (idx === 0 ? ' disabled' : '') + '></td>' +
         '<td class="col-action">' +
         '  <button type="button" class="btn-settings" data-idx="' + globalIdx + '" title="' + T[lang].settingsCpTitle + '">⚙️</button>' +
         '  <button type="button" class="btn-delete" data-idx="' + globalIdx + '" title="' + T[lang].deleteCpTitle + '">✕</button>' +
@@ -1424,6 +1430,7 @@
     var rawDist = parseFloat(dom.poiPosition.value);
     cp.distance = (!isNaN(rawDist) && rawDist >= 0) ? Math.round(rawDist * 100) / 100 : 0;
     cp.segmentTime = dom.poiTimeDetail.value.trim();
+    cp.arrivalTime = ''; // derived; recomputed below so a cleared time is not restored from it
     var rawStop = parseInt(dom.poiStopDuration.value, 10);
     cp.stopDuration = (!isNaN(rawStop) && rawStop >= 0) ? Math.min(rawStop, 1440) : 0;
     cp.notes = dom.poiNotesDetail.value;
@@ -1463,6 +1470,13 @@
 
   // ── CP Normalization & Utilities ────────────────────────────────────
   function normalizeCP(cp, idx) {
+    // Imported JSON may carry strings/garbage; these fields end up in innerHTML and toFixed()
+    var dist = parseFloat(cp.distance);
+    cp.distance = (isFinite(dist) && dist >= 0) ? dist : 0;
+    var stop = parseInt(cp.stopDuration, 10);
+    cp.stopDuration = (isFinite(stop) && stop >= 0) ? stop : 0;
+    cp.name = (cp.name === null || cp.name === undefined) ? '' : String(cp.name);
+    cp.notes = (cp.notes === null || cp.notes === undefined) ? '' : String(cp.notes);
     if (cp.useForIntermediateDistances === undefined) cp.useForIntermediateDistances = true;
     if (!cp.icon && cp.icons && Array.isArray(cp.icons) && cp.icons[0]) cp.icon = cp.icons[0].symbol || '';
     if (!cp.icon) cp.icon = (idx === 0 ? 'start' : 'classic');
@@ -1476,44 +1490,34 @@
     }
     if (cp.arrivalTime === undefined) cp.arrivalTime = '';
     if (cp.segmentTime === undefined) cp.segmentTime = '';
-    if (cp.stopDuration === undefined) cp.stopDuration = 0;
     return cp;
   }
 
+  // cp.arrivalTime mirrors the shared time plan (map popup, JSON export). Arrivals that
+  // depend on an estimated segment stay blank so they are never re-read as user input.
   function updateArrivalTimes() {
-    var cumul = 0;
-    state.checkpoints.forEach(function (cp, idx) {
-      if (idx === 0) {
-        cp.segmentTime = '0:00';
-        cp.arrivalTime = '0:00';
-      } else {
-        var seg = TR.utils.parseTime(cp.segmentTime || '');
-        cumul += seg + (cp.stopDuration || 0);
-        cp.arrivalTime = TR.utils.formatTime(cumul);
-      }
+    if (state.checkpoints[0]) state.checkpoints[0].segmentTime = '0:00';
+    TR.trailAnalysis.computeTimePlan(state.trackpoints, state.checkpoints, state.elevationMode).forEach(function (entry) {
+      entry.cp.arrivalTime = entry.arrivalEstimated ? '' : TR.utils.formatTime(entry.arrivalMinutes);
     });
   }
 
   function normalizeAllCPs() {
-    var prevCumul = 0;
+    var prevDeparture = 0;
     state.checkpoints.forEach(function (cp, idx) {
       normalizeCP(cp, idx);
-      if (cp.segmentTime === undefined || cp.segmentTime === '') {
-        if (idx === 0) {
-          cp.segmentTime = '0:00';
-          prevCumul = 0;
-        } else if (cp.arrivalTime) {
-          var cumul = TR.utils.parseTime(cp.arrivalTime);
-          var seg = Math.max(0, cumul - prevCumul);
-          cp.segmentTime = TR.utils.formatTime(seg);
-          prevCumul = cumul;
-        } else {
-          cp.segmentTime = '';
-        }
-      } else {
-        if (idx === 0) prevCumul = 0;
-        else prevCumul += TR.utils.parseTime(cp.segmentTime);
+      var arrival = prevDeparture;
+      if (idx === 0) {
+        cp.segmentTime = '0:00';
+        arrival = 0;
+      } else if (String(cp.segmentTime).trim() !== '') {
+        arrival = prevDeparture + TR.utils.parseTime(cp.segmentTime);
+      } else if (cp.arrivalTime) {
+        // Legacy JSON carrying only cumulative arrival times
+        arrival = TR.utils.parseTime(cp.arrivalTime);
+        cp.segmentTime = TR.utils.formatTime(Math.max(0, arrival - prevDeparture));
       }
+      prevDeparture = arrival + (cp.stopDuration || 0);
     });
     updateArrivalTimes();
   }
@@ -1589,8 +1593,8 @@
   }
 
   function esc(str) {
-    if (!str) return '';
-    return str.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    if (str === null || str === undefined) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
   // ── JSON Import / Export / Template ─────────────────────────────────

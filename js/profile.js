@@ -24,15 +24,27 @@
 
   var NS = 'http://www.w3.org/2000/svg';
 
-  function yAnchors(name, chartH) {
+  // The notes band grows with the longest multi-line note so lines never overlap
+  // each other, the icons above or the chart below.
+  function notesLineHeight(notes) {
+    return Math.round(notes.fontSize * 1.15);
+  }
+
+  function notesBlockHeight(notes) {
+    return notes.lines > 0 ? Math.max(18, notes.lines * notesLineHeight(notes) + 4) : 18;
+  }
+
+  function yAnchors(name, chartH, notes) {
     chartH = chartH || 280;
+    notes = notes || { lines: 0, fontSize: 0 };
     var y = {}, cur = 0;
     var titleH = name ? 28 : 8;
 
     y.titleBase   = cur + titleH - 8;                  cur += titleH;
     y.timeBase    = cur + 14;                          cur += 22;
     y.iconCY      = cur + 14;                          cur += 28;
-    y.notesBase   = cur + 12;                          cur += 18;
+    y.notesBase   = cur + (notes.lines > 0 ? Math.round(notes.fontSize * 0.8) : 12);
+    y.notesLineH  = notesLineHeight(notes);            cur += notesBlockHeight(notes);
     y.chartTop    = cur;
     y.chartBot    = cur + chartH;                      cur += chartH;
     cur += 4;
@@ -132,7 +144,7 @@
       return String(idx);
     });
 
-    var cumulTimes = computeCumulTimes(cps);
+    var cumulTimes = computeCumulTimes(cps, pts);
     var smoothPts  = u().smoothElevation(pts, 7);
 
     var totalDist = pts[pts.length - 1].distance;
@@ -145,10 +157,16 @@
     var chartW = Math.max(totalDist * 14, 800);
     var svgW = 70 + chartW + 55;
 
+    var notesLayout = { lines: 0, fontSize: fsCPNotes };
+    cps.forEach(function (cp) {
+      var n = cp.notes ? String(cp.notes).split('\n').filter(function (l) { return l.trim(); }).length : 0;
+      if (n > notesLayout.lines) notesLayout.lines = n;
+    });
+
     var chartH = 280;
     var margin = 12;
     var titleH = name ? 28 : 8;
-    var constantH = titleH + 22 + 28 + 18 + 4 + 68 + 26 + 10;
+    var constantH = titleH + 22 + 28 + notesBlockHeight(notesLayout) + 4 + 68 + 26 + 10;
 
     if (ratio && ratio !== 'auto') {
       var ratioVal = 1.0;
@@ -163,7 +181,7 @@
       if (chartH > maxChartH) chartH = Math.max(180, maxChartH);
     }
 
-    var Y = yAnchors(name, chartH);
+    var Y = yAnchors(name, chartH, notesLayout);
     var m = makeMapper(totalDist, minE, maxE, Y, chartH);
 
     container.innerHTML = '';
@@ -441,17 +459,17 @@
     });
   }
 
-  function computeCumulTimes(cps) {
-    var times = [];
-    var prevCumul = 0;
-    for (var i = 0; i < cps.length; i++) {
-      var cumul = u().parseTime(cps[i].arrivalTime || '');
-      if (i === 0 && !cps[i].arrivalTime) cumul = 0;
-      var seg = Math.max(0, cumul - prevCumul);
-      times.push({ segment: seg, cumul: cumul });
-      prevCumul = cumul;
-    }
-    return times;
+  // Only user-entered times are drawn: estimated segments (blank inputs) and arrivals
+  // that depend on them are left off the roadbook rather than shown as fake values.
+  function computeCumulTimes(cps, pts) {
+    var plan = window.TrailRoadbook.trailAnalysis.computeTimePlan(pts, cps, window.TrailRoadbook.elevationMode);
+    return plan.map(function (entry) {
+      return {
+        segment: entry.segEstimated ? 0 : entry.segMinutes,
+        cumul: entry.arrivalMinutes,
+        showCumul: !entry.arrivalEstimated
+      };
+    });
   }
 
   function renderTitle(svg, name, w, Y, fontSize) {
@@ -768,7 +786,7 @@
       var cumulVal = times[idx].cumul;
       var formattedCumul = u().formatTime(cumulVal);
 
-      if (formattedCumul && (idx > 0 || cp.arrivalTime)) {
+      if (times[idx].showCumul) {
         svg.appendChild(el('text', {
           x: x,
           y: Y.timeBase,
@@ -802,18 +820,19 @@
     cps.forEach(function (cp) {
       if (!cp.notes) return;
       var x = m.distToX(cp.distance);
-      var lines = cp.notes.split('\n').filter(function (l) { return l.trim(); });
+      var lines = String(cp.notes).split('\n').filter(function (l) { return l.trim(); });
 
       lines.forEach(function (line, li) {
+        // Background-coloured halo keeps the CP guide line from striking through the text
         svg.appendChild(el('text', {
           x: x,
-          y: Y.notesBase + li * 12,
+          y: Y.notesBase + li * Y.notesLineH,
           'text-anchor': 'middle',
           'font-size': String(fontSize),
           'font-weight': '600',
           'font-style': 'italic',
           fill: C.notesText,
-          style: "font-family: " + FONT_FAMILY
+          style: "font-family: " + FONT_FAMILY + "; paint-order: stroke fill; stroke: " + C.bg + "; stroke-width: 4px; stroke-linejoin: round;"
         }, line.trim()));
       });
     });

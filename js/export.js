@@ -9,19 +9,54 @@
 
   window.TrailRoadbook = window.TrailRoadbook || {};
 
+  // An SVG drawn through <img> may not fetch external resources, so @font-face
+  // rules only take effect when their font files are inlined as data: URIs.
+  var FONT_CSS_URL = 'fonts/fonts.css';
+  var EXPORT_FONT_FAMILIES = ['Plus Jakarta Sans', 'Barlow Condensed'];
+
   var fontCssCache = null;
   function getFontStyles() {
     if (fontCssCache) return Promise.resolve(fontCssCache);
-    var fontUrl = 'https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap';
-    return fetch(fontUrl)
-      .then(function (res) { return res.text(); })
-      .then(function (cssText) {
-        fontCssCache = cssText;
-        return cssText;
+    var baseUrl = new URL(FONT_CSS_URL, document.baseURI);
+    return fetch(baseUrl)
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.text();
       })
-      .catch(function () {
-        return "@import url('" + fontUrl + "');";
+      .then(function (cssText) {
+        var faces = cssText.match(/@font-face\s*\{[^}]*\}/g) || [];
+        faces = faces.filter(function (face) {
+          return EXPORT_FONT_FAMILIES.some(function (fam) { return face.indexOf("'" + fam + "'") !== -1; });
+        });
+        return Promise.all(faces.map(function (face) {
+          var m = face.match(/url\(([^)]+)\)/);
+          if (!m) return face;
+          return fetch(new URL(m[1], baseUrl))
+            .then(function (res) { return res.blob(); })
+            .then(blobToDataURL)
+            .then(function (dataUrl) {
+              return face.replace(m[1], dataUrl.replace(/^data:[^;]*;/, 'data:font/woff2;'));
+            });
+        }));
+      })
+      .then(function (inlinedFaces) {
+        fontCssCache = inlinedFaces.join('\n');
+        return fontCssCache;
+      })
+      .catch(function (err) {
+        // e.g. opened via file:// — export still works, with system fonts
+        console.warn('Could not inline export fonts:', err);
+        return '';
       });
+  }
+
+  function blobToDataURL(blob) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () { resolve(reader.result); };
+      reader.onerror = function () { reject(reader.error); };
+      reader.readAsDataURL(blob);
+    });
   }
 
   /**

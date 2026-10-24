@@ -5,11 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Talus - Trail Roadbook Generator & Trail Analytics — 越野跑路书与轨迹分析</title>
   <meta name="description" content="Upload GPX/KML/KMZ tracks and create a beautiful interactive trail roadbook with synchronized map, gradient distribution, and segment statistics.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="fonts/fonts.css?v=7.8">
   <link rel="stylesheet" href="css/leaflet.css">
-  <link rel="stylesheet" href="style.css?v=7.7">
+  <link rel="stylesheet" href="style.css?v=7.8">
 </head>
 <body>
 
@@ -42,12 +40,12 @@
 
       <div class="toolbar-item">
         <label class="field-label" for="input-name" data-i18n="raceNameLabel">比赛名称</label>
-        <input type="text" id="input-name" class="input-field" placeholder="e.g. UTMB 2026" style="width:130px">
+        <input type="text" id="input-name" class="input-field input-race-name" placeholder="e.g. UTMB 2026">
       </div>
 
       <div class="toolbar-item">
         <label class="field-label" for="input-start-time" data-i18n="raceStartLabel">出发时间</label>
-        <input type="datetime-local" id="input-start-time" class="input-field input-datetime" style="width: 175px;">
+        <input type="datetime-local" id="input-start-time" class="input-field input-datetime">
       </div>
     </div>
 
@@ -63,7 +61,7 @@
 
       <div class="toolbar-item">
         <label class="field-label" for="select-color-mode" data-i18n="colorModeLabel">🎨 剖面着色</label>
-        <select id="select-color-mode" class="input-field select-color" style="width: 140px;">
+        <select id="select-color-mode" class="input-field select-color">
           <option value="classic" data-i18n="colorModeClassic">经典路书柱条</option>
           <option value="gradient" data-i18n="colorModeGradient">按坡度渐变</option>
           <option value="elevation" data-i18n="colorModeElevation">按海拔渐变</option>
@@ -91,7 +89,7 @@
     <div class="toolbar-cluster cluster-export">
       <div class="toolbar-item">
         <label class="field-label" for="export-ratio" data-i18n="exportRatioLabel">导出比例</label>
-        <select id="export-ratio" class="input-field select-ratio" style="width:190px;">
+        <select id="export-ratio" class="input-field select-ratio">
           <option value="auto" data-i18n="ratioAuto">默认自适应 (无白边)</option>
           <option value="19.5-9" data-i18n="ratio19_5_9">19.5:9横屏（iPhone 17/16）</option>
           <option value="20-9" data-i18n="ratio20_9" selected>20:9（小米、华为、安卓）</option>
@@ -457,13 +455,13 @@
   <!-- ═══ Scripts ═══ -->
   <script src="js/leaflet.js"></script>
   <script src="js/leaflet-custom-headers.js"></script>
-  <script src="js/utils.js?v=7.7"></script>
-  <script src="js/trail-math.js?v=7.7"></script>
-  <script src="js/gpx-parser.js?v=7.7"></script>
-  <script src="js/trail-analysis.js?v=7.7"></script>
-  <script src="js/trail-map.js?v=7.7"></script>
-  <script src="js/profile.js?v=7.7"></script>
-  <script src="js/export.js?v=7.7"></script>
-  <script src="js/app.js?v=7.7"></script>
+  <script src="js/utils.js?v=7.8"></script>
+  <script src="js/trail-math.js?v=7.8"></script>
+  <script src="js/gpx-parser.js?v=7.8"></script>
+  <script src="js/trail-analysis.js?v=7.8"></script>
+  <script src="js/trail-map.js?v=7.8"></script>
+  <script src="js/profile.js?v=7.8"></script>
+  <script src="js/export.js?v=7.8"></script>
+  <script src="js/app.js?v=7.8"></script>
 </body>
 </html>
