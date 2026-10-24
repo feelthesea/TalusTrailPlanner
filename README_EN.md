@@ -2,78 +2,101 @@
 
 [简体中文](README.md) | [English](README_EN.md)
 
-**Talus** is an interactive **trail running roadbook and elevation profile analytics tool** designed for runners, coaches, and race directors.
+**Talus** is an interactive **trail running roadbook and pacing planner** for runners, coaches, and race directors.
 
-Upload GPX / KML / KMZ route files, explore the interactive map with real-time elevation profile synchronization, analyze 6-level uphill and downhill gradient distributions with practical technique coaching, view multi-mode segment breakdowns, configure aid stations (Checkpoints) with custom icons and annotations via a floating modal, and export crisp, wallpaper-ready roadbook images tailored to modern smartphone screen ratios.
+Load a GPX / KML / KMZ route, mark your checkpoints on the elevation profile, enter one target finish time to have it split across segments, lock and fine-tune the parts you know, then export a high-resolution roadbook image sized for phone screens. A map, grade distribution, and technique tips help you get to know the course.
 
 > [!NOTE]
 > 👤 **Developer**: Built by **Laurent L** via Vibe Coding.  
-> 🔒 **100% Client-Side Privacy**: Runs completely inside your web browser. All GPX / KML / KMZ parsing, math calculations, and PNG exports happen locally. **No track data is ever uploaded to any server.**
+> 🔒 **100% Client-Side Privacy**: Everything runs in your browser. Track parsing, calculations, and PNG exports happen locally. **No track data is ever uploaded.**
 
 ---
 
 ## ✨ Key Features
 
-- 📈 **Unified Interactive Elevation Profile**: Combines high-fidelity vector roadbook publishing with 60fps real-time exploration. Hovering or touching displays a live crosshair with elevation, distance, and slope grade, seamlessly synchronized with the map location cursor.
-- 🎨 **3 Profile Color Schemes**: Switch instantly between "Classic Colors", "Grade Gradient", and "Elevation Gradient".
-- 🗺️ **Interactive Trail Map**: Supports Tianditu (Road/Satellite/Terrain), Gaode (Hybrid/Road with automatic WGS-84 to GCJ-02 reprojection), OpenStreetMap, OpenTopoMap, and CyclOSM.
-- ⚡ **Dual Elevation Calculation Modes**: Switch between "Raw Data" and "Smooth Filter (4m Hysteresis)" to filter out barometric/GPS jitter and match official race data.
-- 📐 **6-Level Gradient Distribution & Practical Technical Tips**: Breaks down routes into Flat (≤5%), Gentle (5-10%), Moderate (10-15%), Steep (15-25%), Very Steep (25-35%), and Extremely Steep (>35%) for uphill and downhill, complete with cadence, pole technique, and posture recommendations.
-- 📋 **Multi-Mode Segment Statistics**: Analyze by Checkpoints, Auto Slope Variation, 1 km intervals, or 5 km intervals. Click any segment to highlight it simultaneously on the elevation profile and map.
-- 📍 **Floating Checkpoint Settings Modal**: Click any CP row or the "⚙️" icon to open a modal for configuring 12 aid station icons, guide axis colors/thickness, and 6 custom inside-chart annotations (with rotation/alignment).
-- 📊 **3-Line Pointed Segment Info Boxes**: Displays segment distance, climb (green `▲`), and descent (red `▼`) in clean hexagonal badges.
-- 📱 **Multi-Ratio Wallpaper Export**: Supports Auto-fit (no padding), 19.5:9 (iPhone 17/16/15 iOS lockscreen wallpaper), and 20:9 (Xiaomi, Huawei, Android full-screen wallpaper) with 1×, 2× HD, and 3× Ultra HD print resolutions.
-- 📥 **JSON Import / Export / Template**: Save all checkpoints and visual settings as a local JSON file to resume editing anytime.
+- 🧭 **Guided steps**: A step bar at the top (Upload track → Set checkpoints → Target time → Fine-tune → Export) ticks itself off from your data and tells you what to do next. Every step stays clickable; nothing is forced.
+- 📂 **Drag and drop**: Drop a GPX / KML / KMZ track or a JSON settings file anywhere on the page. No file at hand? Start with "Try a sample course".
+- 📍 **Checkpoints**: GPX waypoints become checkpoints automatically (with Undo). **Double-click** the profile to add a checkpoint right there, and edit names and distances directly in the plan table.
+- 🎯 **Target time split**: Enter a target finish time and it is split across segments by "effort distance" (km + D+ in m ÷ 100). Typing a segment time locks it 🔒; the remaining segments are re-balanced so the total always matches the target.
+- 📋 **Race plan table**: One row per checkpoint with distance, segment mini profile, gain / loss, segment time, stop time, and ETA (with a day/night icon), all editable inline. On phones each row becomes a card.
+- 📈 **Interactive roadbook profile**: Move over the profile to see distance, altitude, and grade while the map marker follows. Clicking a table row or a profile segment highlights it on the profile, map, and table at once.
+- 🎨 **3 color modes**: Classic bars, grade gradient, elevation gradient.
+- ⚡ **2 gain algorithms**: Smooth (4 m hysteresis, filters GPS / barometer noise and is closer to watch and official figures) and raw data.
+- 🗺️ **Multi-source map**: Tianditu (road / satellite / terrain), Gaode (hybrid / road, with automatic WGS-84 → GCJ-02 correction), OpenStreetMap, OpenTopoMap, CyclOSM. The base map is picked from the track's location (Tianditu in China, OSM elsewhere) and falls back automatically if Tianditu tiles fail.
+- 📐 **6-level grade distribution and tips**: Uphill and downhill split into 6 levels (≤5%, 5–10%, 10–15%, 15–25%, 25–35%, >35%) with cadence, pole, posture, and shock-absorption advice.
+- 🖌️ **Checkpoint styling**: 9 aid-station icons, guide line color and thickness, custom labels at 6 positions inside the chart (with rotation), and multi-line notes.
+- 📱 **Wallpaper-ready export**: Canvas ratio Auto, 19.5:9 (iPhone and similar), or 20:9 (most Android phones), at 1× / 2× / 3×. Exported images embed the web fonts, so they match what you see on screen.
+- 💾 **JSON settings import / export**: Saves checkpoints, target time, locked segments, and all visual settings so you can pick up where you left off.
 
 ---
 
-## 📖 Step-by-Step User Guide
+## 📖 Step-by-Step Guide
 
-### Step 1: Import Your Route Track File (GPX/KML/KMZ)
-1. Click **"📂 Upload Track (GPX/KML/KMZ)"** on the toolbar.
-2. Select your route file (`.gpx`, `.kml`, or `.kmz`).
-3. The application automatically computes and updates all 3 sections:
-   - **Zone 1**: Generates the elevation profile with Start & Finish checkpoints;
-   - **Zone 2**: Centers the interactive map with color-coded tracklines and calculates 8 summary metrics + 6-level gradient distributions;
-   - **Zone 3**: Populates the Checkpoint list and segment statistics table.
+The page reads top to bottom in workflow order: **Roadbook profile → Race plan → Map and grade analysis**. The step bar always shows where you are.
 
-### Step 2: Configure Race Information & Calculation Modes
-1. Enter the **Race Name** (e.g. `UTMB 2026 100K`).
-2. Select the **Start Time** (e.g. `Fri 18:00`) to compute passage times and weekdays for each station.
-3. Choose the **⚡ Elevation Calc Mode**:
-   - **Smooth (4m)** (Recommended): Filters sensor noise to reflect realistic climbing effort;
-   - **Raw Data**: Displays raw cumulative GPS elevation.
-4. Select the **🎨 Profile Color Mode**: Switch between Classic Colors, Grade Gradient, and Elevation Gradient.
+### Step 1: Upload the track
+1. **Drop** a `.gpx`, `.kml`, or `.kmz` file on the page, or click "Choose file" in the profile area (also under "Import ▾ → Upload track file" in the top bar).
+2. On load, Talus automatically:
+   - draws the elevation profile and places the finish at the end of the track;
+   - turns GPX waypoints into checkpoints (Undo is in the notification);
+   - uses the first point's timestamp as the start time, if the track has one;
+   - picks a suitable base map for the track's location.
+3. Just exploring? Click "Try a sample course" to load a synthetic ~42 km demo course.
 
-### Step 3: Add & Configure Checkpoints / Aid Stations
-1. **Add a Checkpoint**: Click **"＋ Add Checkpoint"** in Zone 3.
-2. **In-place Table Editing**:
-   - Modify the **CP Name** directly in the table row;
-   - Adjust the **Distance (km)**; the table automatically re-sorts and updates the roadbook;
-   - Enter estimated segment time or arrival time.
-3. **Open Detailed Visual Settings Modal**:
-   - Click the **"⚙️"** settings icon (or double-click the row);
-   - In the popup modal, configure:
-     - **Station Symbol**: Start 🟢, Finish 🏁, Water Point 💧, Classic Aid 🍉, Drop Bag 🛍️, Assisted Aid 🤝, Peak 🏔️, Checkpoint 🚩, Danger ⚡;
-     - **Vertical Guide Axis**: Line color and thickness (px);
-     - **Inside Chart Annotations**: Add text at 6 positions (Top/Middle/Bottom on Left and Right) for pacing tips, pole reminders, or cutoff times, with customizable font size and 90° rotation;
-     - **Stop Duration**: Aid station resting time in minutes;
-   - Click **"✓ Save & Apply"**; changes immediately reflect on the profile and map.
+### Step 2: Set checkpoints
+- **Double-click the profile** to add a checkpoint at that distance.
+- **Add checkpoint** inserts one halfway between the selected checkpoint and the next.
+- **Edit names and distances in the race plan table**; rows re-sort by distance.
+- Click the **settings button** on a row (or double-click the row) for details: aid-station icon, guide line, in-chart labels, notes, and "Use for segment split stats" (whether it splits the segment boxes under the profile).
+- Deleting a checkpoint can be undone from the notification too.
 
-### Step 4: Interactive Analytics & Live Tracking
-1. **Real-time Map Sync**: Move your mouse or finger across the elevation profile in Zone 1. A crosshair displays instantaneous distance, altitude, and slope grade, while the red marker on the Leaflet map in Zone 2 tracks along the route.
-2. **Base Map Switching**: Switch between Tianditu, Gaode, OpenStreetMap, OpenTopoMap, and CyclOSM.
-3. **Slope Coaching**: Review the gradient distribution bars and read technical advice on stride length, poles, and impact absorption.
-4. **Segment Statistics**: In Zone 3, switch between Checkpoints, Slope Changes, 1 km, and 5 km modes. Click any row to highlight the segment on both the elevation profile and the map.
+### Step 3: Set your target time
+1. Above the race plan table, set the **Start time** and **Target finish**. The target accepts `14:00`, `13h30`, or just `14` (meaning 14 hours).
+2. Segment times are split by effort distance (km + D+ in m ÷ 100) and marked "From target"; arrival times appear on the profile.
+3. The summary above the table tells you whether the plan hits the target, or by how much locked segments and stops overshoot it.
 
-### Step 5: Granular Font Adjustments & High-Resolution PNG Export
-1. **Adjust Font Sizes**: Use the sidebar panel in Zone 1 to fine-tune font sizes (in pixels) for the title, CP names, segment climbs, times, notes, and cumulative distances.
-2. **Select Aspect Ratio**:
-   - **Auto-fit (No Padding)**: Clean and compact;
-   - **19.5:9 Landscape**: Tailored for iPhone 17/16/15 lockscreen wallpapers;
-   - **20:9 Landscape**: Tailored for Android (Xiaomi, Huawei, Samsung) full-screen wallpapers.
-3. **Download PNG**: Click **"🖼️ Download PNG ▾"** and choose **1× Standard**, **2× HD (Recommended)**, or **3× Ultra HD (Print)**.
-4. **Backup Configuration**: Click **"📤 Export JSON"** to save your roadbook configuration to your computer.
+> No target? Blank segments use a default pace (12 min/km + 10 min per 100 m of climb) and are marked `≈`. These estimates appear in the table only, never on the exported roadbook.
+
+### Step 4: Fine-tune (optional)
+- **Lock a segment** by typing its time, e.g. `1:45`, `1h45`, or `105` (minutes). It gets a lock 🔒 and the other unlocked segments are re-balanced. Click the lock to go back to automatic.
+- **Stop times**: Enter the minutes spent at each aid station in the "Stop" column. Stops count toward the total; the ETA excludes the stop at that checkpoint, and the leave time is shown underneath.
+- The icon next to each ETA shows day ☀️, sunset 🌅, night 🌙, or sunrise 🌄 (fixed hours: day 06:30–19:30, night 20:30–05:30), so you know when you'll need a headlamp.
+
+### Step 5: Export the roadbook
+1. Pick the **Canvas** ratio in the profile header (it also changes the on-screen preview):
+   - **Auto**: compact, no padding;
+   - **19.5:9**: iPhone and similar phones;
+   - **20:9**: most Android phones (Xiaomi, Huawei, Samsung, and others).
+2. Adjust **Colors**, **Gain** algorithm, and **Font sizes** in the same header if needed (race title, CP names, altitude, times, notes, segment boxes, and bottom distances each have their own size).
+3. Click **"Export ▾"** in the top bar and choose **Standard 1×**, **HD 2×** (recommended), or **Ultra HD 3×** to download the PNG.
+4. Choose **"Export roadbook settings"** to save a JSON file, and restore it later with "Import ▾ → Import roadbook settings". The JSON doesn't contain the track itself, so upload the same track as well.
+
+---
+
+## 🗂️ Settings File Format
+
+"Import ▾ → Download template" gives you an example. Main fields:
+
+```json
+{
+  "raceName": "Talus Classic Trail 100K",
+  "startTime": "2026-08-28T06:00",
+  "targetTime": "14:00",
+  "elevationMode": "smooth",
+  "colorMode": "classic",
+  "exportRatio": "20-9",
+  "checkpoints": [
+    { "name": "Start", "distance": 0, "segmentTime": "0:00", "icon": "start" },
+    { "name": "CP1", "distance": 15, "segmentTime": "1:45", "stopDuration": 5, "icon": "classic" },
+    { "name": "CP2", "distance": 52, "segmentTime": "", "stopDuration": 15, "icon": "dropbag" },
+    { "name": "Finish", "distance": 100, "segmentTime": "", "icon": "finish" }
+  ]
+}
+```
+
+- An empty `segmentTime` means "split from the target time"; a value locks that segment.
+- `stopDuration` is in minutes.
+- Older files that only have `arrivalTime` (cumulative arrival times) still import and are converted to segment times.
 
 ---
 
@@ -84,6 +107,8 @@ Visit the live GitHub Pages deployment:
 **🔗 [https://feelthesea.github.io/TalusTrailPlanner/](https://feelthesea.github.io/TalusTrailPlanner/)**
 
 ### 2. Run Locally
+Talus is a static site with no build step. The sample course and the export fonts are loaded over HTTP, so serve the folder rather than opening `index.html` directly.
+
 ```bash
 # 1. Clone the repository
 git clone https://github.com/feelthesea/TalusTrailPlanner.git
@@ -97,6 +122,20 @@ python -m http.server 8080
 # 4. Open in browser: http://localhost:8080
 ```
 
+### 3. Code Structure
+| File | Role |
+|---|---|
+| `index.html` / `style.css` | Page structure, styles, and line icons |
+| `js/app.js` | State, Chinese / English UI, step bar, race plan table, import / export |
+| `js/gpx-parser.js` | GPX / KML / KMZ parsing, distance and grade calculation |
+| `js/trail-math.js` | Color scales, coordinate correction, gain algorithms |
+| `js/trail-analysis.js` | Grade distribution, segment statistics, target time split |
+| `js/profile.js` | SVG roadbook profile and its interactions |
+| `js/trail-map.js` | Leaflet map and base map sources |
+| `js/export.js` | PNG export with embedded fonts |
+| `fonts/` | Self-hosted web fonts |
+| `samples/sample-trail.gpx` | Sample course (synthetic demo track) |
+
 ---
 
 ## 🙏 Acknowledgements
@@ -104,6 +143,8 @@ python -m http.server 8080
 This project references and incorporates algorithms and UI design patterns from the open-source project **[TrailScope](https://github.com/GSUI5051/TrailScope)** for map interaction, elevation smoothing, gradient distribution, and segment statistics.
 
 Special thanks to **TrailScope** (https://github.com/GSUI5051/TrailScope) and its author!
+
+The Barlow Condensed, IBM Plex Mono, and Plus Jakarta Sans web fonts are licensed under the SIL Open Font License 1.1; see the `fonts/` folder.
 
 ---
 
