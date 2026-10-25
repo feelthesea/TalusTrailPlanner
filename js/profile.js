@@ -90,6 +90,10 @@
     gridLine:      'rgba(148,163,184,0.15)',
     axisText:      '#64748b',
     peakLabel:     '#64748b',
+    nightBand:     'rgba(30, 41, 59, 0.11)',
+    twilightBand:  'rgba(30, 41, 59, 0.05)',
+    moon:          '#64748b',
+    altLines:      ['#c2410c', '#b91c1c'],
   };
 
   function cpLineColor(type) {
@@ -217,6 +221,7 @@
       renderSegmentHighlight(g, pts, m, Y, activeSegment);
     }
 
+    renderNightBands(g, options.nightBands, cps, m, Y);
     renderTitle(g, name, svgW, Y, fsTitle);
     renderYAxis(g, m, Y, fsCPElev);
 
@@ -227,6 +232,7 @@
     }
 
     renderElevationCurve(g, pts, m, Y);
+    renderAltitudeLines(g, options.altitudeLevels, m, Y, fsCPElev);
     renderCPLines(g, cps, pts, m, Y);
     renderCPIcons(g, cps, seqLabels, m, Y);
     renderCPNames(g, cps, pts, m, Y, fsCPName);
@@ -455,6 +461,50 @@
       'stroke-width': '2',
       'stroke-dasharray': '4,3'
     }));
+  }
+
+  // ── Night & Twilight Bands ──────────────────────────────────────────
+  // Where the plan has the runner out after dusk (headlamp) or in twilight; the "sky" above
+  // the profile shows the shade, and long nights get a small moon.
+  var MOON_PATH = 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z';
+
+  function renderNightBands(svg, bands, cps, m, Y) {
+    (bands || []).forEach(function (b) {
+      var x1 = m.distToX(b.startDist);
+      var x2 = m.distToX(b.endDist);
+      if (x2 - x1 < 1) return;
+      svg.appendChild(el('rect', {
+        x: x1, y: Y.chartTop, width: x2 - x1, height: Y.chartBot - Y.chartTop,
+        fill: b.kind === 'night' ? C.nightBand : C.twilightBand
+      }));
+      if (b.kind !== 'night' || x2 - x1 < 30) return;
+      var cx = (x1 + x2) / 2;
+      // CP names hang down from the top of the chart; keep the moon clear of them
+      if (cps.some(function (cp) { return Math.abs(m.distToX(cp.distance) - cx) < 16; })) return;
+      svg.appendChild(el('path', {
+        d: MOON_PATH,
+        transform: 'translate(' + (cx - 7) + ',' + (Y.chartTop + 6) + ') scale(0.6)',
+        fill: C.moon, opacity: '0.7'
+      }));
+    });
+  }
+
+  // ── High-Altitude Reference Lines (2500 m / 3500 m) ─────────────────
+  function renderAltitudeLines(svg, levels, m, Y, fontSize) {
+    (levels || []).forEach(function (h, i) {
+      var yy = m.eleToY(h);
+      if (yy <= Y.chartTop || yy >= Y.chartBot) return;
+      var col = C.altLines[Math.min(i, C.altLines.length - 1)];
+      svg.appendChild(el('line', {
+        x1: 70, y1: yy, x2: 70 + m.chartW, y2: yy,
+        stroke: col, 'stroke-width': '1.2', 'stroke-dasharray': '6,4', opacity: '0.75'
+      }));
+      svg.appendChild(el('text', {
+        x: 70 + m.chartW + 4, y: yy + 4,
+        'font-size': String(fontSize), 'font-weight': '700', fill: col,
+        style: "font-family: " + FONT_NUMERIC
+      }, h + 'm'));
+    });
   }
 
   // ── Continuous Gradient Fill (Grade or Elevation) ───────────────────

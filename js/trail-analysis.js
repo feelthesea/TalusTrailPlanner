@@ -414,5 +414,193 @@
     return segments;
   };
 
+  // ── Plan Time ⇄ Course Position ─────────────────────────────────────
+  // The plan has the runner moving at an even pace within each segment and standing still
+  // during stops. Both take a computeTimePlan() result.
+  TA.distanceAtMinutes = function (plan, minutes) {
+    if (!plan.length) return 0;
+    if (minutes <= 0) return plan[0].cp.distance;
+    for (var i = 1; i < plan.length; i++) {
+      var prev = plan[i - 1], cur = plan[i];
+      if (minutes <= cur.arrivalMinutes) {
+        var span = cur.arrivalMinutes - prev.departureMinutes;
+        if (minutes <= prev.departureMinutes || span <= 0) return prev.cp.distance;
+        return prev.cp.distance + (cur.cp.distance - prev.cp.distance) * (minutes - prev.departureMinutes) / span;
+      }
+      if (minutes <= cur.departureMinutes) return cur.cp.distance;
+    }
+    return plan[plan.length - 1].cp.distance;
+  };
+
+  TA.minutesAtDistance = function (plan, km) {
+    if (!plan.length) return 0;
+    for (var i = 1; i < plan.length; i++) {
+      var prev = plan[i - 1], cur = plan[i];
+      if (km <= cur.cp.distance) {
+        var len = cur.cp.distance - prev.cp.distance;
+        var t = len > 0 ? Math.max(0, (km - prev.cp.distance) / len) : 1;
+        return prev.departureMinutes + t * (cur.arrivalMinutes - prev.departureMinutes);
+      }
+    }
+    return plan[plan.length - 1].arrivalMinutes;
+  };
+
+  // ── High Altitude ───────────────────────────────────────────────────
+  // Altitude sickness becomes possible from about 2500 m; 3500 m and up is "very high"
+  TA.ALTITUDE_LEVELS = [2500, 3500];
+
+  TA.segmentMaxElevation = function (points, startKm, endKm) {
+    var tm = getTM();
+    var si = tm.findNearestPointIndexByDistance(points, startKm);
+    var ei = tm.findNearestPointIndexByDistance(points, endKm);
+    var max = -Infinity;
+    for (var i = si; i <= ei; i++) if (points[i].elevation > max) max = points[i].elevation;
+    return max;
+  };
+
+  // Stretches of the course at or above `level` m. Gaps under 300 m are bridged and slivers under
+  // 50 m dropped, so GPS noise around the threshold doesn't break one ridge into many pieces.
+  TA.altitudeStretches = function (points, level) {
+    var raw = [];
+    var cur = null;
+    points.forEach(function (p) {
+      if (p.elevation >= level) {
+        if (!cur) cur = { startDist: p.distance, endDist: p.distance, maxElevation: p.elevation };
+        cur.endDist = p.distance;
+        if (p.elevation > cur.maxElevation) cur.maxElevation = p.elevation;
+      } else if (cur) {
+        raw.push(cur);
+        cur = null;
+      }
+    });
+    if (cur) raw.push(cur);
+
+    var merged = [];
+    raw.forEach(function (s) {
+      var last = merged[merged.length - 1];
+      if (last && s.startDist - last.endDist < 0.3) {
+        last.endDist = s.endDist;
+        last.maxElevation = Math.max(last.maxElevation, s.maxElevation);
+      } else {
+        merged.push(s);
+      }
+    });
+    return merged.filter(function (s) { return s.endDist - s.startDist >= 0.05; });
+  };
+
+  // ── Major Climbs ────────────────────────────────────────────────────
+  // Found on a resampled elevation line smoothed over ±100 m: turning points need a 20 m swing,
+  // a dip of up to 15 % of the smaller climb joins two climbs into one, and what is left must
+  // gain enough to matter on this course (4 % of its D+, between 50 and 150 m) at ≥ 3 % average.
+  var CLIMB_SWING = 20;
+  var climbCache = { points: null, mode: null, climbs: null };
+
+  TA.detectClimbs = function (points, elevationMode, totalAscent) {
+    if (!points || points.length < 2) return [];
+    if (climbCache.points === points && climbCache.mode === elevationMode) return climbCache.climbs;
+    var u = window.TrailRoadbook.utils;
+    var total = points[points.length - 1].distance;
+    var step = Math.max(0.025, total / 6000);
+    var n = Math.floor(total / step) + 1;
+
+    var raw = new Array(n);
+    var j = 0;
+    for (var k = 0; k < n; k++) {
+      var d = Math.min(total, k * step);
+      while (j < points.length - 2 && points[j + 1].distance < d) j++;
+      var p1 = points[j], p2 = points[j + 1];
+      var span = p2.distance - p1.distance;
+      raw[k] = span > 0
+        ? p1.elevation + (p2.elevation - p1.elevation) * Math.max(0, Math.min(1, (d - p1.distance) / span))
+        : p1.elevation;
+    }
+
+    var half = Math.max(1, Math.round(0.1 / step));
+    var prefix = [0];
+    for (k = 0; k < n; k++) prefix.push(prefix[k] + raw[k]);
+    var e = raw.map(function (_, i) {
+      var a = Math.max(0, i - half), b = Math.min(n - 1, i + half);
+      return (prefix[b + 1] - prefix[a]) / (b - a + 1);
+    });
+
+    // Alternating minima / maxima at least CLIMB_SWING apart
+    var ext = [];
+    var mode = 0, lo = 0, hi = 0, cand = 0;
+    for (k = 1; k < n; k++) {
+      if (mode === 0) {
+        if (e[k] > e[hi]) hi = k;
+        if (e[k] < e[lo]) lo = k;
+        if (e[hi] - e[lo] >= CLIMB_SWING) {
+          if (hi > lo) { ext.push({ i: lo, type: 'min' }); mode = 1; cand = hi; }
+          else { ext.push({ i: hi, type: 'max' }); mode = -1; cand = lo; }
+        }
+      } else if (mode === 1) {
+        if (e[k] > e[cand]) cand = k;
+        else if (e[cand] - e[k] >= CLIMB_SWING) { ext.push({ i: cand, type: 'max' }); mode = -1; cand = k; }
+      } else {
+        if (e[k] < e[cand]) cand = k;
+        else if (e[k] - e[cand] >= CLIMB_SWING) { ext.push({ i: cand, type: 'min' }); mode = 1; cand = k; }
+      }
+    }
+    if (mode !== 0) ext.push({ i: cand, type: mode === 1 ? 'max' : 'min' });
+
+    var climbs = [];
+    for (k = 0; k + 1 < ext.length; k++) {
+      if (ext[k].type === 'min' && ext[k + 1].type === 'max') climbs.push({ s: ext[k].i, t: ext[k + 1].i });
+    }
+
+    var merged = true;
+    while (merged) {
+      merged = false;
+      for (k = 0; k + 1 < climbs.length; k++) {
+        var A = climbs[k], B = climbs[k + 1];
+        var dip = e[A.t] - e[B.s];
+        var smaller = Math.min(e[A.t] - e[A.s], e[B.t] - e[B.s]);
+        if (e[B.t] > e[A.t] && dip <= Math.max(CLIMB_SWING, 0.15 * smaller)) {
+          climbs.splice(k, 2, { s: A.s, t: B.t });
+          merged = true;
+          break;
+        }
+      }
+    }
+
+    var minGain = Math.max(50, Math.min(150, Math.round((totalAscent || 0) * 0.04)));
+    var tm = getTM();
+    var window200 = Math.max(1, Math.round(0.2 / step));
+    var result = [];
+    climbs.forEach(function (c) {
+      var startDist = c.s * step;
+      var endDist = Math.min(total, c.t * step);
+      var length = endDist - startDist;
+      var net = e[c.t] - e[c.s];
+      if (length <= 0 || net < minGain) return;
+      var avg = net / (length * 1000) * 100;
+      if (avg < 3) return;
+
+      var maxGrade = avg;
+      for (var w = c.s; w + window200 <= c.t; w++) {
+        maxGrade = Math.max(maxGrade, (e[w + window200] - e[w]) / (window200 * step * 1000) * 100);
+      }
+
+      var si = tm.findNearestPointIndexByDistance(points, startDist);
+      var ei = tm.findNearestPointIndexByDistance(points, endDist);
+      var top = -Infinity;
+      for (var q = si; q <= ei; q++) if (points[q].elevation > top) top = points[q].elevation;
+
+      result.push({
+        startDist: Math.round(startDist * 100) / 100,
+        endDist: Math.round(endDist * 100) / 100,
+        length: length,
+        dPlus: u.segmentStats(points, startDist, endDist, elevationMode).dPlus,
+        avgGrade: avg,
+        maxGrade: maxGrade,
+        topElevation: top
+      });
+    });
+
+    climbCache = { points: points, mode: elevationMode, climbs: result };
+    return result;
+  };
+
   window.TrailRoadbook.trailAnalysis = TA;
 })();

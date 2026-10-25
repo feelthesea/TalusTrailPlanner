@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Talus - Trail Roadbook Generator & Trail Analytics — 越野跑路书与轨迹分析</title>
   <meta name="description" content="Upload GPX/KML/KMZ tracks and create a beautiful interactive trail roadbook with synchronized map, gradient distribution, and segment statistics.">
-  <link rel="stylesheet" href="fonts/fonts.css?v=8.2">
+  <link rel="stylesheet" href="fonts/fonts.css?v=8.3">
   <link rel="stylesheet" href="css/leaflet.css">
-  <link rel="stylesheet" href="style.css?v=8.2">
+  <link rel="stylesheet" href="style.css?v=8.3">
 </head>
 <body>
 
@@ -38,6 +38,11 @@
     <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
     <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></symbol>
+    <symbol id="i-printer" viewBox="0 0 24 24"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></symbol>
+    <symbol id="i-droplet" viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></symbol>
+    <symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11v6M9 14h6"/></symbol>
+    <symbol id="i-climb" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
   </svg>
 
   <!-- ═══ App bar: brand, race name, import / export, language ═══ -->
@@ -72,6 +77,10 @@
             <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>
             <span data-i18n="downloadTemplate">下载配置模板</span>
           </button>
+          <button type="button" role="menuitem" id="btn-new-roadbook" class="menu-item-muted">
+            <svg class="icon" aria-hidden="true"><use href="#i-file-plus"/></svg>
+            <span data-i18n="newRoadbook">新建路书</span><small data-i18n="newRoadbookTag">清空本地保存</small>
+          </button>
         </div>
       </div>
       <input type="file" id="input-gpx" accept=".gpx,.kml,.kmz" class="hidden">
@@ -96,6 +105,12 @@
           <button type="button" role="menuitem" data-scale="3">
             <svg class="icon" aria-hidden="true"><use href="#i-image"/></svg>
             <span data-i18n="scale3">超清 3×</span><small data-i18n="scale3Tag">打印</small>
+          </button>
+          <div class="menu-sep"></div>
+          <div class="menu-label" data-i18n="printLabel">打印</div>
+          <button type="button" role="menuitem" id="btn-print-plan">
+            <svg class="icon" aria-hidden="true"><use href="#i-printer"/></svg>
+            <span data-i18n="printPlan">打印计划表</span><small>A4</small>
           </button>
           <div class="menu-sep"></div>
           <button type="button" role="menuitem" id="btn-export-json">
@@ -208,12 +223,41 @@
           <span data-i18n="raceStartLabel">出发时间</span>
           <input type="datetime-local" id="input-start-time" class="input-field input-datetime">
         </label>
+        <label class="field-inline" for="select-utc-offset" title="比赛当地时区，用于计算日出日落和夜间路段；出国比赛时请确认" data-i18n-title="tzTitle">
+          <span data-i18n="tzLabel">时区</span>
+          <select id="select-utc-offset" class="input-field select-tz"></select>
+        </label>
+        <span class="sun-info" id="sun-info"></span>
         <label class="field-inline" for="input-target-time">
           <svg class="icon icon-sm" aria-hidden="true"><use href="#i-flag"/></svg>
           <span data-i18n="targetTimeLabel">目标完赛</span>
           <input type="text" id="input-target-time" class="input-field input-target" placeholder="如 14:00" data-i18n-placeholder="targetTimePlaceholder" inputmode="decimal" autocomplete="off">
         </label>
         <span class="plan-summary" id="plan-summary" aria-live="polite"></span>
+      </div>
+
+      <div class="plan-fuel">
+        <span class="field-inline fuel-label">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="#i-droplet"/></svg>
+          <span data-i18n="fuelRatesLabel">每小时补给</span>
+          <span class="info-tip" title="" data-i18n-title="fuelRatesTip"><svg class="icon icon-sm" aria-hidden="true"><use href="#i-info"/></svg></span>
+        </span>
+        <label class="field-inline" for="input-carbs-rate">
+          <span data-i18n="fuelCarbs">碳水</span>
+          <input type="text" id="input-carbs-rate" class="input-field input-rate" inputmode="decimal" autocomplete="off" placeholder="40-90">
+          <span class="field-unit">g</span>
+        </label>
+        <label class="field-inline" for="input-water-rate">
+          <span data-i18n="fuelWater">水</span>
+          <input type="text" id="input-water-rate" class="input-field input-rate" inputmode="decimal" autocomplete="off" placeholder="450-750">
+          <span class="field-unit">ml</span>
+        </label>
+        <label class="field-inline" for="input-sodium-rate">
+          <span data-i18n="fuelSodium">钠</span>
+          <input type="text" id="input-sodium-rate" class="input-field input-rate" inputmode="decimal" autocomplete="off" placeholder="300-600">
+          <span class="field-unit">mg</span>
+        </label>
+        <span class="fuel-total" id="fuel-total"></span>
       </div>
 
       <div class="plan-table-wrap">
@@ -228,6 +272,7 @@
               <th class="col-plan-time" data-i18n="colTime">分段用时</th>
               <th class="col-plan-stop" data-i18n="colStop">停留 (分)</th>
               <th class="col-plan-eta" data-i18n="colEta">预计抵达</th>
+              <th class="col-plan-fuel" data-i18n="colFuel">碳水 / 水 / 钠</th>
               <th class="col-plan-actions"><span class="sr-only" data-i18n="colActions">操作</span></th>
             </tr>
           </thead>
@@ -299,10 +344,22 @@
         </div>
       </div>
     </section>
+
+    <!-- 爬坡与海拔：按地形识别的主要爬坡、高海拔路段 -->
+    <section class="panel-card climbs-panel-card" id="section-climbs">
+      <div class="panel-card-header">
+        <h3>
+          <svg class="icon" aria-hidden="true"><use href="#i-climb"/></svg>
+          <span data-i18n="climbsTitle">爬坡与海拔</span>
+        </h3>
+        <span class="panel-tip" data-i18n="climbsTip">按地形自动识别，不受 CP 位置影响；点击一行可在剖面图和地图上定位</span>
+      </div>
+      <div class="climbs-body" id="climbs-body"></div>
+    </section>
   </main>
 
   <footer class="page-footer">
-    <span data-i18n="footerPrivacy">轨迹和路书数据只在你的浏览器本地处理</span>
+    <span data-i18n="footerPrivacy">轨迹和路书数据只在你的浏览器本地处理和保存</span>
     <span aria-hidden="true">·</span>
     <span><span data-i18n="vibeCodedBy">Vibe coded by</span> <strong>Laurent L</strong></span>
   </footer>
@@ -512,15 +569,20 @@
   <!-- ═══ Toast ═══ -->
   <div class="toast" id="toast"><span id="toast-text"></span><button type="button" class="toast-action hidden" id="toast-action"></button></div>
 
+  <!-- ═══ Print sheet: filled right before printing, shown only on paper ═══ -->
+  <div class="print-sheet" id="print-sheet"></div>
+
   <!-- ═══ Scripts ═══ -->
   <script src="js/leaflet.js"></script>
-  <script src="js/utils.js?v=8.2"></script>
-  <script src="js/trail-math.js?v=8.2"></script>
-  <script src="js/gpx-parser.js?v=8.2"></script>
-  <script src="js/trail-analysis.js?v=8.2"></script>
-  <script src="js/trail-map.js?v=8.2"></script>
-  <script src="js/profile.js?v=8.2"></script>
-  <script src="js/export.js?v=8.2"></script>
-  <script src="js/app.js?v=8.2"></script>
+  <script src="js/utils.js?v=8.3"></script>
+  <script src="js/trail-math.js?v=8.3"></script>
+  <script src="js/sun.js?v=8.3"></script>
+  <script src="js/storage.js?v=8.3"></script>
+  <script src="js/gpx-parser.js?v=8.3"></script>
+  <script src="js/trail-analysis.js?v=8.3"></script>
+  <script src="js/trail-map.js?v=8.3"></script>
+  <script src="js/profile.js?v=8.3"></script>
+  <script src="js/export.js?v=8.3"></script>
+  <script src="js/app.js?v=8.3"></script>
 </body>
 </html>

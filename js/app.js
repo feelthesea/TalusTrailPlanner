@@ -19,7 +19,7 @@
   var T = {
     zh: {
       vibeCodedBy: "Vibe coded by",
-      footerPrivacy: "轨迹和路书数据只在你的浏览器本地处理",
+      footerPrivacy: "轨迹和路书数据只在你的浏览器本地处理和保存",
       raceNameLabel: "比赛名称",
       raceNamePlaceholder: "未命名赛事",
       raceStartLabel: "出发时间",
@@ -116,6 +116,24 @@
       summaryUnder: "所有分段都已锁定，合计比目标少 {t}",
       summaryEstimate: "还没设目标：按默认配速估算，完赛约 {t}",
       summaryFinish: "预计完赛用时 {t}",
+      colFuel: "碳水 / 水 / 钠",
+      fuelRatesLabel: "每小时补给",
+      fuelRatesTip: "按每段的预计用时（不含补给站停留）计算，可填区间（如 40-90）或单个数值，留空则不显示。参考：碳水 40–90 g/h（超过 2 小时的比赛最多约 90 g/h，需要提前练肠胃；6 小时以上的超马常见 30–50 g/h）；水 450–750 ml/h；钠 300–600 mg/h（约每升水 500–700 mg），炎热时取高值。",
+      fuelCarbs: "碳水",
+      fuelWater: "水",
+      fuelSodium: "钠",
+      fuelTotal: "全程合计",
+      tzLabel: "时区",
+      tzAuto: "自动 · {o}",
+      tzTitle: "比赛当地时区，用于计算日出日落和夜间路段；出国比赛时请确认",
+      sunInfo: "日出 {r} · 日落 {s}",
+      sunAlwaysUp: "全天日照",
+      sunAlwaysDown: "全天无日照",
+      sunDay: "白天",
+      sunSunset: "日落前后",
+      sunNight: "夜间，需要头灯",
+      sunSunrise: "日出前后",
+      altSegmentMax: "最高 {e} m",
       toastCpAddedAt: "已在 {d} km 添加 CP",
       toastWaypoints: "已把 GPX 中的 {n} 个航点设为 CP",
       undo: "撤销",
@@ -211,11 +229,46 @@
       btnSaveApply: "保存并应用",
 
       labelStopDuration: "停留时间 (分钟)",
-      toastMapFallback: "天地图图层加载受阻，已自动切换到备用地图（高德 / OSM）"
+      toastMapFallback: "天地图图层加载受阻，已自动切换到备用地图（高德 / OSM）",
+
+      newRoadbook: "新建路书",
+      newRoadbookTag: "清空本地保存",
+      startOverConfirm: "清空当前路书和这个浏览器里保存的数据，重新开始？",
+      toastRestored: "已恢复上次编辑的路书（只保存在这个浏览器里）",
+      startOver: "重新开始",
+      printLabel: "打印",
+      printPlan: "打印计划表",
+
+      climbsTitle: "爬坡与海拔",
+      climbsTip: "按地形自动识别，不受 CP 位置影响；点击一行可在剖面图和地图上定位",
+      climbsNone: "这条赛道没有明显的爬坡",
+      climbsCount: "共 {n} 段主要爬坡，合计爬升 +{g} m",
+      climbColWhere: "位置 (km)",
+      climbColSegment: "所在赛段",
+      climbColProfile: "剖面",
+      climbColLength: "长度",
+      climbColGain: "爬升",
+      climbColAvg: "平均坡度",
+      climbColMax: "最陡 200 m",
+      climbColTop: "坡顶海拔",
+      altTitle: "高海拔",
+      altMax: "全程最高 {e} m",
+      altAbove: "{h} m 以上 {d} km",
+      altAboveTime: "（预计约 {t}）",
+      altTip: "海拔 2500 m 以上可能出现高原反应（头痛、恶心、乏力、失眠）。能提前几天到达适应最好；比赛中放慢节奏，注意保暖和补水，症状持续加重时及时下撤。",
+
+      printColSegKm: "分段 km",
+      printColNotes: "备注",
+      printStart: "出发",
+      printTarget: "目标",
+      printFinish: "预计完赛",
+      printCourse: "全程",
+      printFuelRates: "每小时补给",
+      printGenerated: "由 Talus 生成 · {d}"
     },
     en: {
       vibeCodedBy: "Vibe coded by",
-      footerPrivacy: "Your tracks and roadbooks are processed locally in your browser",
+      footerPrivacy: "Your tracks and roadbooks are processed and saved locally in your browser",
       raceNameLabel: "Race name",
       raceNamePlaceholder: "Untitled race",
       raceStartLabel: "Start time",
@@ -312,6 +365,24 @@
       summaryUnder: "All segments are locked and add up to {t} less than the target",
       summaryEstimate: "No target yet: the default pace gives about {t}",
       summaryFinish: "Expected finish time {t}",
+      colFuel: "Carbs / Water / Sodium",
+      fuelRatesLabel: "Fuel per hour",
+      fuelRatesTip: "Worked out from each segment's planned time (aid-station stops not included). Enter a range (e.g. 40-90) or one number; leave blank to hide. For reference: carbs 40–90 g/h (up to about 90 g/h for races over 2 hours with a trained gut; 30–50 g/h is typical in ultras over 6 hours); water 450–750 ml/h; sodium 300–600 mg/h (about 500–700 mg per litre), the high end in the heat.",
+      fuelCarbs: "Carbs",
+      fuelWater: "Water",
+      fuelSodium: "Sodium",
+      fuelTotal: "Race total",
+      tzLabel: "Time zone",
+      tzAuto: "Auto · {o}",
+      tzTitle: "The race's local time zone, used for sunrise, sunset and night sections; check it for races abroad",
+      sunInfo: "Sunrise {r} · Sunset {s}",
+      sunAlwaysUp: "Sun up all day",
+      sunAlwaysDown: "No sunrise",
+      sunDay: "Daylight",
+      sunSunset: "Around sunset",
+      sunNight: "Night, headlamp needed",
+      sunSunrise: "Around sunrise",
+      altSegmentMax: "Max {e} m",
       toastCpAddedAt: "Checkpoint added at {d} km",
       toastWaypoints: "{n} GPX waypoints added as checkpoints",
       undo: "Undo",
@@ -407,7 +478,42 @@
       btnSaveApply: "Save and apply",
 
       labelStopDuration: "Stop Duration (min)",
-      toastMapFallback: "Tianditu tiles failed to load, switched to a backup map (Gaode / OSM)"
+      toastMapFallback: "Tianditu tiles failed to load, switched to a backup map (Gaode / OSM)",
+
+      newRoadbook: "New roadbook",
+      newRoadbookTag: "clears saved data",
+      startOverConfirm: "Clear this roadbook and everything saved in this browser, and start over?",
+      toastRestored: "Restored your last roadbook (saved in this browser only)",
+      startOver: "Start over",
+      printLabel: "Print",
+      printPlan: "Print race plan",
+
+      climbsTitle: "Climbs and altitude",
+      climbsTip: "Found from the terrain, wherever the checkpoints are; click a row to locate it on the profile and map",
+      climbsNone: "No significant climbs on this course",
+      climbsCount: "{n} main climbs, +{g} m in total",
+      climbColWhere: "Where (km)",
+      climbColSegment: "Segment",
+      climbColProfile: "Profile",
+      climbColLength: "Length",
+      climbColGain: "Gain",
+      climbColAvg: "Avg grade",
+      climbColMax: "Steepest 200 m",
+      climbColTop: "Top",
+      altTitle: "High altitude",
+      altMax: "Highest point {e} m",
+      altAbove: "Above {h} m: {d} km",
+      altAboveTime: " (about {t})",
+      altTip: "Altitude sickness becomes possible above 2,500 m (headache, nausea, fatigue, poor sleep). Arriving a few days early to acclimatise helps; in the race slow down, stay warm and keep drinking, and go down if symptoms keep getting worse.",
+
+      printColSegKm: "Seg. km",
+      printColNotes: "Notes",
+      printStart: "Start",
+      printTarget: "Target",
+      printFinish: "Expected finish",
+      printCourse: "Course",
+      printFuelRates: "Fuel per hour",
+      printGenerated: "Made with Talus · {d}"
     }
   };
 
@@ -437,8 +543,13 @@
     trackData: null,
     trackpoints: null,
     trackFileName: '',
+    trackFileSize: 0,
     raceName: '',
     startTime: getDefaultStartDatetime(),
+    utcOffset: 'auto',        // race-local time zone: 'auto' (guessed from the course) or ±hh:mm
+    carbsPerHour: '40-90',    // fuel needs per hour: a range "lo-hi", one number, or '' to hide
+    waterPerHour: '450-750',
+    sodiumPerHour: '300-600',
     activeCPIndex: 0,
     elevationMode: 'smooth',  // 'smooth' | 'raw'
     colorMode: 'classic',     // 'classic' | 'gradient' | 'elevation'
@@ -524,6 +635,18 @@
     dom.planSummary       = document.getElementById('plan-summary');
     dom.planTbody         = document.getElementById('plan-tbody');
     dom.btnAddCp          = document.getElementById('btn-add-cp');
+    dom.selectUtcOffset   = document.getElementById('select-utc-offset');
+    dom.sunInfo           = document.getElementById('sun-info');
+    dom.inputCarbsRate    = document.getElementById('input-carbs-rate');
+    dom.inputWaterRate    = document.getElementById('input-water-rate');
+    dom.inputSodiumRate   = document.getElementById('input-sodium-rate');
+    dom.fuelTotal         = document.getElementById('fuel-total');
+
+    // Climbs & altitude, print sheet, new roadbook
+    dom.climbsBody        = document.getElementById('climbs-body');
+    dom.printSheet        = document.getElementById('print-sheet');
+    dom.btnPrintPlan      = document.getElementById('btn-print-plan');
+    dom.btnNewRoadbook    = document.getElementById('btn-new-roadbook');
 
     // Analysis: Map & Gradient Distribution
     dom.selectMapSource   = document.getElementById('select-map-source');
@@ -579,11 +702,20 @@
     if (dom.inputStartTime) {
       dom.inputStartTime.value = state.startTime;
     }
+    syncFuelInputs();
+
+    // Pick up where the last visit left off: settings now, the track once IndexedDB answers
+    var saved = TR.storage.loadConfig();
+    if (saved) {
+      try { applyConfig(saved); } catch (e) { saved = null; }
+    }
     normalizeAllCPs();
     bindEvents();
     bindModalEvents();
     bindDragAndDrop();
     applyLanguage();
+    saveEnabled = true;
+    if (saved && saved.track) restoreSavedTrack(saved.track);
   }
 
   // ── Event Bindings ──────────────────────────────────────────────────
@@ -610,6 +742,22 @@
       this.value = state.targetTime;
       updateArrivalTimes();
       refreshAfterPlanChange(false);
+    });
+
+    dom.selectUtcOffset.addEventListener('change', function () {
+      state.utcOffset = this.value;
+      renderPlanTable();
+      scheduleRender();
+    });
+
+    // Fuel rates: anything unreadable goes back to the previous value
+    [['carbsPerHour', dom.inputCarbsRate], ['waterPerHour', dom.inputWaterRate], ['sodiumPerHour', dom.inputSodiumRate]].forEach(function (pair) {
+      pair[1].addEventListener('change', function () {
+        var rate = parseRate(this.value);
+        if (rate !== undefined) state[pair[0]] = formatRate(rate);
+        this.value = state[pair[0]];
+        renderPlanTable();
+      });
     });
 
     // View settings in the profile header
@@ -675,6 +823,11 @@
         handleImageExport(parseInt(this.dataset.scale, 10));
       });
     });
+    dom.btnPrintPlan.addEventListener('click', handlePrintPlan);
+    dom.btnNewRoadbook.addEventListener('click', startOver);
+    // Ctrl+P prints the plan sheet too, not the interactive page
+    window.addEventListener('beforeprint', buildPrintSheet);
+    window.addEventListener('pagehide', flushSave);
     document.addEventListener('click', closeMenus);
     document.addEventListener('keydown', function (e) {
       if (e.key !== 'Escape') return;
@@ -717,6 +870,23 @@
     dom.planTbody.addEventListener('mouseleave', function () {
       hoveredRow = null;
       if (!state.activeRange) TR.trailMap.clearSegmentHighlight();
+    });
+
+    // Climb rows and high-altitude stretches locate their range the same way plan rows do
+    var hoveredClimb = null;
+    dom.climbsBody.addEventListener('mouseover', function (e) {
+      var item = e.target.closest('[data-seg-start]');
+      if (item === hoveredClimb) return;
+      hoveredClimb = item;
+      if (!state.activeRange) highlightRangeOnMap(rowRange(item));
+    });
+    dom.climbsBody.addEventListener('mouseleave', function () {
+      hoveredClimb = null;
+      if (!state.activeRange) TR.trailMap.clearSegmentHighlight();
+    });
+    dom.climbsBody.addEventListener('click', function (e) {
+      var range = rowRange(e.target.closest('[data-seg-start]'));
+      if (range) toggleActiveRange(range);
     });
 
     // Font Sizes Modal Events
@@ -978,23 +1148,26 @@
       });
   }
 
-  function loadTrackFile(file) {
+  function setTrack(trackData, file) {
+    state.trackData = trackData;
+    state.trackpoints = trackData.points;
     state.trackFileName = file.name;
+    state.trackFileSize = file.size;
+  }
 
+  function loadTrackFile(file) {
     TR.gpxParser.parseFile(file, state.elevationMode).then(function (trackData) {
-      state.trackData = trackData;
-      state.trackpoints = trackData.points;
+      setTrack(trackData, file);
+      TR.storage.saveTrack(file);
 
-      // Auto-detect race start time from track if available
+      // A recorded track starts the plan at the same time of day, in the race's local time
       if (trackData.startTime) {
         var d = new Date(trackData.startTime);
         if (!isNaN(d.getTime())) {
-          var y = d.getFullYear();
-          var m = d.getMonth() + 1;
-          var day = d.getDate();
-          var hh = d.getHours();
-          var mm = d.getMinutes();
-          var iso = y + '-' + (m < 10 ? '0' : '') + m + '-' + (day < 10 ? '0' : '') + day + 'T' + (hh < 10 ? '0' : '') + hh + ':' + (mm < 10 ? '0' : '') + mm;
+          var offset = raceUtcOffset(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes());
+          var w = new Date(d.getTime() + offset * 60000);
+          var iso = w.getUTCFullYear() + '-' + pad2(w.getUTCMonth() + 1) + '-' + pad2(w.getUTCDate()) +
+            'T' + pad2(w.getUTCHours()) + ':' + pad2(w.getUTCMinutes());
           state.startTime = iso;
           if (dom.inputStartTime) dom.inputStartTime.value = iso;
         }
@@ -1056,6 +1229,51 @@
     });
   }
 
+  // ── Local Autosave ──────────────────────────────────────────────────
+  // Settings go to localStorage shortly after every change; the track file was stored when it
+  // was loaded. Nothing is saved until the previous session has been read back in.
+  var saveEnabled = false;
+  var saveTimer = null;
+
+  function scheduleSave() {
+    if (!saveEnabled) return;
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(flushSave, 400);
+  }
+
+  function flushSave() {
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+    if (!saveEnabled) return;
+    var config = buildConfig();
+    config.track = state.trackData ? { name: state.trackFileName, size: state.trackFileSize } : null;
+    TR.storage.saveConfig(config);
+  }
+
+  // The stored file must be the one these settings were made for
+  function restoreSavedTrack(info) {
+    TR.storage.loadTrack().then(function (file) {
+      if (!file || file.name !== info.name || file.size !== info.size || state.trackData) return null;
+      return TR.gpxParser.parseFile(file, state.elevationMode).then(function (trackData) {
+        if (state.trackData) return; // the user loaded another track meanwhile
+        setTrack(trackData, file);
+        autoSelectMapForTrack(trackData.points);
+        TR.trailAnalysis.resetSegmentCache();
+        normalizeAllCPs();
+        renderAllComponents();
+        var dict = T[state.language];
+        toast(dict.toastRestored, { actionLabel: dict.startOver, onAction: startOver });
+      });
+    }).catch(function () {
+      TR.storage.clearTrack(); // unreadable: don't try again next time
+    });
+  }
+
+  function startOver() {
+    if (!window.confirm(T[state.language].startOverConfirm)) return;
+    saveEnabled = false;
+    TR.storage.clearAll().then(function () { window.location.reload(); });
+  }
+
   // ── Elevation Calculation Mode Switch ───────────────────────────────
   function setElevationMode(mode) {
     if (state.elevationMode === mode) return;
@@ -1082,6 +1300,7 @@
     renderTrailSummaryStats();
     renderGradientDistribution();
     renderPlanTable();
+    renderClimbs();
     // Draw (and fit) the map last, once the panels around it have their final size
     TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints);
     updateStepBar();
@@ -1106,26 +1325,21 @@
       state.language,
       state.startTime
     );
+    var plan = computePlan();
     TR.profile.render(
       dom.profileContainer,
       state.trackpoints,
       state.checkpoints,
       state.raceName,
-      {
-        title: state.fontSizeTitle,
-        cpName: state.fontSizeCPName,
-        cpElev: state.fontSizeCPElev,
-        cpTime: state.fontSizeCPTime,
-        cpNotes: state.fontSizeCPNotes,
-        segment: state.fontSizeSegment,
-        cumulDist: state.fontSizeCumulDist
-      },
+      profileFontSizes(),
       state.exportRatio,
       {
         colorMode: state.colorMode,
         activeSegment: state.activeRange,
         segments: segments,
         targetMinutes: getTargetMinutes(),
+        nightBands: computeNightBands(plan),
+        altitudeLevels: altitudeLevelsReached(),
         onHover: function (ptIdx, pt, segIdx, seg) {
           TR.trailMap.updateMapCurrentPoint(ptIdx);
         },
@@ -1142,6 +1356,174 @@
         }
       }
     );
+    scheduleSave();
+  }
+
+  function profileFontSizes() {
+    return {
+      title: state.fontSizeTitle,
+      cpName: state.fontSizeCPName,
+      cpElev: state.fontSizeCPElev,
+      cpTime: state.fontSizeCPTime,
+      cpNotes: state.fontSizeCPNotes,
+      segment: state.fontSizeSegment,
+      cumulDist: state.fontSizeCumulDist
+    };
+  }
+
+  // ── Sun & Night Sections ────────────────────────────────────────────
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+
+  // Minutes east of UTC where the race is held, for a wall-clock date there (month 0-based)
+  function raceUtcOffset(y, m, d, h, min) {
+    var manual = state.utcOffset === 'auto' ? null : TR.sun.parseOffset(state.utcOffset);
+    if (manual !== null) return manual;
+    var p0 = state.trackpoints ? state.trackpoints[0] : null;
+    if (!p0) return -new Date(y, m, d, h, min).getTimezoneOffset();
+    return TR.sun.guessUtcOffset(p0.lat, p0.lon, y, m, d, h, min);
+  }
+
+  // The start time is typed as the race's wall-clock time; this is the actual moment (UTC ms)
+  function raceStartUtc(startInfo) {
+    if (!startInfo.isDate) return null;
+    var offset = raceUtcOffset(startInfo.year, startInfo.month, startInfo.day, startInfo.hour, startInfo.min);
+    return Date.UTC(startInfo.year, startInfo.month, startInfo.day, startInfo.hour, startInfo.min) - offset * 60000;
+  }
+
+  function pointAtKm(km) {
+    return state.trackpoints[TR.trailMath.findNearestPointIndexByDistance(state.trackpoints, km)];
+  }
+
+  // Night / twilight sections of the planned race as distance ranges. Like the times on the
+  // roadbook, they are only drawn once the plan isn't a default-pace guess.
+  function computeNightBands(plan) {
+    if (!state.trackpoints || plan.length < 2 || plan[plan.length - 1].arrivalEstimated) return [];
+    var start = raceStartUtc(parseStartTime(state.startTime));
+    var finish = plan[plan.length - 1].arrivalMinutes;
+    if (start === null || finish <= 0) return [];
+    var TA = TR.trailAnalysis;
+    function kmAt(ms) { return TA.distanceAtMinutes(plan, (ms - start) / 60000); }
+    return TR.sun.darkStretches(start, start + finish * 60000, function (ms) {
+      return pointAtKm(kmAt(ms));
+    }).map(function (s) {
+      return { kind: s.kind, startDist: kmAt(s.start), endDist: kmAt(s.end) };
+    }).filter(function (b) { return b.endDist - b.startDist > 0.01; });
+  }
+
+  // Day / night at each checkpoint's ETA; without a track there is no place, so fixed hours
+  function sunStatusAt(startUtc, startInfo, minutes, km) {
+    if (startUtc !== null && state.trackpoints) {
+      var p = pointAtKm(km);
+      return TR.sun.status(startUtc + minutes * 60000, p.lat, p.lon);
+    }
+    if (!startInfo.isDate) return null;
+    return TR.trailAnalysis.getDayNightStatus(new Date(startInfo.dateObj.getTime() + minutes * 60000)).type;
+  }
+
+  var SUN_ICONS = { day: '☀️', sunset: '🌅', night: '🌙', sunrise: '🌄' };
+  var SUN_TITLES = { day: 'sunDay', sunset: 'sunSunset', night: 'sunNight', sunrise: 'sunSunrise' };
+
+  function sunIconHtml(status, dict) {
+    if (!status) return '';
+    return '<span class="daynight" title="' + esc(dict[SUN_TITLES[status]]) + '">' + SUN_ICONS[status] + '</span>';
+  }
+
+  // "Sunrise 05:21 · Sunset 18:52" on the start day at the start, in race-local time
+  function sunInfoText(startInfo, dict) {
+    if (!state.trackpoints || !startInfo.isDate) return '';
+    var offset = raceUtcOffset(startInfo.year, startInfo.month, startInfo.day, startInfo.hour, startInfo.min);
+    var p0 = state.trackpoints[0];
+    var noonUtc = Date.UTC(startInfo.year, startInfo.month, startInfo.day, 12) - offset * 60000;
+    var t = TR.sun.dayTimes(noonUtc, p0.lat, p0.lon);
+    if (t.sunrise === null) return t.alwaysUp ? dict.sunAlwaysUp : dict.sunAlwaysDown;
+    function clock(ms) {
+      var w = new Date(ms + offset * 60000);
+      return pad2(w.getUTCHours()) + ':' + pad2(w.getUTCMinutes());
+    }
+    return dict.sunInfo.replace('{r}', clock(t.sunrise)).replace('{s}', clock(t.sunset));
+  }
+
+  // Time-zone picker: "Auto · UTC+8" first (the guess for this course and date), then every offset
+  function renderTimeZoneOptions(startInfo, dict) {
+    var sel = dom.selectUtcOffset;
+    var guess = startInfo.isDate
+      ? (state.trackpoints
+        ? TR.sun.guessUtcOffset(state.trackpoints[0].lat, state.trackpoints[0].lon, startInfo.year, startInfo.month, startInfo.day, startInfo.hour, startInfo.min)
+        : -new Date(startInfo.year, startInfo.month, startInfo.day, startInfo.hour, startInfo.min).getTimezoneOffset())
+      : -new Date().getTimezoneOffset();
+    var html = '<option value="auto">' + esc(dict.tzAuto.replace('{o}', TR.sun.offsetLabel(guess))) + '</option>';
+    TR.sun.OFFSETS.forEach(function (min) {
+      html += '<option value="' + TR.sun.formatOffset(min) + '">' + TR.sun.offsetLabel(min) + '</option>';
+    });
+    sel.innerHTML = html;
+    sel.value = state.utcOffset;
+    if (sel.value !== state.utcOffset) { state.utcOffset = 'auto'; sel.value = 'auto'; }
+  }
+
+  // ── Fuel: carbs, water and sodium per segment ───────────────────────
+  // "40-90", "40–90", "60" → { lo, hi }; blank or 0 → null (hidden); unreadable → undefined
+  function parseRate(str) {
+    var s = String(str === undefined || str === null ? '' : str).trim();
+    if (!s) return null;
+    var range = s.match(/^(\d+(?:\.\d+)?)\s*(?:-|–|—|~|～|至|到|to)\s*(\d+(?:\.\d+)?)$/i);
+    var lo, hi;
+    if (range) {
+      lo = parseFloat(range[1]);
+      hi = parseFloat(range[2]);
+    } else if (/^\d+(?:\.\d+)?$/.test(s)) {
+      lo = hi = parseFloat(s);
+    } else {
+      return undefined;
+    }
+    if (lo > hi) { var tmp = lo; lo = hi; hi = tmp; }
+    return hi > 0 ? { lo: lo, hi: hi } : null;
+  }
+
+  function formatRate(rate) {
+    if (!rate) return '';
+    return rate.lo === rate.hi ? String(rate.lo) : rate.lo + '-' + rate.hi;
+  }
+
+  function fuelRates() {
+    return {
+      carbs: parseRate(state.carbsPerHour) || null,
+      water: parseRate(state.waterPerHour) || null,
+      sodium: parseRate(state.sodiumPerHour) || null
+    };
+  }
+
+  function syncFuelInputs() {
+    dom.inputCarbsRate.value = state.carbsPerHour;
+    dom.inputWaterRate.value = state.waterPerHour;
+    dom.inputSodiumRate.value = state.sodiumPerHour;
+  }
+
+  // Grams to the nearest 5, sodium to the nearest 50 mg, water in ml or, from a litre, in L
+  function fuelAmount(kind, rate, minutes) {
+    if (!rate) return '';
+    var h = Math.max(0, minutes) / 60;
+    var lo = rate.lo * h, hi = rate.hi * h;
+    function join(a, b, unit) { return (a === b ? a : a + '–' + b) + ' ' + unit; }
+    if (kind === 'water') {
+      if (hi >= 1000) return join((lo / 1000).toFixed(1), (hi / 1000).toFixed(1), 'L');
+      return join(Math.round(lo / 50) * 50, Math.round(hi / 50) * 50, 'ml');
+    }
+    var step = kind === 'carbs' ? 5 : 50;
+    return join(Math.round(lo / step) * step, Math.round(hi / step) * step, kind === 'carbs' ? 'g' : 'mg');
+  }
+
+  var FUEL_KINDS = [['carbs', 'fuelCarbs'], ['water', 'fuelWater'], ['sodium', 'fuelSodium']];
+
+  // [{ key, label, text }] for the nutrients that have a rate
+  function fuelLines(rates, minutes, dict) {
+    return FUEL_KINDS.filter(function (k) { return rates[k[0]]; }).map(function (k) {
+      return { key: k[0], label: dict[k[1]], text: fuelAmount(k[0], rates[k[0]], minutes) };
+    });
+  }
+
+  function altitudeLevelsReached() {
+    if (!state.trackData) return [];
+    return TR.trailAnalysis.ALTITUDE_LEVELS.filter(function (h) { return state.trackData.maxElevation >= h; });
   }
 
   // ── 2. Zone 2: Trail Summary Stats Cards ────────────────────────────
@@ -1369,6 +1751,7 @@
     if (state.activeRange) highlightRangeOnMap(state.activeRange);
     else TR.trailMap.clearSegmentHighlight();
     markPlanRows(null);
+    markClimbRows();
     scheduleRender();
   }
 
@@ -1402,16 +1785,66 @@
     return TR.trailAnalysis.computeTimePlan(state.trackpoints, state.checkpoints, state.elevationMode, getTargetMinutes());
   }
 
-  function renderPlanTable() {
-    if (!dom.planTbody) return;
+  // Everything the plan table and the print sheet show for each checkpoint, computed once
+  function planRowModels(plan) {
     var dict = T[state.language];
     var lang = state.language;
     var u = TR.utils;
+    var TA = TR.trailAnalysis;
     var pts = state.trackpoints;
-    var plan = computePlan();
     var startInfo = parseStartTime(state.startTime);
+    var startUtc = pts ? raceStartUtc(startInfo) : null;
+    var rates = fuelRates();
     var cumulAscent = 0;
+
+    return plan.map(function (entry, idx) {
+      var cp = entry.cp;
+      var isFirst = (idx === 0);
+      var isLast = (idx === plan.length - 1);
+      var prev = isFirst ? null : plan[idx - 1].cp;
+      var stats = (!isFirst && pts) ? u.segmentStats(pts, prev.distance, cp.distance, state.elevationMode) : null;
+      if (stats) cumulAscent += stats.dPlus;
+      return {
+        entry: entry,
+        cp: cp,
+        prev: prev,
+        isFirst: isFirst,
+        isLast: isLast,
+        badge: isFirst ? 'S' : (isLast ? 'F' : String(idx)),
+        stats: stats,
+        cumulAscent: cumulAscent,
+        elevation: pts ? Math.round(u.interpolateElevation(pts, cp.distance)) : null,
+        segMaxElevation: stats ? TA.segmentMaxElevation(pts, prev.distance, cp.distance) : null,
+        sun: sunStatusAt(startUtc, startInfo, entry.arrivalMinutes, cp.distance),
+        arrival: (entry.arrivalEstimated ? '≈ ' : '') + formatArrivalTime(startInfo, entry.arrivalMinutes, lang),
+        departure: (entry.stopMinutes > 0 && !isLast) ? formatArrivalTime(startInfo, entry.departureMinutes, lang).split(' ').pop() : '',
+        fuel: isFirst ? [] : fuelLines(rates, entry.segMinutes, dict),
+        fuelEstimated: entry.segEstimated
+      };
+    });
+  }
+
+  // "⛰ Max 3420 m" under a segment's gain once it goes above the first altitude level
+  function altitudeChipHtml(maxElevation, dict) {
+    var levels = TR.trailAnalysis.ALTITUDE_LEVELS;
+    if (maxElevation === null || maxElevation < levels[0]) return '';
+    var veryHigh = maxElevation >= levels[1];
+    return '<div class="stat-secondary alt-chip' + (veryHigh ? ' very-high' : '') + '">⛰ ' +
+      dict.altSegmentMax.replace('{e}', Math.round(maxElevation)) + '</div>';
+  }
+
+  function renderPlanTable() {
+    if (!dom.planTbody) return;
+    var dict = T[state.language];
+    var u = TR.utils;
+    var plan = computePlan();
+    var rows = planRowModels(plan);
+    var startInfo = parseStartTime(state.startTime);
     var html = '';
+
+    renderTimeZoneOptions(startInfo, dict);
+    dom.sunInfo.textContent = sunInfoText(startInfo, dict);
+    renderFuelTotal(plan, dict);
 
     // Re-rendering replaces the inputs and buttons; remember which one had focus to restore it
     var focused = document.activeElement;
@@ -1422,20 +1855,19 @@
         : '.' + focused.className.split(' ')[0]);
     }
 
-    plan.forEach(function (entry, idx) {
-      var cp = entry.cp;
+    rows.forEach(function (row) {
+      var entry = row.entry;
+      var cp = row.cp;
+      var prev = row.prev;
+      var stats = row.stats;
+      var isFirst = row.isFirst;
+      var isLast = row.isLast;
       var gi = state.checkpoints.indexOf(cp);
-      var isFirst = (idx === 0);
-      var isLast = (idx === plan.length - 1);
-      var prev = isFirst ? null : plan[idx - 1].cp;
       var badgeClass = isFirst ? 'cp-badge-start' : (isLast ? 'cp-badge-finish' : 'cp-badge-default');
-      var badgeText = isFirst ? 'S' : (isLast ? 'F' : String(idx));
-      var stats = (!isFirst && pts) ? u.segmentStats(pts, prev.distance, cp.distance, state.elevationMode) : null;
-      if (stats) cumulAscent += stats.dPlus;
 
       var nameCell =
         '<input type="text" class="plan-input plan-input-name" data-idx="' + gi + '" data-field="name" value="' + esc(cp.name) + '" placeholder="' + esc(dict.placeholderCpNameInput) + '" aria-label="' + esc(dict.colName) + '">' +
-        (pts ? '<div class="stat-secondary">' + dict.altitudeShort + ' ' + Math.round(u.interpolateElevation(pts, cp.distance)) + ' m</div>' : '');
+        (row.elevation !== null ? '<div class="stat-secondary">' + dict.altitudeShort + ' ' + row.elevation + ' m</div>' : '');
 
       var distCell =
         '<input type="number" class="plan-input plan-input-num" data-idx="' + gi + '" data-field="distance" value="' + cp.distance + '" step="0.1" min="0" aria-label="' + esc(dict.colDist) + '">' +
@@ -1445,7 +1877,8 @@
 
       var elevCell = stats
         ? '<div class="stat-primary"><span class="gain">+' + stats.dPlus + '</span> / <span class="loss">−' + stats.dMinus + '</span> m</div>' +
-          '<div class="stat-secondary">' + dict.cumulShort + ' +' + cumulAscent + ' m</div>'
+          '<div class="stat-secondary">' + dict.cumulShort + ' +' + row.cumulAscent + ' m</div>' +
+          altitudeChipHtml(row.segMaxElevation, dict)
         : '<div class="stat-secondary">–</div>';
 
       var timeCell = '<div class="stat-secondary">–</div>';
@@ -1465,17 +1898,16 @@
         ? '<div class="stat-secondary">–</div>'
         : '<input type="number" class="plan-input plan-input-stop" data-idx="' + gi + '" data-field="stopDuration" value="' + (cp.stopDuration || 0) + '" min="0" max="1440" step="1" aria-label="' + esc(dict.colStop) + '">';
 
-      var dayNight = startInfo.isDate
-        ? TR.trailAnalysis.getDayNightStatus(new Date(startInfo.dateObj.getTime() + entry.arrivalMinutes * 60000))
-        : null;
       var etaCell =
-        '<div class="stat-primary eta">' +
-        (dayNight ? '<span class="daynight" title="' + dayNight.type + '">' + dayNight.icon + '</span>' : '') +
-        (entry.arrivalEstimated ? '≈ ' : '') + formatArrivalTime(startInfo, entry.arrivalMinutes, lang) +
-        '</div>' +
-        ((entry.stopMinutes > 0 && !isLast)
-          ? '<div class="stat-secondary">' + dict.departShort + ' ' + formatArrivalTime(startInfo, entry.departureMinutes, lang).split(' ').pop() + '</div>'
-          : '');
+        '<div class="stat-primary eta">' + sunIconHtml(row.sun, dict) + row.arrival + '</div>' +
+        (row.departure ? '<div class="stat-secondary">' + dict.departShort + ' ' + row.departure + '</div>' : '');
+
+      var fuelCell = row.fuel.length
+        ? '<div class="fuel-cell">' + row.fuel.map(function (f) {
+            return '<div class="fuel-line fuel-' + f.key + '"><span class="fuel-k">' + esc(f.label) + '</span>' +
+              (row.fuelEstimated ? '≈' : '') + f.text + '</div>';
+          }).join('') + '</div>'
+        : '<div class="stat-secondary">–</div>';
 
       var actionsCell =
         '<button type="button" class="btn-settings" data-idx="' + gi + '" title="' + esc(dict.settingsCpTitle) + '" aria-label="' + esc(dict.settingsCpTitle) + '"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg></button>' +
@@ -1484,7 +1916,7 @@
       html +=
         '<tr class="plan-row' + (gi === state.activeCPIndex ? ' selected-row' : '') + (cp.useForIntermediateDistances === false ? ' is-minor' : '') + '" data-global-idx="' + gi + '"' +
         (isFirst ? '' : ' data-seg-start="' + prev.distance + '" data-seg-end="' + cp.distance + '"') + '>' +
-        '<td class="col-plan-num"><span class="cp-table-badge ' + badgeClass + '">' + badgeText + '</span></td>' +
+        '<td class="col-plan-num"><span class="cp-table-badge ' + badgeClass + '">' + row.badge + '</span></td>' +
         '<td class="col-plan-name">' + nameCell + '</td>' +
         '<td class="col-plan-dist" data-label="' + esc(dict.colDist) + '">' + distCell + '</td>' +
         '<td class="col-plan-profile">' + profileCell + '</td>' +
@@ -1492,6 +1924,7 @@
         '<td class="col-plan-time" data-label="' + esc(dict.colTime) + '">' + timeCell + '</td>' +
         '<td class="col-plan-stop" data-label="' + esc(dict.colStop) + '">' + stopCell + '</td>' +
         '<td class="col-plan-eta" data-label="' + esc(dict.colEta) + '">' + etaCell + '</td>' +
+        '<td class="col-plan-fuel" data-label="' + esc(dict.colFuel) + '">' + fuelCell + '</td>' +
         '<td class="col-plan-actions">' + actionsCell + '</td>' +
         '</tr>';
     });
@@ -1500,11 +1933,22 @@
     renderPlanSummary(plan);
     markPlanRows(null);
     updateStepBar();
+    scheduleSave();
 
     if (focusSelector) {
       var again = dom.planTbody.querySelector(focusSelector);
       if (again) again.focus({ preventScroll: true });
     }
+  }
+
+  // "Race total · Carbs 560–1260 g · Water …" over the whole moving time (stops not counted)
+  function renderFuelTotal(plan, dict) {
+    var moving = plan.reduce(function (sum, e, i) { return i > 0 ? sum + e.segMinutes : sum; }, 0);
+    var lines = (plan.length > 1 && moving > 0) ? fuelLines(fuelRates(), moving, dict) : [];
+    var estimated = plan.length > 1 && plan[plan.length - 1].arrivalEstimated;
+    dom.fuelTotal.textContent = lines.length
+      ? dict.fuelTotal + ' · ' + lines.map(function (f) { return f.label + ' ' + (estimated ? '≈' : '') + f.text; }).join(' · ')
+      : '';
   }
 
   function renderPlanSummary(plan) {
@@ -1543,6 +1987,7 @@
   function refreshAfterPlanChange(redrawMap) {
     TR.trailAnalysis.resetSegmentCache();
     renderPlanTable();
+    renderClimbs();
     scheduleRender();
     if (redrawMap && state.trackData) {
       TR.trailMap.drawMap(state.trackData, state.colorMode, state.checkpoints, true);
@@ -1880,6 +2325,9 @@
           isDate: true,
           dateObj: d,
           dayOffset: (d.getDay() + 6) % 7,
+          year: year,
+          month: month,
+          day: day,
           hour: hour,
           min: min
         };
@@ -1945,34 +2393,7 @@
     var reader = new FileReader();
     reader.onload = function (e) {
       try {
-        var data = JSON.parse(e.target.result);
-        if (data.raceName) { state.raceName = data.raceName; dom.inputName.value = data.raceName; }
-        if (data.fontSizeTitle) state.fontSizeTitle = parseInt(data.fontSizeTitle, 10);
-        if (data.fontSizeCPName) state.fontSizeCPName = parseInt(data.fontSizeCPName, 10);
-        if (data.fontSizeCPElev) state.fontSizeCPElev = parseInt(data.fontSizeCPElev, 10);
-        if (data.fontSizeCPTime) state.fontSizeCPTime = parseInt(data.fontSizeCPTime, 10);
-        if (data.fontSizeCPNotes) state.fontSizeCPNotes = parseInt(data.fontSizeCPNotes, 10);
-        if (data.fontSizeSegment) state.fontSizeSegment = parseInt(data.fontSizeSegment, 10);
-        if (data.fontSizeCumulDist) state.fontSizeCumulDist = parseInt(data.fontSizeCumulDist, 10);
-        if (data.language === 'zh' || data.language === 'en') state.language = data.language;
-        if (['classic', 'gradient', 'elevation'].indexOf(data.colorMode) !== -1) state.colorMode = data.colorMode;
-        if (['auto', '19.5-9', '20-9'].indexOf(data.exportRatio) !== -1) state.exportRatio = data.exportRatio;
-        if (data.elevationMode === 'raw' || data.elevationMode === 'smooth') setElevationMode(data.elevationMode);
-        if (data.startTime) {
-          state.startTime = data.startTime;
-          if (dom.inputStartTime) dom.inputStartTime.value = data.startTime;
-        }
-        var target = parseTargetTime(data.targetTime);
-        state.targetTime = target > 0 ? TR.utils.formatTime(target) : '';
-        dom.inputTargetTime.value = state.targetTime;
-        if (Array.isArray(data.checkpoints)) {
-          migrateLegacyArrivalTimes(data.checkpoints);
-          state.checkpoints = data.checkpoints;
-        }
-        sortCheckpoints();
-        normalizeAllCPs();
-        state.activeCPIndex = 0;
-        state.activeRange = null;
+        applyConfig(JSON.parse(e.target.result));
         applyLanguage();
         toast(T[state.language].toastImportSuccess);
       } catch (err) {
@@ -1982,8 +2403,49 @@
     reader.readAsText(file);
   }
 
-  function handleJsonExport() {
-    var data = {
+  // A roadbook config (JSON file or the autosave) into state and the inputs; the caller renders.
+  // Fields that are missing keep their current value.
+  function applyConfig(data) {
+    if (data.raceName) { state.raceName = data.raceName; dom.inputName.value = data.raceName; }
+    if (data.fontSizeTitle) state.fontSizeTitle = parseInt(data.fontSizeTitle, 10);
+    if (data.fontSizeCPName) state.fontSizeCPName = parseInt(data.fontSizeCPName, 10);
+    if (data.fontSizeCPElev) state.fontSizeCPElev = parseInt(data.fontSizeCPElev, 10);
+    if (data.fontSizeCPTime) state.fontSizeCPTime = parseInt(data.fontSizeCPTime, 10);
+    if (data.fontSizeCPNotes) state.fontSizeCPNotes = parseInt(data.fontSizeCPNotes, 10);
+    if (data.fontSizeSegment) state.fontSizeSegment = parseInt(data.fontSizeSegment, 10);
+    if (data.fontSizeCumulDist) state.fontSizeCumulDist = parseInt(data.fontSizeCumulDist, 10);
+    if (data.language === 'zh' || data.language === 'en') state.language = data.language;
+    if (['classic', 'gradient', 'elevation'].indexOf(data.colorMode) !== -1) state.colorMode = data.colorMode;
+    if (['auto', '19.5-9', '20-9'].indexOf(data.exportRatio) !== -1) state.exportRatio = data.exportRatio;
+    if (data.elevationMode === 'raw' || data.elevationMode === 'smooth') setElevationMode(data.elevationMode);
+    if (data.startTime) {
+      state.startTime = data.startTime;
+      if (dom.inputStartTime) dom.inputStartTime.value = data.startTime;
+    }
+    if (data.utcOffset !== undefined) {
+      state.utcOffset = TR.sun.parseOffset(data.utcOffset) !== null ? String(data.utcOffset).trim() : 'auto';
+    }
+    ['carbsPerHour', 'waterPerHour', 'sodiumPerHour'].forEach(function (key) {
+      if (data[key] === undefined) return;
+      var rate = parseRate(data[key]);
+      if (rate !== undefined) state[key] = formatRate(rate);
+    });
+    syncFuelInputs();
+    var target = parseTargetTime(data.targetTime);
+    state.targetTime = target > 0 ? TR.utils.formatTime(target) : '';
+    dom.inputTargetTime.value = state.targetTime;
+    if (Array.isArray(data.checkpoints)) {
+      migrateLegacyArrivalTimes(data.checkpoints);
+      state.checkpoints = data.checkpoints;
+    }
+    sortCheckpoints();
+    normalizeAllCPs();
+    state.activeCPIndex = 0;
+    state.activeRange = null;
+  }
+
+  function buildConfig() {
+    return {
       raceName: state.raceName,
       elevationMode: state.elevationMode,
       colorMode: state.colorMode,
@@ -1997,10 +2459,17 @@
       fontSizeCumulDist: state.fontSizeCumulDist,
       language: state.language,
       startTime: state.startTime || '',
+      utcOffset: state.utcOffset,
       targetTime: state.targetTime || '',
+      carbsPerHour: state.carbsPerHour,
+      waterPerHour: state.waterPerHour,
+      sodiumPerHour: state.sodiumPerHour,
       checkpoints: state.checkpoints
     };
-    var json = JSON.stringify(data, null, 2);
+  }
+
+  function handleJsonExport() {
+    var json = JSON.stringify(buildConfig(), null, 2);
     var blob = new Blob([json], { type: 'application/json' });
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -2027,7 +2496,13 @@
       fontSizeCumulDist: 17,
       language: state.language,
       startTime: "2026-08-28T06:00",
+      // "auto" guesses the race's time zone from the course; or e.g. "+02:00"
+      utcOffset: "auto",
       targetTime: "14:00",
+      // per hour of moving time: a range "lo-hi", one number, or "" to hide
+      carbsPerHour: "40-90",
+      waterPerHour: "450-750",
+      sodiumPerHour: "300-600",
       // segmentTime "" = split automatically from targetTime; a value locks that segment
       checkpoints: [
         { name: isZH ? "起点" : "Start", distance: 0.0, segmentTime: "0:00", stopDuration: 0, icon: "start" },
@@ -2046,6 +2521,217 @@
     document.body.removeChild(a);
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
     toast(T[state.language].toastTemplateSuccess);
+  }
+
+  // ── Climbs & High Altitude ──────────────────────────────────────────
+  // Climbs follow the terrain rather than the checkpoints, so each row names the plan segment(s)
+  // it falls in; the plan table's D+ per segment and this list answer different questions.
+  function climbSegmentLabel(plan, c) {
+    var from = 0, to = plan.length - 1;
+    plan.forEach(function (e, i) {
+      if (e.cp.distance <= c.startDist + 0.05) from = i;
+    });
+    for (var i = plan.length - 1; i >= 0; i--) {
+      if (plan[i].cp.distance >= c.endDist - 0.05) to = i;
+    }
+    function label(i) {
+      var cp = plan[i].cp;
+      return cp.name || (i === 0 ? 'S' : (i === plan.length - 1 ? 'F' : 'CP' + i));
+    }
+    return label(from) + ' → ' + label(Math.max(from, to));
+  }
+
+  function climbsModel(plan) {
+    var TA = TR.trailAnalysis;
+    var td = state.trackData;
+    var climbs = TA.detectClimbs(state.trackpoints, state.elevationMode, td.totalAscent);
+    var estimated = plan.length > 1 && plan[plan.length - 1].arrivalEstimated;
+    var levels = altitudeLevelsReached().map(function (h) {
+      var stretches = TA.altitudeStretches(state.trackpoints, h);
+      var km = 0, minutes = 0;
+      stretches.forEach(function (s) {
+        km += s.endDist - s.startDist;
+        minutes += TA.minutesAtDistance(plan, s.endDist) - TA.minutesAtDistance(plan, s.startDist);
+      });
+      return { level: h, stretches: stretches, km: km, minutes: Math.round(minutes) };
+    });
+    return { climbs: climbs, levels: levels, estimated: estimated, plan: plan };
+  }
+
+  function altitudeLineText(lv, model, dict) {
+    return dict.altAbove.replace('{h}', lv.level).replace('{d}', lv.km.toFixed(1)) +
+      (lv.minutes > 0 && model.plan.length > 1
+        ? dict.altAboveTime.replace('{t}', (model.estimated ? '≈' : '') + TR.utils.formatTime(lv.minutes))
+        : '');
+  }
+
+  function renderClimbs() {
+    if (!dom.climbsBody) return;
+    if (!state.trackData) { dom.climbsBody.innerHTML = ''; return; }
+    var dict = T[state.language];
+    var model = climbsModel(computePlan());
+    var html = '';
+
+    if (model.levels.length) {
+      html += '<div class="alt-summary">' +
+        '<div class="alt-head"><strong>⛰ ' + dict.altTitle + '</strong><span>' +
+        dict.altMax.replace('{e}', Math.round(state.trackData.maxElevation)) + '</span></div>';
+      model.levels.forEach(function (lv, i) {
+        html += '<div class="alt-line alt-level-' + i + '"><span class="alt-label">' + altitudeLineText(lv, model, dict) + '</span>' +
+          lv.stretches.map(function (s) {
+            return '<button type="button" class="alt-range" data-seg-start="' + s.startDist + '" data-seg-end="' + s.endDist + '">' +
+              'km ' + s.startDist.toFixed(1) + '–' + s.endDist.toFixed(1) + '</button>';
+          }).join('') + '</div>';
+      });
+      html += '<p class="alt-tip">' + dict.altTip + '</p></div>';
+    }
+
+    var climbs = model.climbs;
+    if (!climbs.length) {
+      html += '<div class="climbs-empty">' + dict.climbsNone + '</div>';
+    } else {
+      var maxGain = Math.max.apply(null, climbs.map(function (c) { return c.dPlus; })) || 1;
+      var totalGain = climbs.reduce(function (s, c) { return s + c.dPlus; }, 0);
+      var tm = TR.trailMath;
+      html += '<div class="climbs-summary">' + dict.climbsCount.replace('{n}', climbs.length).replace('{g}', totalGain) + '</div>' +
+        '<div class="climbs-table-wrap"><table class="climbs-table"><thead><tr>' +
+        '<th>#</th><th>' + dict.climbColWhere + '</th><th>' + dict.climbColSegment + '</th>' +
+        '<th class="col-climb-profile">' + dict.climbColProfile + '</th><th>' + dict.climbColLength + '</th>' +
+        '<th>' + dict.climbColGain + '</th><th>' + dict.climbColAvg + '</th><th>' + dict.climbColMax + '</th>' +
+        '<th>' + dict.climbColTop + '</th></tr></thead><tbody>';
+      climbs.forEach(function (c, i) {
+        var color = tm.UPHILL_GRADIENT_COLORS[tm.getGradientLevel(c.avgGrade)];
+        html += '<tr class="climb-row" data-seg-start="' + c.startDist + '" data-seg-end="' + c.endDist + '">' +
+          '<td><span class="climb-badge" style="background:' + color + '">' + (i + 1) + '</span></td>' +
+          '<td class="climb-where">' + c.startDist.toFixed(1) + ' → ' + c.endDist.toFixed(1) + '</td>' +
+          '<td class="climb-seg">' + esc(climbSegmentLabel(model.plan, c)) + '</td>' +
+          '<td class="col-climb-profile">' + generateMiniProfileSvg(state.trackData, c.startDist, c.endDist) + '</td>' +
+          '<td class="climb-num">' + c.length.toFixed(1) + ' km</td>' +
+          '<td class="climb-num"><div class="climb-gain"><span class="climb-gain-bar" style="width:' + Math.round(c.dPlus / maxGain * 100) + '%"></span><span class="climb-gain-val">+' + c.dPlus + ' m</span></div></td>' +
+          '<td class="climb-num">' + c.avgGrade.toFixed(1) + '%</td>' +
+          '<td class="climb-num">' + Math.round(c.maxGrade) + '%</td>' +
+          '<td class="climb-num">' + Math.round(c.topElevation) + ' m</td>' +
+          '</tr>';
+      });
+      html += '</tbody></table></div>';
+    }
+
+    dom.climbsBody.innerHTML = html;
+    markClimbRows();
+  }
+
+  function markClimbRows() {
+    if (!dom.climbsBody) return;
+    dom.climbsBody.querySelectorAll('[data-seg-start]').forEach(function (item) {
+      item.classList.toggle('active-seg-row', sameRange(rowRange(item), state.activeRange));
+    });
+  }
+
+  // ── A4 Print Sheet ──────────────────────────────────────────────────
+  // A static copy of the plan (profile, table, climbs) that only print media shows; built right
+  // before printing, so Ctrl+P prints it too.
+  function buildPrintSheet() {
+    if (!dom.printSheet) return false;
+    document.body.classList.toggle('has-print-sheet', !!state.trackData);
+    if (!state.trackData) { dom.printSheet.innerHTML = ''; return false; }
+
+    var dict = T[state.language];
+    var u = TR.utils;
+    var td = state.trackData;
+    var plan = computePlan();
+    var rows = planRowModels(plan);
+    var last = plan[plan.length - 1];
+    var startInfo = parseStartTime(state.startTime);
+    var rates = fuelRates();
+    var fuelKinds = FUEL_KINDS.filter(function (k) { return rates[k[0]]; });
+    var target = getTargetMinutes();
+
+    var startText = formatArrivalTime(startInfo, 0, state.language);
+    if (startInfo.isDate) {
+      startText = startInfo.year + '-' + pad2(startInfo.month + 1) + '-' + pad2(startInfo.day) + ' ' + startText;
+    }
+    var offset = raceUtcOffset(startInfo.year, startInfo.month, startInfo.day, startInfo.hour, startInfo.min);
+    var meta = [
+      dict.printStart + ' ' + startText + (startInfo.isDate ? ' (' + TR.sun.offsetLabel(offset) + ')' : ''),
+      target > 0 ? dict.printTarget + ' ' + u.formatTime(target) : '',
+      last && plan.length > 1 ? dict.printFinish + ' ' + (last.arrivalEstimated ? '≈ ' : '') + u.formatTime(last.arrivalMinutes) : '',
+      dict.printCourse + ' ' + td.totalDistance.toFixed(1) + ' km · D+ ' + Math.round(td.totalAscent) + ' m · D− ' + Math.round(td.totalDescent) + ' m',
+      sunInfoText(startInfo, dict),
+      fuelKinds.length ? dict.printFuelRates + ' ' + fuelKinds.map(function (k) {
+        return dict[k[1]] + ' ' + formatRate(rates[k[0]]).replace('-', '–') + ' ' + { carbs: 'g', water: 'ml', sodium: 'mg' }[k[0]];
+      }).join(' · ') : ''
+    ].filter(Boolean);
+
+    var head = '<tr><th>#</th><th>' + dict.colName + '</th><th>' + dict.colDist + '</th><th>' + dict.printColSegKm + '</th>' +
+      '<th>' + dict.segColGainLoss + '</th><th>' + dict.colTime + '</th><th>' + dict.colEta + '</th><th>' + dict.colStop + '</th>' +
+      fuelKinds.map(function (k) { return '<th>' + dict[k[1]] + '</th>'; }).join('') +
+      '<th>' + dict.printColNotes + '</th></tr>';
+
+    var body = rows.map(function (row) {
+      var e = row.entry, s = row.stats;
+      var fuelByKey = {};
+      row.fuel.forEach(function (f) { fuelByKey[f.key] = (row.fuelEstimated ? '≈' : '') + f.text; });
+      return '<tr>' +
+        '<td class="ps-badge">' + row.badge + '</td>' +
+        '<td class="ps-name"><strong>' + esc(row.cp.name) + '</strong>' + (row.elevation !== null ? '<br><small>' + row.elevation + ' m</small>' : '') + '</td>' +
+        '<td>' + row.cp.distance.toFixed(1) + '</td>' +
+        '<td>' + (row.isFirst ? '' : '+' + (row.cp.distance - row.prev.distance).toFixed(1)) + '</td>' +
+        '<td>' + (s ? '+' + s.dPlus + ' / −' + s.dMinus + (row.segMaxElevation >= TR.trailAnalysis.ALTITUDE_LEVELS[0] ? '<br><small>⛰ ' + Math.round(row.segMaxElevation) + ' m</small>' : '') : '') + '</td>' +
+        '<td>' + (row.isFirst ? '' : (e.segEstimated ? '≈' : '') + u.formatTime(e.segMinutes)) + '</td>' +
+        '<td class="ps-eta">' + (row.sun ? SUN_ICONS[row.sun] + ' ' : '') + row.arrival + (row.departure ? '<br><small>' + dict.departShort + ' ' + row.departure + '</small>' : '') + '</td>' +
+        '<td>' + (e.stopMinutes > 0 && !row.isLast ? e.stopMinutes : '') + '</td>' +
+        fuelKinds.map(function (k) { return '<td>' + (fuelByKey[k[0]] || '') + '</td>'; }).join('') +
+        '<td class="ps-notes">' + esc(row.cp.notes) + '</td>' +
+        '</tr>';
+    }).join('');
+
+    var model = climbsModel(plan);
+    var climbsHtml = '';
+    if (model.levels.length) {
+      climbsHtml += '<p class="ps-alt"><strong>⛰ ' + dict.altTitle + '</strong> · ' + dict.altMax.replace('{e}', Math.round(td.maxElevation)) + ' · ' +
+        model.levels.map(function (lv) { return altitudeLineText(lv, model, dict); }).join(' · ') + '</p>';
+    }
+    if (model.climbs.length) {
+      climbsHtml += '<h2>' + dict.climbsTitle + '</h2><table class="ps-table ps-climbs"><thead><tr><th>#</th><th>' + dict.climbColWhere + '</th><th>' + dict.climbColSegment +
+        '</th><th>' + dict.climbColLength + '</th><th>' + dict.climbColGain + '</th><th>' + dict.climbColAvg + '</th><th>' + dict.climbColMax + '</th><th>' + dict.climbColTop + '</th></tr></thead><tbody>' +
+        model.climbs.map(function (c, i) {
+          return '<tr><td>' + (i + 1) + '</td><td>' + c.startDist.toFixed(1) + ' → ' + c.endDist.toFixed(1) + '</td><td>' + esc(climbSegmentLabel(plan, c)) +
+            '</td><td>' + c.length.toFixed(1) + ' km</td><td>+' + c.dPlus + ' m</td><td>' + c.avgGrade.toFixed(1) + '%</td><td>' + Math.round(c.maxGrade) +
+            '%</td><td>' + Math.round(c.topElevation) + ' m</td></tr>';
+        }).join('') + '</tbody></table>';
+    }
+
+    var today = new Date();
+    dom.printSheet.innerHTML =
+      '<header class="ps-header"><h1>' + esc(state.raceName || dict.raceNamePlaceholder) + '</h1>' +
+      '<div class="ps-meta">' + meta.map(esc).join('<span class="ps-sep">·</span>') + '</div></header>' +
+      '<div class="ps-profile"></div>' +
+      '<table class="ps-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>' +
+      climbsHtml +
+      '<footer class="ps-footer">' + esc(dict.printGenerated.replace('{d}', today.getFullYear() + '-' + pad2(today.getMonth() + 1) + '-' + pad2(today.getDate()))) + '</footer>';
+
+    var profileSlot = dom.printSheet.querySelector('.ps-profile');
+    TR.profile.render(profileSlot, state.trackpoints, state.checkpoints, '', profileFontSizes(), 'auto', {
+      colorMode: state.colorMode,
+      segments: TR.trailAnalysis.analyzeSegments(td, 'waypoint', state.checkpoints, state.elevationMode, state.language, state.startTime),
+      targetMinutes: target,
+      nightBands: computeNightBands(plan),
+      altitudeLevels: altitudeLevelsReached()
+    });
+    // The on-screen profile owns these ids
+    profileSlot.querySelectorAll('[id]').forEach(function (n) { n.removeAttribute('id'); });
+    return true;
+  }
+
+  function handlePrintPlan() {
+    if (!state.trackpoints) {
+      toast(T[state.language].toastGpxFirst);
+      return;
+    }
+    buildPrintSheet();
+    state.hasExported = true;
+    updateStepBar();
+    window.print();
   }
 
   // ── High-Resolution PNG Image Export ────────────────────────────────
