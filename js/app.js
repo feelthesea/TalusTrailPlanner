@@ -49,7 +49,7 @@
       hintStep2Action: "添加 CP",
       hintStep3: "填写目标完赛时间，系统会按每段的距离和爬升自动分配用时。",
       hintStep3Action: "填写目标时间",
-      hintStep5: "可以导出路书了。也可以先锁定某段用时或填写停留时间来微调。",
+      hintStep5: "可以导出路书了。导出前可以在剖面图上点「＋ 标注」，把每段要吃喝什么写进路书。",
       hintStep5Action: "导出图片",
       hintAllDone: "路书已导出。之后修改任何内容，都可以随时重新导出。",
 
@@ -156,9 +156,9 @@
       colName: "名称",
       colDist: "距起点 (km)",
       colTime: "分段用时",
-      colNotes: "备注 (支持回车多行)",
+      colNotes: "站点备注（印在剖面图上方，支持回车多行）",
       addCpBtn: "添加 CP",
-      poiPanelTitle: "检查点详细视觉配置",
+      poiPanelTitle: "CP 设置",
       poiCol1Title: "基本信息",
       poiCol1Pos: "CP位置距离 (公里)",
       poiCol1Intermediate: "用于分段统计点 (划分子赛段)",
@@ -177,7 +177,7 @@
       poiCol3Title: "垂直指示辅助线",
       poiCol3Color: "指示线颜色",
       poiCol3Thickness: "指示线粗细 (px)",
-      poiCol4Title: "图表内嵌自定义标注",
+      poiCol4Title: "路书标注",
       poiCol4Color: "标注颜色",
       poiCol4Size: "字号 (px)",
       poiCol4Orient: "排列方向",
@@ -264,7 +264,53 @@
       printFinish: "预计完赛",
       printCourse: "全程",
       printFuelRates: "每小时补给",
-      printGenerated: "由 Talus 生成 · {d}"
+      printGenerated: "由 Talus 生成 · {d}",
+
+      labelPlaceholder: "＋ 标注",
+      labelEditorTitle: "{a} → {b} · 路书标注",
+      labelEditorHint: "印在路书这一段的底部。下面的按钮可以插入自动计算的数值，计划改了会跟着变。",
+      labelEditorPlaceholder: "例如：\n{胶} 支胶\n{水} 水\n长下坡 护膝",
+      labelEditorPreview: "预览：",
+      labelEditorNeedTarget: "设置目标完赛时间后，补给和用时才会显示数值。",
+      labelWarnShrunk: "这一段较窄，字号已自动缩小。",
+      labelWarnTruncated: "这一段放不下，文字被截断了：可以缩短文字，或者在「字号」里调小路书标注。",
+      labelChipGels: "胶",
+      labelChipCarbs: "碳水",
+      labelChipWater: "水",
+      labelChipSodium: "钠",
+      labelChipTime: "用时",
+      labelChipKm: "距离",
+      labelChipGain: "爬升",
+      labelClear: "删除",
+      labelDone: "完成",
+      labelWriteToRoadbook: "写到路书",
+      fillLabels: "写入路书",
+      fillLabelsTitle: "给还没有标注的赛段写上要带的胶和水，印在路书上",
+      fillLabelsDone: "已给 {n} 段写入补给标注",
+      fillLabelsNone: "所有赛段都已经有标注了",
+      gelGramsLabel: "每支胶",
+      labelsSectionHint: "这里写的内容印在路书剖面对应赛段的底部。",
+      labelPrevSegment: "上一段（{a} → 本站）",
+      labelNextSegment: "下一段（本站 → {b}）",
+      labelsAdvanced: "自由位置标注（高级）",
+      fsLabelLabel: "路书标注",
+      fsAutoScale: "长赛程自动放大",
+      fsAutoScaleTitle: "手机比例的路书按 CP 间距收窄画布，长赛程的字不再跟着变小；关掉后完全按下面的字号",
+      fsScaleNow: "当前 ×{s}",
+      fsPhoneHint: "「≈ px」是在 1080 像素高的手机屏幕上大约的大小，36 px 以上比较舒服。",
+      fsTooSmall: "路书标注在手机上偏小。可以调大字号，或者用「分段导出」把赛道分成几张图。",
+      splitExport: "分段导出",
+      splitExportTag: "多张手机图",
+      splitTitle: "分段导出（多张手机图）",
+      splitIntro: "勾选在哪些 CP 切开。每一部分导出成一张手机比例的路书图，字号和短赛程一样清楚，打包成一个 zip。",
+      splitPart: "图 {n}：{a} → {b}（{d0}–{d1} km，{s} 段）",
+      splitDropbag: "寄存包",
+      splitScale: "分辨率",
+      splitExportBtn: "导出 zip",
+      splitExporting: "正在生成 {n} 张图…",
+      splitDone: "已导出 {n} 张图（zip）",
+      splitNeedCuts: "至少勾选一个要切开的 CP",
+      splitFailed: "分段导出失败："
     },
     en: {
       vibeCodedBy: "Vibe coded by",
@@ -298,7 +344,7 @@
       hintStep2Action: "Add checkpoint",
       hintStep3: "Enter your target finish time; it is split across segments by distance and climb.",
       hintStep3Action: "Set target time",
-      hintStep5: "Your roadbook is ready to export. You can still lock a segment time or add stop times first.",
+      hintStep5: "Ready to export. Before you do, click \"+ Label\" on the profile to put what to eat and drink on each segment.",
       hintStep5Action: "Export image",
       hintAllDone: "Roadbook exported. Change anything and export again whenever you like.",
 
@@ -405,9 +451,9 @@
       colName: "Name",
       colDist: "Distance (km)",
       colTime: "Segment Duration",
-      colNotes: "Notes (supports Enter)",
+      colNotes: "CP notes (printed above the profile; Enter for a new line)",
       addCpBtn: "Add checkpoint",
-      poiPanelTitle: "Checkpoint visual settings",
+      poiPanelTitle: "Checkpoint settings",
       poiCol1Title: "Basic Info",
       poiCol1Pos: "CP Distance (km)",
       poiCol1Intermediate: "Use for segment split stats",
@@ -426,7 +472,7 @@
       poiCol3Title: "Vertical Guide Axis",
       poiCol3Color: "Line Color",
       poiCol3Thickness: "Line Thickness (px)",
-      poiCol4Title: "Chart Inside Annotations",
+      poiCol4Title: "Roadbook labels",
       poiCol4Color: "Text Color",
       poiCol4Size: "Size (px)",
       poiCol4Orient: "Alignment",
@@ -513,7 +559,53 @@
       printFinish: "Expected finish",
       printCourse: "Course",
       printFuelRates: "Fuel per hour",
-      printGenerated: "Made with Talus · {d}"
+      printGenerated: "Made with Talus · {d}",
+
+      labelPlaceholder: "+ Label",
+      labelEditorTitle: "{a} → {b} · Roadbook label",
+      labelEditorHint: "Printed at the bottom of this segment on the roadbook. The buttons insert values worked out from your plan; they update when the plan changes.",
+      labelEditorPlaceholder: "For example:\n{gels} gels\n{water} water\nLong descent, knee straps",
+      labelEditorPreview: "Preview: ",
+      labelEditorNeedTarget: "Fuel and time values appear once a target finish time is set.",
+      labelWarnShrunk: "This segment is narrow, so the text was made a little smaller.",
+      labelWarnTruncated: "This segment is too narrow and the text was cut short: shorten it, or make roadbook labels smaller under Font sizes.",
+      labelChipGels: "Gels",
+      labelChipCarbs: "Carbs",
+      labelChipWater: "Water",
+      labelChipSodium: "Sodium",
+      labelChipTime: "Time",
+      labelChipKm: "Distance",
+      labelChipGain: "Gain",
+      labelClear: "Delete",
+      labelDone: "Done",
+      labelWriteToRoadbook: "Put on roadbook",
+      fillLabels: "Put on roadbook",
+      fillLabelsTitle: "Write the gels and water to carry on every segment that has no label yet",
+      fillLabelsDone: "Fuel labels added to {n} segments",
+      fillLabelsNone: "Every segment already has a label",
+      gelGramsLabel: "Per gel",
+      labelsSectionHint: "What you write here is printed at the bottom of that segment on the roadbook.",
+      labelPrevSegment: "Previous segment ({a} → here)",
+      labelNextSegment: "Next segment (here → {b})",
+      labelsAdvanced: "Free-position texts (advanced)",
+      fsLabelLabel: "Roadbook labels",
+      fsAutoScale: "Enlarge for long courses",
+      fsAutoScaleTitle: "On phone ratios the chart is narrowed to what the checkpoints need, so text no longer shrinks on long courses; turn off to use the sizes below exactly",
+      fsScaleNow: "now ×{s}",
+      fsPhoneHint: "\"≈ px\" is the approximate size on a phone screen 1080 px tall; 36 px and up reads comfortably.",
+      fsTooSmall: "Roadbook labels come out small on a phone. Make them bigger, or use Split export to spread the course over several images.",
+      splitExport: "Split export",
+      splitExportTag: "Several phone images",
+      splitTitle: "Split export (several phone images)",
+      splitIntro: "Tick the checkpoints to split at. Each part becomes one phone-ratio roadbook image, as readable as a short course, all in one zip.",
+      splitPart: "Image {n}: {a} → {b} ({d0}–{d1} km, {s} segments)",
+      splitDropbag: "drop bag",
+      splitScale: "Resolution",
+      splitExportBtn: "Export zip",
+      splitExporting: "Making {n} images…",
+      splitDone: "Exported {n} images (zip)",
+      splitNeedCuts: "Tick at least one checkpoint to split at",
+      splitFailed: "Split export failed: "
     }
   };
 
@@ -564,6 +656,9 @@
     fontSizeCPNotes: 22,
     fontSizeSegment: 17,
     fontSizeCumulDist: 17,
+    fontSizeLabel: 16,        // roadbook labels (one card per segment)
+    autoScale: true,          // phone ratios: narrow the chart so long courses keep readable text
+    gelGrams: 25,             // carbs per gel, for the {gels} label token
     language: 'zh',
     checkpoints: []
   };
@@ -628,6 +723,12 @@
     dom.fsCPNotes         = document.getElementById('fs-cpnotes');
     dom.fsSegment         = document.getElementById('fs-segment');
     dom.fsCumulDist       = document.getElementById('fs-cumuldist');
+    dom.fsLabel           = document.getElementById('fs-label');
+    dom.fsAutoScale       = document.getElementById('fs-auto-scale');
+    dom.fsScaleNow        = document.getElementById('fs-scale-now');
+    dom.fsWarn            = document.getElementById('fs-warn');
+    dom.fsWarnText        = document.getElementById('fs-warn-text');
+    dom.btnFsSplit        = document.getElementById('btn-fs-split');
 
     // Plan: start time, CP Table & Segment Statistics
     dom.inputStartTime    = document.getElementById('input-start-time');
@@ -647,6 +748,32 @@
     dom.printSheet        = document.getElementById('print-sheet');
     dom.btnPrintPlan      = document.getElementById('btn-print-plan');
     dom.btnNewRoadbook    = document.getElementById('btn-new-roadbook');
+
+    // Roadbook labels: editor, fill button, gel size
+    dom.labelEditor       = document.getElementById('label-editor');
+    dom.labelEditorTitle  = document.getElementById('label-editor-title');
+    dom.labelEditorText   = document.getElementById('label-editor-text');
+    dom.labelEditorChips  = document.getElementById('label-editor-chips');
+    dom.labelEditorPreview= document.getElementById('label-editor-preview');
+    dom.labelEditorWarn   = document.getElementById('label-editor-warn');
+    dom.btnFillLabels     = document.getElementById('btn-fill-labels');
+    dom.inputGelGrams     = document.getElementById('input-gel-grams');
+
+    // Split export
+    dom.btnSplitExport    = document.getElementById('btn-split-export');
+    dom.splitBackdrop     = document.getElementById('split-modal-backdrop');
+    dom.splitCps          = document.getElementById('split-cps');
+    dom.splitParts        = document.getElementById('split-parts');
+    dom.splitScale        = document.getElementById('split-scale');
+    dom.btnSplitRun       = document.getElementById('btn-split-run');
+
+    // CP modal: the labels of the segments on either side
+    dom.poiLabelPrevField = document.getElementById('poi-label-prev-field');
+    dom.poiLabelPrevName  = document.getElementById('poi-label-prev-name');
+    dom.poiLabelPrev      = document.getElementById('poi-label-prev');
+    dom.poiLabelNextField = document.getElementById('poi-label-next-field');
+    dom.poiLabelNextName  = document.getElementById('poi-label-next-name');
+    dom.poiLabelNext      = document.getElementById('poi-label-next');
 
     // Analysis: Map & Gradient Distribution
     dom.selectMapSource   = document.getElementById('select-map-source');
@@ -716,6 +843,10 @@
     applyLanguage();
     saveEnabled = true;
     if (saved && saved.track) restoreSavedTrack(saved.track);
+    // Label cards are laid out from measured text: lay them out again once the web fonts are in
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () { if (state.trackData) scheduleRender(); });
+    }
   }
 
   // ── Event Bindings ──────────────────────────────────────────────────
@@ -757,8 +888,19 @@
         if (rate !== undefined) state[pair[0]] = formatRate(rate);
         this.value = state[pair[0]];
         renderPlanTable();
+        scheduleRender(); // labels with fuel tokens
       });
     });
+
+    dom.inputGelGrams.addEventListener('change', function () {
+      var grams = parseInt(this.value, 10);
+      if (isFinite(grams) && grams >= 5) state.gelGrams = Math.min(grams, 100);
+      this.value = state.gelGrams;
+      renderPlanTable();
+      scheduleRender();
+    });
+    dom.btnFillLabels.addEventListener('click', fillLabels);
+    bindLabelEditor();
 
     // View settings in the profile header
     dom.btnElevRaw.addEventListener('click', function () { setElevationMode('raw'); });
@@ -824,6 +966,8 @@
       });
     });
     dom.btnPrintPlan.addEventListener('click', handlePrintPlan);
+    dom.btnSplitExport.addEventListener('click', openSplitModal);
+    bindSplitModal();
     dom.btnNewRoadbook.addEventListener('click', startOver);
     // Ctrl+P prints the plan sheet too, not the interactive page
     window.addEventListener('beforeprint', buildPrintSheet);
@@ -834,6 +978,8 @@
       closeMenus();
       closeCPModal();
       closeFontSizesModal();
+      closeLabelEditor();
+      closeSplitModal();
     });
 
     // Empty state (drop zone) actions
@@ -898,6 +1044,13 @@
     if (dom.fsModalBackdrop) {
       dom.fsModalBackdrop.addEventListener('click', function (e) {
         if (e.target === dom.fsModalBackdrop) closeFontSizesModal();
+      });
+      // Font sizes preview live; Cancel puts the previous ones back
+      dom.fsModalBackdrop.addEventListener('input', applyFontInputs);
+      dom.fsAutoScale.addEventListener('change', applyFontInputs);
+      dom.btnFsSplit.addEventListener('click', function () {
+        saveFontSizesModal();
+        openSplitModal();
       });
     }
   }
@@ -1083,44 +1236,99 @@
 
 
   // ── Font Sizes Modal Functions ──────────────────────────────────────
+  // [input, state key, default]
+  var FONT_FIELDS = [
+    ['fsTitle', 'fontSizeTitle', 18],
+    ['fsCPName', 'fontSizeCPName', 20],
+    ['fsCPElev', 'fontSizeCPElev', 11],
+    ['fsCPTime', 'fontSizeCPTime', 20],
+    ['fsCPNotes', 'fontSizeCPNotes', 22],
+    ['fsSegment', 'fontSizeSegment', 17],
+    ['fsLabel', 'fontSizeLabel', 16],
+    ['fsCumulDist', 'fontSizeCumulDist', 17]
+  ];
+  var fontSnapshot = null; // sizes before the modal opened; Cancel restores them
+
   function openFontSizesModal() {
     if (!dom.fsModalBackdrop) return;
-    if (dom.fsTitle) dom.fsTitle.value = state.fontSizeTitle;
-    if (dom.fsCPName) dom.fsCPName.value = state.fontSizeCPName;
-    if (dom.fsCPElev) dom.fsCPElev.value = state.fontSizeCPElev;
-    if (dom.fsCPTime) dom.fsCPTime.value = state.fontSizeCPTime;
-    if (dom.fsCPNotes) dom.fsCPNotes.value = state.fontSizeCPNotes;
-    if (dom.fsSegment) dom.fsSegment.value = state.fontSizeSegment;
-    if (dom.fsCumulDist) dom.fsCumulDist.value = state.fontSizeCumulDist;
+    fontSnapshot = { autoScale: state.autoScale };
+    FONT_FIELDS.forEach(function (f) {
+      fontSnapshot[f[1]] = state[f[1]];
+      dom[f[0]].value = state[f[1]];
+    });
+    dom.fsAutoScale.checked = state.autoScale;
     dom.fsModalBackdrop.classList.add('open');
+    updateFontHints();
+  }
+
+  function applyFontInputs() {
+    FONT_FIELDS.forEach(function (f) {
+      var v = parseInt(dom[f[0]].value, 10);
+      if (isFinite(v) && v >= 6 && v <= 40) state[f[1]] = v;
+    });
+    state.autoScale = dom.fsAutoScale.checked;
+    scheduleRender();
   }
 
   function closeFontSizesModal() {
-    if (dom.fsModalBackdrop) dom.fsModalBackdrop.classList.remove('open');
+    if (!dom.fsModalBackdrop || !dom.fsModalBackdrop.classList.contains('open')) return;
+    if (fontSnapshot) {
+      Object.keys(fontSnapshot).forEach(function (key) { state[key] = fontSnapshot[key]; });
+      fontSnapshot = null;
+      scheduleRender();
+    }
+    dom.fsModalBackdrop.classList.remove('open');
   }
 
   function resetFontSizesModal() {
-    if (dom.fsTitle) dom.fsTitle.value = 18;
-    if (dom.fsCPName) dom.fsCPName.value = 20;
-    if (dom.fsCPElev) dom.fsCPElev.value = 11;
-    if (dom.fsCPTime) dom.fsCPTime.value = 20;
-    if (dom.fsCPNotes) dom.fsCPNotes.value = 22;
-    if (dom.fsSegment) dom.fsSegment.value = 17;
-    if (dom.fsCumulDist) dom.fsCumulDist.value = 17;
+    FONT_FIELDS.forEach(function (f) { dom[f[0]].value = f[2]; });
+    dom.fsAutoScale.checked = true;
+    applyFontInputs();
   }
 
   function saveFontSizesModal() {
-    if (dom.fsTitle) state.fontSizeTitle = parseInt(dom.fsTitle.value, 10) || 18;
-    if (dom.fsCPName) state.fontSizeCPName = parseInt(dom.fsCPName.value, 10) || 20;
-    if (dom.fsCPElev) state.fontSizeCPElev = parseInt(dom.fsCPElev.value, 10) || 11;
-    if (dom.fsCPTime) state.fontSizeCPTime = parseInt(dom.fsCPTime.value, 10) || 20;
-    if (dom.fsCPNotes) state.fontSizeCPNotes = parseInt(dom.fsCPNotes.value, 10) || 22;
-    if (dom.fsSegment) state.fontSizeSegment = parseInt(dom.fsSegment.value, 10) || 17;
-    if (dom.fsCumulDist) state.fontSizeCumulDist = parseInt(dom.fsCumulDist.value, 10) || 17;
-
-    scheduleRender();
+    applyFontInputs();
+    fontSnapshot = null;
     closeFontSizesModal();
     toast(T[state.language].toastFontSizesSaved || '各元素字号设置已保存并应用！');
+  }
+
+  // Roughly how tall a size comes out on a phone (a 2400 × 1080 or 2340 × 1080 screen showing
+  // the exported image full screen), from the profile as it is drawn now
+  function phonePx(size) {
+    var svg = dom.profileContainer && dom.profileContainer.querySelector('svg');
+    if (!svg) return null;
+    var vb = svg.viewBox.baseVal;
+    var cw = vb.width, ch = vb.height;
+    var screenW = state.exportRatio === '19.5-9' ? 2340 : 2400;
+    if (state.exportRatio !== 'auto') {
+      var rv = state.exportRatio === '19.5-9' ? 19.5 / 9 : 20 / 9;
+      if (rv > cw / ch) cw = ch * rv; else ch = cw / rv;
+    }
+    return Math.round(size * Math.min(screenW / cw, 1080 / ch));
+  }
+
+  function updateFontHints() {
+    if (!dom.fsModalBackdrop || !dom.fsModalBackdrop.classList.contains('open')) return;
+    var dict = T[state.language];
+    FONT_FIELDS.forEach(function (f) {
+      var input = dom[f[0]];
+      var hint = input.parentNode.querySelector('.fs-px');
+      if (!hint) {
+        hint = document.createElement('span');
+        hint.className = 'fs-px';
+        input.parentNode.appendChild(hint);
+      }
+      var px = phonePx(state[f[1]]);
+      hint.textContent = px ? '≈ ' + px + ' px' : '';
+      hint.className = 'fs-px' + (px === null ? '' : (px >= 36 ? ' ok' : (px >= 28 ? ' small' : ' tiny')));
+    });
+    var svg = dom.profileContainer.querySelector('svg');
+    var scale = svg ? parseFloat(svg.getAttribute('data-scale')) : 1;
+    dom.fsScaleNow.textContent = (scale > 1.01) ? dict.fsScaleNow.replace('{s}', scale.toFixed(1)) : '';
+    var labelPx = phonePx(state.fontSizeLabel);
+    dom.fsWarn.hidden = !(labelPx !== null && labelPx < 28);
+    dom.fsWarnText.textContent = dict.fsTooSmall;
   }
 
   // ── Track Upload (GPX / KML / KMZ) ──────────────────────────────────
@@ -1326,6 +1534,7 @@
       state.startTime
     );
     var plan = computePlan();
+    var dict = T[state.language];
     TR.profile.render(
       dom.profileContainer,
       state.trackpoints,
@@ -1340,6 +1549,17 @@
         targetMinutes: getTargetMinutes(),
         nightBands: computeNightBands(plan),
         altitudeLevels: altitudeLevelsReached(),
+        autoScale: state.autoScale,
+        segmentLabels: segmentLabelModels(planRowModels(plan)),
+        labelPlaceholder: dict.labelPlaceholder,
+        showPlaceholders: placeholderMode(),
+        onEditLabel: function (key, rect) {
+          openLabelEditor(state.checkpoints[key], rect);
+        },
+        onLabelLayout: function (report) {
+          labelReport = report;
+          updateLabelEditorWarn();
+        },
         onHover: function (ptIdx, pt, segIdx, seg) {
           TR.trailMap.updateMapCurrentPoint(ptIdx);
         },
@@ -1356,6 +1576,7 @@
         }
       }
     );
+    updateFontHints();
     scheduleSave();
   }
 
@@ -1367,8 +1588,248 @@
       cpTime: state.fontSizeCPTime,
       cpNotes: state.fontSizeCPNotes,
       segment: state.fontSizeSegment,
-      cumulDist: state.fontSizeCumulDist
+      cumulDist: state.fontSizeCumulDist,
+      label: state.fontSizeLabel
     };
+  }
+
+  // ── Roadbook Labels: one per segment, printed along the bottom of the profile ──
+  // The text is stored on the checkpoint that ends the segment (like segmentTime) and may hold
+  // tokens such as {胶} / {gels} that follow the plan.
+  var NBSP = ' ';
+  var LABEL_TOKENS = {
+    '胶': 'gels', gels: 'gels', '碳水': 'carbs', carbs: 'carbs', '水': 'water', water: 'water',
+    '钠': 'sodium', sodium: 'sodium', '用时': 'time', time: 'time', '距离': 'km', km: 'km',
+    '爬升': 'gain', gain: 'gain', '下降': 'loss', loss: 'loss'
+  };
+  var TIMED_TOKENS = ['gels', 'carbs', 'water', 'sodium', 'time'];
+  // Quick-insert buttons in the editor: [dict key for the label, token zh, token en]
+  var LABEL_CHIPS = [
+    ['labelChipGels', '胶', 'gels'], ['labelChipCarbs', '碳水', 'carbs'], ['labelChipWater', '水', 'water'],
+    ['labelChipSodium', '钠', 'sodium'], ['labelChipTime', '用时', 'time'], ['labelChipKm', '距离', 'km'],
+    ['labelChipGain', '爬升', 'gain']
+  ];
+
+  function range2(lo, hi, unit) {
+    return (lo === hi ? String(lo) : lo + '–' + hi) + (unit ? NBSP + unit : '');
+  }
+
+  // Gels to carry: both ends rounded up
+  function gelsText(rate, minutes) {
+    var h = Math.max(0, minutes) / 60;
+    var grams = state.gelGrams || 25;
+    return range2(Math.ceil(rate.lo * h / grams), Math.ceil(rate.hi * h / grams));
+  }
+
+  // Labels always give water in litres: "0.4–0.6 L" is shorter than "350–600 ml"
+  function waterLitres(rate, minutes) {
+    var h = Math.max(0, minutes) / 60;
+    return range2((rate.lo * h / 1000).toFixed(1), (rate.hi * h / 1000).toFixed(1), 'L');
+  }
+
+  function expandLabel(text, row, rates) {
+    return String(text || '').replace(/\{([^{}]+)\}/g, function (all, name) {
+      var key = LABEL_TOKENS[name.trim()];
+      if (!key || !row || row.isFirst) return all;
+      var e = row.entry;
+      // Default-pace guesses stay off the roadbook, like the times
+      if (TIMED_TOKENS.indexOf(key) !== -1 && e.segEstimated) return '–';
+      switch (key) {
+        case 'gels': return rates.carbs ? gelsText(rates.carbs, e.segMinutes) : '–';
+        case 'carbs': return rates.carbs ? fuelAmount('carbs', rates.carbs, e.segMinutes).replace(/ (\S+)$/, NBSP + '$1') : '–';
+        case 'water': return rates.water ? waterLitres(rates.water, e.segMinutes) : '–';
+        case 'sodium': return rates.sodium ? fuelAmount('sodium', rates.sodium, e.segMinutes).replace(/ (\S+)$/, NBSP + '$1') : '–';
+        case 'time': return TR.utils.formatTime(e.segMinutes);
+        case 'km': return (row.cp.distance - row.prev.distance).toFixed(1) + NBSP + 'km';
+        case 'gain': return row.stats ? '+' + row.stats.dPlus + NBSP + 'm' : '–';
+        case 'loss': return row.stats ? '−' + row.stats.dMinus + NBSP + 'm' : '–';
+      }
+      return all;
+    });
+  }
+
+  function hasLabel(cp) {
+    return !!cp && String(cp.segmentLabel || '').trim() !== '';
+  }
+
+  // One entry per segment for the profile (empty ones get a placeholder on screen)
+  function segmentLabelModels(rows) {
+    return rows.filter(function (row) { return !row.isFirst; }).map(function (row) {
+      return {
+        key: state.checkpoints.indexOf(row.cp),
+        startDist: row.prev.distance,
+        endDist: row.cp.distance,
+        text: row.labelText,
+        empty: !hasLabel(row.cp)
+      };
+    });
+  }
+
+  // Until the first label is written every empty segment shows "+ Label"; after that only the
+  // one under the pointer does (touch screens have no pointer, so they keep showing all)
+  function placeholderMode() {
+    var any = state.checkpoints.some(function (cp, i) { return i > 0 && hasLabel(cp); });
+    var touch = window.matchMedia && window.matchMedia('(hover: none)').matches;
+    return (!any || touch) ? 'all' : 'hover';
+  }
+
+  function defaultLabelTemplate() {
+    var rates = fuelRates();
+    var zh = (state.language === 'zh');
+    var parts = [];
+    if (rates.carbs) parts.push(zh ? '{胶}' + NBSP + '支胶' : '{gels}' + NBSP + 'gels');
+    if (rates.water) parts.push(zh ? '{水}' + NBSP + '水' : '{water}' + NBSP + 'water');
+    if (!parts.length) parts.push(zh ? '{用时}' : '{time}');
+    return parts.join('\n');
+  }
+
+  // "Put on roadbook": the default template on every segment that has no label yet (undoable)
+  function fillLabels() {
+    var dict = T[state.language];
+    var template = defaultLabelTemplate();
+    var filled = state.checkpoints.filter(function (cp, i) { return i > 0 && !hasLabel(cp); });
+    if (!filled.length) {
+      toast(dict.fillLabelsNone);
+      return;
+    }
+    filled.forEach(function (cp) { cp.segmentLabel = template; });
+    refreshAfterPlanChange(false);
+    toast(dict.fillLabelsDone.replace('{n}', filled.length), {
+      actionLabel: dict.undo,
+      onAction: function () {
+        filled.forEach(function (cp) { cp.segmentLabel = ''; });
+        refreshAfterPlanChange(false);
+      }
+    });
+  }
+
+  // ── Label editor (a floating panel; a bottom sheet on phones) ───────
+  var labelEditorCp = null;
+  var labelEditorPrevRange = null;
+  var labelReport = [];
+
+  function cpDisplayName(cp, i) {
+    var n = state.checkpoints.length;
+    return cp.name || (i === 0 ? 'S' : (i === n - 1 ? 'F' : 'CP' + i));
+  }
+
+  function bindLabelEditor() {
+    dom.labelEditorText.addEventListener('input', function () {
+      if (!labelEditorCp) return;
+      labelEditorCp.segmentLabel = this.value;
+      updateLabelPreview();
+      scheduleRender();
+    });
+    dom.labelEditorChips.addEventListener('click', function (e) {
+      var chip = e.target.closest('[data-token]');
+      if (!chip) return;
+      var ta = dom.labelEditorText;
+      var token = '{' + chip.dataset.token + '}';
+      var s = ta.selectionStart, end = ta.selectionEnd;
+      ta.value = ta.value.slice(0, s) + token + ta.value.slice(end);
+      ta.selectionStart = ta.selectionEnd = s + token.length;
+      ta.focus();
+      ta.dispatchEvent(new Event('input'));
+    });
+    document.getElementById('label-editor-close').addEventListener('click', closeLabelEditor);
+    document.getElementById('label-editor-done').addEventListener('click', closeLabelEditor);
+    document.getElementById('label-editor-clear').addEventListener('click', function () {
+      dom.labelEditorText.value = '';
+      dom.labelEditorText.dispatchEvent(new Event('input'));
+      dom.labelEditorText.focus();
+    });
+    dom.labelEditorText.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) closeLabelEditor();
+    });
+    // A click anywhere else closes it (another label or label button reopens it there)
+    document.addEventListener('mousedown', function (e) {
+      if (!labelEditorCp || dom.labelEditor.contains(e.target)) return;
+      if (e.target.closest && e.target.closest('[data-label-key], .btn-label')) return;
+      closeLabelEditor();
+    });
+  }
+
+  function openLabelEditor(cp, rect) {
+    var i = state.checkpoints.indexOf(cp);
+    if (i < 1) return;
+    var dict = T[state.language];
+    var prev = state.checkpoints[i - 1];
+    if (!labelEditorCp) labelEditorPrevRange = state.activeRange;
+    labelEditorCp = cp;
+
+    dom.labelEditorTitle.textContent = dict.labelEditorTitle
+      .replace('{a}', cpDisplayName(prev, i - 1)).replace('{b}', cpDisplayName(cp, i));
+    dom.labelEditorText.value = cp.segmentLabel || '';
+    dom.labelEditorText.placeholder = dict.labelEditorPlaceholder;
+    var zh = (state.language === 'zh');
+    dom.labelEditorChips.innerHTML = LABEL_CHIPS.map(function (c) {
+      return '<button type="button" class="chip" data-token="' + (zh ? c[1] : c[2]) + '">+ ' + esc(dict[c[0]]) + '</button>';
+    }).join('');
+    dom.labelEditor.hidden = false;
+    positionLabelEditor(rect);
+
+    // Show which segment is being edited
+    state.activeRange = { startDist: prev.distance, endDist: cp.distance };
+    highlightRangeOnMap(state.activeRange);
+    markPlanRows(null);
+    markClimbRows();
+    updateLabelPreview();
+    scheduleRender();
+    dom.labelEditorText.focus({ preventScroll: true });
+  }
+
+  function positionLabelEditor(rect) {
+    var ed = dom.labelEditor;
+    var sheet = window.innerWidth <= 640;
+    ed.classList.toggle('is-sheet', sheet);
+    if (sheet || !rect) {
+      ed.style.left = '';
+      ed.style.top = '';
+      return;
+    }
+    var w = ed.offsetWidth, h = ed.offsetHeight;
+    var left = Math.max(8, Math.min(window.innerWidth - w - 8, rect.left + rect.width / 2 - w / 2));
+    // Above the card (cards sit at the bottom of the chart), below it if there is no room
+    var top = rect.top - h - 10;
+    if (top < 64) top = Math.min(window.innerHeight - h - 8, rect.bottom + 10);
+    ed.style.left = Math.round(left) + 'px';
+    ed.style.top = Math.round(Math.max(8, top)) + 'px';
+  }
+
+  function closeLabelEditor() {
+    if (!labelEditorCp) return;
+    labelEditorCp = null;
+    dom.labelEditor.hidden = true;
+    state.activeRange = labelEditorPrevRange;
+    labelEditorPrevRange = null;
+    if (state.activeRange) highlightRangeOnMap(state.activeRange);
+    else TR.trailMap.clearSegmentHighlight();
+    renderPlanTable();
+    markClimbRows();
+    scheduleRender();
+  }
+
+  function updateLabelPreview() {
+    if (!labelEditorCp) return;
+    var dict = T[state.language];
+    var row = planRowModels(computePlan()).filter(function (r) { return r.cp === labelEditorCp; })[0];
+    var text = row ? row.labelText : '';
+    var timed = /\{[^{}]+\}/.test(labelEditorCp.segmentLabel || '') && row && row.entry.segEstimated;
+    dom.labelEditorPreview.textContent = text
+      ? dict.labelEditorPreview + text.split('\n').join(' / ') + (timed ? ' · ' + dict.labelEditorNeedTarget : '')
+      : dict.labelEditorHint;
+    updateLabelEditorWarn();
+  }
+
+  function updateLabelEditorWarn() {
+    if (!labelEditorCp || !dom.labelEditorWarn) return;
+    var dict = T[state.language];
+    var key = state.checkpoints.indexOf(labelEditorCp);
+    var item = labelReport.filter(function (r) { return r.key === key; })[0];
+    var msg = !item ? '' : (item.status === 'truncated' ? dict.labelWarnTruncated : (item.status === 'shrunk' ? dict.labelWarnShrunk : ''));
+    dom.labelEditorWarn.textContent = msg;
+    dom.labelEditorWarn.hidden = !msg;
+    dom.labelEditorWarn.classList.toggle('is-error', item && item.status === 'truncated');
   }
 
   // ── Sun & Night Sections ────────────────────────────────────────────
@@ -1496,6 +1957,7 @@
     dom.inputCarbsRate.value = state.carbsPerHour;
     dom.inputWaterRate.value = state.waterPerHour;
     dom.inputSodiumRate.value = state.sodiumPerHour;
+    dom.inputGelGrams.value = state.gelGrams;
   }
 
   // Grams to the nearest 5, sodium to the nearest 50 mg, water in ml or, from a litre, in L
@@ -1804,7 +2266,7 @@
       var prev = isFirst ? null : plan[idx - 1].cp;
       var stats = (!isFirst && pts) ? u.segmentStats(pts, prev.distance, cp.distance, state.elevationMode) : null;
       if (stats) cumulAscent += stats.dPlus;
-      return {
+      var row = {
         entry: entry,
         cp: cp,
         prev: prev,
@@ -1821,6 +2283,8 @@
         fuel: isFirst ? [] : fuelLines(rates, entry.segMinutes, dict),
         fuelEstimated: entry.segEstimated
       };
+      row.labelText = isFirst ? '' : expandLabel(cp.segmentLabel, row, rates).trim();
+      return row;
     });
   }
 
@@ -1908,6 +2372,13 @@
               (row.fuelEstimated ? '≈' : '') + f.text + '</div>';
           }).join('') + '</div>'
         : '<div class="stat-secondary">–</div>';
+      if (!isFirst) {
+        // What this segment says on the roadbook, or a way to write it
+        var labelFirst = row.labelText.split('\n')[0];
+        fuelCell += '<button type="button" class="btn-label' + (row.labelText ? ' has-label' : '') + '" data-idx="' + gi + '" title="' +
+          esc(row.labelText ? row.labelText.replace(/\n/g, ' / ') : dict.labelWriteToRoadbook) + '">' +
+          (row.labelText ? '📝 ' + esc(labelFirst) : '✎ ' + esc(dict.labelWriteToRoadbook)) + '</button>';
+      }
 
       var actionsCell =
         '<button type="button" class="btn-settings" data-idx="' + gi + '" title="' + esc(dict.settingsCpTitle) + '" aria-label="' + esc(dict.settingsCpTitle) + '"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg></button>' +
@@ -2001,6 +2472,7 @@
       if (btn.classList.contains('btn-settings')) openCPModal(idx);
       else if (btn.classList.contains('btn-delete')) handleDeleteCP(idx);
       else if (btn.classList.contains('btn-lock')) toggleSegmentLock(idx);
+      else if (btn.classList.contains('btn-label')) openLabelEditor(state.checkpoints[idx], btn.getBoundingClientRect());
       return;
     }
     if (e.target.closest('input')) return;
@@ -2198,8 +2670,25 @@
     dom.poiTxtRightMiddle.value = (cp.texts && cp.texts.rightMiddle) || '';
     dom.poiTxtRightTop.value = (cp.texts && cp.texts.rightTop) || '';
 
+    // Roadbook labels of the segments arriving here and leaving from here
+    var dict = T[state.language];
+    var prevCp = state.checkpoints[cpIndex - 1];
+    modalNextCp = state.checkpoints[cpIndex + 1] || null;
+    dom.poiLabelPrevField.hidden = !prevCp;
+    dom.poiLabelNextField.hidden = !modalNextCp;
+    if (prevCp) {
+      dom.poiLabelPrevName.textContent = dict.labelPrevSegment.replace('{a}', cpDisplayName(prevCp, cpIndex - 1));
+      dom.poiLabelPrev.value = cp.segmentLabel || '';
+    }
+    if (modalNextCp) {
+      dom.poiLabelNextName.textContent = dict.labelNextSegment.replace('{b}', cpDisplayName(modalNextCp, cpIndex + 1));
+      dom.poiLabelNext.value = modalNextCp.segmentLabel || '';
+    }
+
     dom.modalBackdrop.classList.add('open');
   }
+
+  var modalNextCp = null;
 
   function closeCPModal() {
     dom.modalBackdrop.classList.remove('open');
@@ -2236,6 +2725,9 @@
       rightTop: dom.poiTxtRightTop.value
     };
 
+    if (!dom.poiLabelPrevField.hidden) cp.segmentLabel = dom.poiLabelPrev.value;
+    if (modalNextCp && !dom.poiLabelNextField.hidden) modalNextCp.segmentLabel = dom.poiLabelNext.value;
+
     sortCheckpoints();
     normalizeAllCPs();
     state.activeCPIndex = state.checkpoints.indexOf(cp);
@@ -2265,6 +2757,7 @@
     }
     if (cp.arrivalTime === undefined) cp.arrivalTime = '';
     if (cp.segmentTime === undefined) cp.segmentTime = '';
+    cp.segmentLabel = (cp.segmentLabel === null || cp.segmentLabel === undefined) ? '' : String(cp.segmentLabel);
     return cp;
   }
 
@@ -2414,6 +2907,12 @@
     if (data.fontSizeCPNotes) state.fontSizeCPNotes = parseInt(data.fontSizeCPNotes, 10);
     if (data.fontSizeSegment) state.fontSizeSegment = parseInt(data.fontSizeSegment, 10);
     if (data.fontSizeCumulDist) state.fontSizeCumulDist = parseInt(data.fontSizeCumulDist, 10);
+    var labelSize = parseInt(data.fontSizeLabel, 10);
+    if (isFinite(labelSize) && labelSize >= 6 && labelSize <= 40) state.fontSizeLabel = labelSize;
+    var gel = parseInt(data.gelGrams, 10);
+    if (isFinite(gel) && gel >= 5 && gel <= 100) state.gelGrams = gel;
+    if (typeof data.autoScale === 'boolean') state.autoScale = data.autoScale;
+    if (dom.inputGelGrams) dom.inputGelGrams.value = state.gelGrams;
     if (data.language === 'zh' || data.language === 'en') state.language = data.language;
     if (['classic', 'gradient', 'elevation'].indexOf(data.colorMode) !== -1) state.colorMode = data.colorMode;
     if (['auto', '19.5-9', '20-9'].indexOf(data.exportRatio) !== -1) state.exportRatio = data.exportRatio;
@@ -2457,6 +2956,9 @@
       fontSizeCPNotes: state.fontSizeCPNotes,
       fontSizeSegment: state.fontSizeSegment,
       fontSizeCumulDist: state.fontSizeCumulDist,
+      fontSizeLabel: state.fontSizeLabel,
+      autoScale: state.autoScale,
+      gelGrams: state.gelGrams,
       language: state.language,
       startTime: state.startTime || '',
       utcOffset: state.utcOffset,
@@ -2494,6 +2996,11 @@
       fontSizeCPNotes: 22,
       fontSizeSegment: 17,
       fontSizeCumulDist: 17,
+      fontSizeLabel: 16,
+      // phone ratios: narrow the chart on long courses so the text stays readable
+      autoScale: true,
+      // grams of carbs per gel, for the {胶} / {gels} label token
+      gelGrams: 25,
       language: state.language,
       startTime: "2026-08-28T06:00",
       // "auto" guesses the race's time zone from the course; or e.g. "+02:00"
@@ -2503,10 +3010,12 @@
       carbsPerHour: "40-90",
       waterPerHour: "450-750",
       sodiumPerHour: "300-600",
-      // segmentTime "" = split automatically from targetTime; a value locks that segment
+      // segmentTime "" = split automatically from targetTime; a value locks that segment.
+      // segmentLabel is printed along the bottom of the segment that ends at that checkpoint.
       checkpoints: [
         { name: isZH ? "起点" : "Start", distance: 0.0, segmentTime: "0:00", stopDuration: 0, icon: "start" },
-        { name: "CP1", distance: 15.0, segmentTime: "1:45", stopDuration: 5, icon: "classic" },
+        { name: "CP1", distance: 15.0, segmentTime: "1:45", stopDuration: 5, icon: "classic",
+          segmentLabel: isZH ? "{胶} 支胶\n{水} 水" : "{gels} gels\n{water} water" },
         { name: "CP2", distance: 52.0, segmentTime: "", stopDuration: 15, icon: "dropbag" },
         { name: isZH ? "终点" : "Finish", distance: 100.0, segmentTime: "", icon: "finish" }
       ]
@@ -2716,7 +3225,8 @@
       segments: TR.trailAnalysis.analyzeSegments(td, 'waypoint', state.checkpoints, state.elevationMode, state.language, state.startTime),
       targetMinutes: target,
       nightBands: computeNightBands(plan),
-      altitudeLevels: altitudeLevelsReached()
+      altitudeLevels: altitudeLevelsReached(),
+      segmentLabels: segmentLabelModels(rows)
     });
     // The on-screen profile owns these ids
     profileSlot.querySelectorAll('[id]').forEach(function (n) { n.removeAttribute('id'); });
@@ -2732,6 +3242,169 @@
     state.hasExported = true;
     updateStepBar();
     window.print();
+  }
+
+  // ── Split Export: one phone image per stretch of the course ─────────
+  // Long courses can't be readable as a single phone image, so the course is cut at chosen
+  // checkpoints and each part is drawn on its own phone-ratio canvas (zipped together).
+  var splitCuts = [];
+
+  // Default cuts: at most 5 segments or 50 km per image, preferably at a drop-bag station as
+  // long as that still leaves the image at least 3 segments
+  function defaultSplitCuts() {
+    var cps = state.checkpoints;
+    var cuts = [];
+    var partStart = 0;
+    for (var i = 1; i < cps.length - 1; i++) {
+      var nextSegs = i + 1 - partStart;
+      var nextKm = cps[i + 1].distance - cps[partStart].distance;
+      if (nextSegs <= 5 && nextKm <= 50) continue;
+      var cut = i;
+      for (var j = i; j > partStart + 2; j--) {
+        if (cps[j].icon === 'dropbag') { cut = j; break; }
+      }
+      cuts.push(cps[cut]);
+      partStart = cut;
+      i = cut;
+    }
+    return cuts;
+  }
+
+  function splitParts() {
+    var cps = state.checkpoints;
+    var bounds = [0];
+    cps.forEach(function (cp, i) {
+      if (i > 0 && i < cps.length - 1 && splitCuts.indexOf(cp) !== -1) bounds.push(i);
+    });
+    bounds.push(cps.length - 1);
+    var parts = [];
+    for (var k = 0; k + 1 < bounds.length; k++) parts.push({ from: bounds[k], to: bounds[k + 1] });
+    return parts;
+  }
+
+  function bindSplitModal() {
+    document.getElementById('btn-split-close').addEventListener('click', closeSplitModal);
+    document.getElementById('btn-split-cancel').addEventListener('click', closeSplitModal);
+    dom.splitBackdrop.addEventListener('click', function (e) {
+      if (e.target === dom.splitBackdrop) closeSplitModal();
+    });
+    dom.splitCps.addEventListener('change', function (e) {
+      var box = e.target.closest('input[data-idx]');
+      if (!box) return;
+      var cp = state.checkpoints[parseInt(box.dataset.idx, 10)];
+      splitCuts = splitCuts.filter(function (c) { return c !== cp; });
+      if (box.checked) splitCuts.push(cp);
+      renderSplitParts();
+    });
+    dom.btnSplitRun.addEventListener('click', runSplitExport);
+  }
+
+  function openSplitModal() {
+    if (!state.trackpoints) {
+      toast(T[state.language].toastGpxFirst);
+      return;
+    }
+    splitCuts = defaultSplitCuts();
+    var cps = state.checkpoints;
+    var dict = T[state.language];
+    dom.splitCps.innerHTML = cps.map(function (cp, i) {
+      if (i === 0 || i === cps.length - 1) return '';
+      return '<label class="split-cp">' +
+        '<input type="checkbox" data-idx="' + i + '"' + (splitCuts.indexOf(cp) !== -1 ? ' checked' : '') + '>' +
+        '<span class="cp-table-badge cp-badge-default">' + i + '</span>' +
+        '<span class="split-cp-name">' + esc(cpDisplayName(cp, i)) + '</span>' +
+        '<span class="split-cp-km">' + cp.distance.toFixed(1) + ' km</span>' +
+        (cp.icon === 'dropbag' ? '<span class="split-cp-tag">' + esc(dict.splitDropbag) + '</span>' : '') +
+        '</label>';
+    }).join('');
+    renderSplitParts();
+    dom.splitBackdrop.classList.add('open');
+  }
+
+  function closeSplitModal() {
+    if (dom.splitBackdrop) dom.splitBackdrop.classList.remove('open');
+  }
+
+  function renderSplitParts() {
+    var dict = T[state.language];
+    var cps = state.checkpoints;
+    dom.splitParts.innerHTML = splitParts().map(function (p, n) {
+      return '<li>' + esc(dict.splitPart
+        .replace('{n}', n + 1)
+        .replace('{a}', cpDisplayName(cps[p.from], p.from))
+        .replace('{b}', cpDisplayName(cps[p.to], p.to))
+        .replace('{d0}', cps[p.from].distance.toFixed(1))
+        .replace('{d1}', cps[p.to].distance.toFixed(1))
+        .replace('{s}', p.to - p.from)) + '</li>';
+    }).join('');
+  }
+
+  function downloadBlob(blob, filename) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+  }
+
+  function runSplitExport() {
+    var dict = T[state.language];
+    var parts = splitParts();
+    if (parts.length < 2) {
+      toast(dict.splitNeedCuts);
+      return;
+    }
+    var scale = parseInt(dom.splitScale.value, 10) || 2;
+    var ratio = state.exportRatio === 'auto' ? '20-9' : state.exportRatio;
+    var plan = computePlan();
+    var labels = segmentLabelModels(planRowModels(plan));
+    var bands = computeNightBands(plan);
+    var cps = state.checkpoints;
+    var base = (state.raceName || 'roadbook').replace(/[^a-zA-Z0-9_\-一-鿿]/g, '_');
+    var stage = document.createElement('div');
+    stage.style.cssText = 'position:absolute; left:-100000px; top:0;';
+    document.body.appendChild(stage);
+    closeSplitModal();
+    toast(dict.splitExporting.replace('{n}', parts.length));
+
+    var blobs = [];
+    var chain = Promise.resolve();
+    parts.forEach(function (p, n) {
+      chain = chain.then(function () {
+        var title = (state.raceName ? state.raceName + ' · ' : '') + (n + 1) + '/' + parts.length;
+        var svg = TR.profile.render(stage, state.trackpoints, cps, title, profileFontSizes(), ratio, {
+          colorMode: state.colorMode,
+          targetMinutes: getTargetMinutes(),
+          nightBands: bands,
+          altitudeLevels: altitudeLevelsReached(),
+          segmentLabels: labels,
+          autoScale: state.autoScale,
+          window: { startDist: cps[p.from].distance, endDist: cps[p.to].distance }
+        });
+        return TR.exporter.toPngBlob(svg, scale, ratio).then(function (blob) { blobs.push(blob); });
+      });
+    });
+
+    chain.then(function () {
+      return TR.gpxParser.loadJSZip();
+    }).then(function (JSZipLib) {
+      var zip = new JSZipLib();
+      blobs.forEach(function (blob, n) {
+        zip.file(base + '_' + (n + 1) + 'of' + blobs.length + '_' + ratio.replace('-', '_') + '.png', blob);
+      });
+      return zip.generateAsync({ type: 'blob' });
+    }).then(function (zipBlob) {
+      downloadBlob(zipBlob, base + '_split_' + ratio.replace('-', '_') + '.zip');
+      toast(dict.splitDone.replace('{n}', blobs.length));
+      state.hasExported = true;
+      updateStepBar();
+    }).catch(function (err) {
+      toast(dict.splitFailed + (err && err.message ? err.message : err));
+    }).then(function () {
+      if (stage.parentNode) stage.parentNode.removeChild(stage);
+    });
   }
 
   // ── High-Resolution PNG Image Export ────────────────────────────────

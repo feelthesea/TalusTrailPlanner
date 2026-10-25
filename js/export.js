@@ -68,17 +68,39 @@
    * @param {string}        ratio    – target aspect ratio ("auto", "16-9", "19.5-9", "9-16", "9-19.5")
    */
   function exportToPNG(svgEl, scale, filename, ratio) {
+    ratio = ratio || 'auto';
+    toPngBlob(svgEl, scale, ratio).then(function (pngBlob) {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(pngBlob);
+      a.download = (filename || 'roadbook') + '_' + ratio.replace('-', '_') + '.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+    }).catch(function (err) {
+      console.error('Export error:', err);
+      alert('Export failed: ' + err.message);
+    });
+  }
+
+  /**
+   * Render an SVG profile to a PNG Blob, padded to the aspect ratio.
+   * Elements marked .screen-only (hover and selection highlights, label placeholders) are left out.
+   */
+  function toPngBlob(svgEl, scale, ratio) {
     scale = scale || 2;
-    filename = filename || 'roadbook';
     ratio = ratio || 'auto';
 
     var fontPromise = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
 
-    Promise.all([fontPromise, getFontStyles()]).then(function (results) {
+    return Promise.all([fontPromise, getFontStyles()]).then(function (results) {
       var fontCss = results[1] || '';
 
       // 1. Clone SVG to avoid modifying live DOM and inline fonts
       var cloneSvg = svgEl.cloneNode(true);
+      Array.prototype.forEach.call(cloneSvg.querySelectorAll('.screen-only'), function (n) {
+        n.parentNode.removeChild(n);
+      });
       var defs = cloneSvg.querySelector('defs');
       if (!defs) {
         defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
@@ -148,48 +170,39 @@
       var url = URL.createObjectURL(blob);
 
       // 3. Draw onto a canvas
-      var img = new Image();
-      img.onload = function () {
-        var canvas = document.createElement('canvas');
-        canvas.width = canvasW;
-        canvas.height = canvasH;
-        var ctx = canvas.getContext('2d');
+      return new Promise(function (resolve, reject) {
+        var img = new Image();
+        img.onload = function () {
+          var canvas = document.createElement('canvas');
+          canvas.width = canvasW;
+          canvas.height = canvasH;
+          var ctx = canvas.getContext('2d');
 
-        // Fill with the background color matching the profile background
-        var bgRect = cloneSvg.querySelector('rect');
-        var bgColor = bgRect ? bgRect.getAttribute('fill') : '#ffffff';
-        ctx.fillStyle = bgColor;
-        ctx.fillRect(0, 0, canvasW, canvasH);
+          // Fill with the background color matching the profile background
+          var bgRect = cloneSvg.querySelector('rect');
+          var bgColor = bgRect ? bgRect.getAttribute('fill') : '#ffffff';
+          ctx.fillStyle = bgColor;
+          ctx.fillRect(0, 0, canvasW, canvasH);
 
-        // Draw SVG centered in the canvas
-        ctx.drawImage(img, dx, dy, drawW, drawH);
-        URL.revokeObjectURL(url);
-
-        // 4. Trigger download
-        canvas.toBlob(function (pngBlob) {
-          var a = document.createElement('a');
-          a.href = URL.createObjectURL(pngBlob);
-          a.download = filename + '_' + ratio.replace('-', '_') + '.png';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
-        }, 'image/png');
-      };
-
-      img.onerror = function () {
-        URL.revokeObjectURL(url);
-        alert('Image export failed. Please try again.');
-      };
-      img.src = url;
-    }).catch(function (err) {
-      console.error('Export error:', err);
-      alert('Export failed: ' + err.message);
+          // Draw SVG centered in the canvas
+          ctx.drawImage(img, dx, dy, drawW, drawH);
+          URL.revokeObjectURL(url);
+          canvas.toBlob(function (pngBlob) {
+            if (pngBlob) resolve(pngBlob); else reject(new Error('Image export failed.'));
+          }, 'image/png');
+        };
+        img.onerror = function () {
+          URL.revokeObjectURL(url);
+          reject(new Error('Image export failed. Please try again.'));
+        };
+        img.src = url;
+      });
     });
   }
 
   // ── Public API ──────────────────────────────────────────────────────
   window.TrailRoadbook.exporter = {
-    exportToPNG: exportToPNG
+    exportToPNG: exportToPNG,
+    toPngBlob: toPngBlob
   };
 })();

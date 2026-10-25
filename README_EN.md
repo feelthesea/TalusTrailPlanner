@@ -22,6 +22,9 @@ Load a GPX / KML / KMZ route, mark your checkpoints on the elevation profile, en
 - 🍌 **Fuel needs**: Each segment's carbs, water, and sodium, worked out from its planned time (stops not included). Defaults are carbs 40–90 g/h, water 450–750 ml/h, sodium 300–600 mg/h; change them to your own range or a single number. The race total is shown above the table.
 - 🌙 **Real sunrise, sunset, and night sections**: Sunrise and sunset are computed for the course's location and race date, in the race's local time zone (guessed from the course; pick it by hand for races abroad if needed). The icon next to each ETA shows daylight, around sunset, night, or around sunrise, and the profile shades the sections where you'll need a headlamp.
 - ⛰️ **Climb list and high-altitude hints**: Main climbs found from the terrain (where, which segment, length, gain, average grade, steepest 200 m, top altitude); click one to locate it on the profile and map. Courses above 2,500 m also get the high-altitude stretches, the planned time up there, an altitude-sickness note, and 2,500 m / 3,500 m reference lines on the profile.
+- 🏷️ **Roadbook labels**: One small card per segment, along the bottom of that segment on the profile, for the gels and water to carry or your own notes. Click "+ Label" on the profile to write one, or "Put on roadbook" to fill every segment at once. Tokens such as `{gels}` and `{water}` are worked out from your fuel plan and follow the target time. Cards keep clear of each other and of other text, and altitude labels make way for them.
+- 🔠 **Type size on long courses**: On phone ratios the chart narrows to what the checkpoints need, so 60–120 km courses keep readable text (can be turned off under Font sizes); Font sizes also shows roughly how big each kind of text comes out on a phone.
+- 🧩 **Split export**: Cut a long course at chosen checkpoints and export each part as its own phone-ratio image, zipped together.
 - 💾 **Local autosave**: The track and every setting are saved in this browser and come back next time; "Import ▾ → New roadbook" clears them.
 - 📈 **Interactive roadbook profile**: Move over the profile to see distance, altitude, and grade while the map marker follows. Clicking a table row or a profile segment highlights it on the profile, map, and table at once.
 - 🎨 **3 color modes**: Classic bars, grade gradient, elevation gradient.
@@ -68,6 +71,13 @@ The page reads top to bottom in workflow order: **Roadbook profile → Race plan
 - The icon next to each ETA shows daylight ☀️, around sunset 🌅, night 🌙, or around sunrise 🌄, from the real sun altitude at that checkpoint and time. Shading on the profile marks the planned night sections (lighter for twilight), so you know when you'll need a headlamp.
 - **Fuel needs**: In the "Fuel per hour" row, enter carbs (g), water (ml), and sodium (mg) per hour as a range (`40-90`) or one number (`60`); leave a field blank to hide it. The last column shows each segment's amounts, from its planned time without aid-station stops. For reference: up to about 90 g/h of carbs in races over 2 hours, 30–50 g/h typical in ultras over 6 hours; water 450–750 ml/h; sodium 300–600 mg/h (about 500–700 mg per litre), per the [ISSN ultra-marathon position stand (Tiller et al., 2019)](https://pmc.ncbi.nlm.nih.gov/articles/PMC6839090/).
 
+### Roadbook labels (optional)
+- Each segment on the profile has "+ Label" along its bottom; click it to open the editor, and what you type appears on the roadbook as you type. "✎ Put on roadbook" in the Carbs / Water / Sodium column opens it too.
+- **Put on roadbook** in the "Fuel per hour" row writes "{gels} gels / {water} water" on every segment without a label (undoable); **Per gel** sets the grams of carbs in one gel.
+- Tokens: `{gels}` `{carbs}` `{water}` `{sodium}` `{time}` `{km}` `{gain}` `{loss}` (the Chinese names `{胶}` `{碳水}` `{水}` `{钠}` `{用时}` `{距离}` `{爬升}` `{下降}` work too). Without a target time, the time-based values show "–".
+- In the checkpoint dialog, "Roadbook labels" edits the previous and next segments' labels; the six free-position texts are still there under "Free-position texts (advanced)".
+- Font sizes has a size for roadbook labels and shows roughly how big each one comes out on a phone; when labels get too small it suggests Split export.
+
 ### Step 5: Export the roadbook
 1. Pick the **Canvas** ratio in the profile header (it also changes the on-screen preview):
    - **Auto**: compact, no padding;
@@ -75,8 +85,9 @@ The page reads top to bottom in workflow order: **Roadbook profile → Race plan
    - **20:9**: most Android phones (Xiaomi, Huawei, Samsung, and others).
 2. Adjust **Colors**, **Gain** algorithm, and **Font sizes** in the same header if needed (race title, CP names, altitude, times, notes, segment boxes, and bottom distances each have their own size).
 3. Click **"Export ▾"** in the top bar and choose **Standard 1×**, **HD 2×** (recommended), or **Ultra HD 3×** to download the PNG.
-4. Choose **"Print race plan"** for the A4 sheet (or save it as a PDF from the print dialog); Ctrl+P prints the same sheet.
-5. Choose **"Export roadbook settings"** to save a JSON file, and restore it later with "Import ▾ → Import roadbook settings". The JSON doesn't contain the track itself, so upload the same track as well. In the same browser you don't need to: the track and settings are saved automatically and come back next time.
+4. For long races choose **"Split export"**: tick the checkpoints to cut at (by default at most 5 segments or 50 km per image, preferably at drop bags), and each part becomes one phone-ratio image in a zip.
+5. Choose **"Print race plan"** for the A4 sheet (or save it as a PDF from the print dialog); Ctrl+P prints the same sheet.
+6. Choose **"Export roadbook settings"** to save a JSON file, and restore it later with "Import ▾ → Import roadbook settings". The JSON doesn't contain the track itself, so upload the same track as well. In the same browser you don't need to: the track and settings are saved automatically and come back next time.
 
 ### Reference: climbs and altitude
 **Climbs and altitude**, at the bottom of the page, finds the main climbs from the terrain. It complements the checkpoint-based plan: the plan tells you how much you climb between two checkpoints, the climb list tells you where the hard climbs are, how long and steep they are, and which segment they fall in. Click a row to locate it on the profile and map. On courses above 2,500 m it also lists the high-altitude stretches and the planned time spent up there.
@@ -96,12 +107,15 @@ The page reads top to bottom in workflow order: **Roadbook profile → Race plan
   "carbsPerHour": "40-90",
   "waterPerHour": "450-750",
   "sodiumPerHour": "300-600",
+  "gelGrams": 25,
+  "fontSizeLabel": 16,
+  "autoScale": true,
   "elevationMode": "smooth",
   "colorMode": "classic",
   "exportRatio": "20-9",
   "checkpoints": [
     { "name": "Start", "distance": 0, "segmentTime": "0:00", "icon": "start" },
-    { "name": "CP1", "distance": 15, "segmentTime": "1:45", "stopDuration": 5, "icon": "classic" },
+    { "name": "CP1", "distance": 15, "segmentTime": "1:45", "stopDuration": 5, "icon": "classic", "segmentLabel": "{gels} gels\n{water} water" },
     { "name": "CP2", "distance": 52, "segmentTime": "", "stopDuration": 15, "icon": "dropbag" },
     { "name": "Finish", "distance": 100, "segmentTime": "", "icon": "finish" }
   ]
@@ -112,6 +126,8 @@ The page reads top to bottom in workflow order: **Roadbook profile → Race plan
 - `stopDuration` is in minutes.
 - `utcOffset` is the race's time zone: `auto` guesses it from the course, or give a fixed value such as `+02:00`.
 - `carbsPerHour` / `waterPerHour` / `sodiumPerHour` are the hourly carbs (g), water (ml), and sodium (mg), as a range or one number; an empty string hides that line.
+- `segmentLabel` is the label printed along the bottom of the segment arriving at that checkpoint; it may have line breaks and tokens such as `{gels}` and `{water}`.
+- `gelGrams` is the carbs in one gel; `fontSizeLabel` the roadbook label size; `autoScale` turns the long-course enlargement on phone ratios on or off.
 - Older files that only have `arrivalTime` (cumulative arrival times) still import and are converted to segment times.
 
 ---

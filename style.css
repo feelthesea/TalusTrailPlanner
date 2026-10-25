@@ -938,6 +938,209 @@ body.drag-over .drop-zone {
 .alt-chip { color: #c2410c; font-weight: 600; }
 .alt-chip.very-high { color: var(--danger); }
 
+[hidden] { display: none !important; }
+
+/* ── Roadbook labels: cards on the profile, plan-table button, editor ── */
+.seg-label { cursor: pointer; outline: none; }
+.seg-label:hover .seg-label-card,
+.seg-label:focus .seg-label-card { stroke: var(--accent); stroke-width: 1.5; }
+.seg-label-empty { transition: opacity 0.15s; }
+.seg-label-empty.is-idle { opacity: 0; }
+.seg-label-empty:hover .seg-label-card { fill: #fffaf0; }
+
+.btn-label {
+  display: block;
+  max-width: 170px;
+  margin-top: 5px;
+  padding: 2px 7px;
+  border: 1px dashed var(--border-accent);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.btn-label:hover { border-color: var(--accent); color: #8a5207; }
+.btn-label.has-label {
+  border-style: solid;
+  border-color: rgba(212, 136, 30, 0.45);
+  background: #fffaf0;
+  color: var(--text-primary);
+}
+.input-gel { width: 60px; font-family: var(--font-mono); }
+
+.label-editor {
+  position: fixed;
+  z-index: 10002;
+  width: 340px;
+  max-width: calc(100vw - 16px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-accent);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-modal);
+}
+.label-editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.84rem;
+}
+.label-editor textarea {
+  width: 100%;
+  min-height: 70px;
+  resize: vertical;
+  padding: 6px 8px;
+  border: 1px solid var(--border-accent);
+  border-radius: 5px;
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  line-height: 1.4;
+  outline: none;
+}
+.label-editor textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+.label-editor-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip {
+  border: 1px solid var(--border-accent);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--text-secondary);
+  padding: 2px 9px;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.chip:hover { border-color: var(--accent); color: #8a5207; background: #fffaf0; }
+.label-editor-preview {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+.label-editor-warn {
+  font-size: 0.72rem;
+  color: #8a5207;
+  background: var(--accent-light);
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+.label-editor-warn.is-error { color: var(--danger); background: rgba(198, 40, 40, 0.08); }
+.label-editor-foot { display: flex; justify-content: space-between; gap: 8px; }
+.label-editor.is-sheet {
+  left: 0 !important;
+  right: 0;
+  top: auto !important;
+  bottom: 0;
+  width: auto;
+  max-width: none;
+  border-radius: 14px 14px 0 0;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+}
+
+/* CP modal: segment labels, older free-position texts folded away */
+.modal-hint { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 8px; line-height: 1.45; }
+.label-textarea {
+  width: 100%;
+  min-height: 48px;
+  resize: vertical;
+  padding: 5px 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  outline: none;
+}
+.label-textarea:focus { border-color: var(--accent); }
+.label-fields { margin-bottom: 10px; }
+.labels-advanced {
+  border-top: 1px dashed var(--border-subtle);
+  padding-top: 8px;
+}
+.labels-advanced summary {
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+/* Font sizes modal: auto-scale switch, phone size hints */
+.fs-auto {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+.fs-auto input { accent-color: var(--accent); }
+.fs-scale-now { font-family: var(--font-mono); font-size: 0.72rem; color: var(--success); }
+.fs-px { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-muted); }
+.fs-px.ok { color: var(--success); }
+.fs-px.small { color: #8a5207; }
+.fs-px.tiny { color: var(--danger); font-weight: 700; }
+.fs-warn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(198, 40, 40, 0.07);
+  color: var(--danger);
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+.fs-warn .btn { flex-shrink: 0; }
+
+/* Split export dialog */
+.split-cps {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 260px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+.split-cp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.split-cp:hover { background: var(--bg-secondary); }
+.split-cp input { accent-color: var(--accent); }
+.split-cp-name { font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.split-cp-km { font-family: var(--font-mono); font-size: 0.74rem; color: var(--text-muted); }
+.split-cp-tag {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #8a5207;
+  background: var(--accent-light);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+.split-parts {
+  margin: 0 0 12px 18px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
 .plan-footer {
   display: flex;
   align-items: center;

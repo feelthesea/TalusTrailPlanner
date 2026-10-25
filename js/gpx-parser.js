@@ -401,6 +401,7 @@
     },
     parseFile: parseFile,
     parseString: parseString,
-    processTrack: processTrack
+    processTrack: processTrack,
+    loadJSZip: loadJSZipOnDemand // also used to zip the split export
   };
 })();

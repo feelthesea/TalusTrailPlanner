@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Talus - Trail Roadbook Generator & Trail Analytics — 越野跑路书与轨迹分析</title>
   <meta name="description" content="Upload GPX/KML/KMZ tracks and create a beautiful interactive trail roadbook with synchronized map, gradient distribution, and segment statistics.">
-  <link rel="stylesheet" href="fonts/fonts.css?v=8.3">
+  <link rel="stylesheet" href="fonts/fonts.css?v=8.4">
   <link rel="stylesheet" href="css/leaflet.css">
-  <link rel="stylesheet" href="style.css?v=8.3">
+  <link rel="stylesheet" href="style.css?v=8.4">
 </head>
 <body>
 
@@ -105,6 +105,10 @@
           <button type="button" role="menuitem" data-scale="3">
             <svg class="icon" aria-hidden="true"><use href="#i-image"/></svg>
             <span data-i18n="scale3">超清 3×</span><small data-i18n="scale3Tag">打印</small>
+          </button>
+          <button type="button" role="menuitem" id="btn-split-export">
+            <svg class="icon" aria-hidden="true"><use href="#i-image"/></svg>
+            <span data-i18n="splitExport">分段导出</span><small data-i18n="splitExportTag">多张手机图</small>
           </button>
           <div class="menu-sep"></div>
           <div class="menu-label" data-i18n="printLabel">打印</div>
@@ -257,6 +261,15 @@
           <input type="text" id="input-sodium-rate" class="input-field input-rate" inputmode="decimal" autocomplete="off" placeholder="300-600">
           <span class="field-unit">mg</span>
         </label>
+        <label class="field-inline" for="input-gel-grams">
+          <span data-i18n="gelGramsLabel">每支胶</span>
+          <input type="number" id="input-gel-grams" class="input-field input-gel" min="5" max="100" step="1" value="25">
+          <span class="field-unit">g</span>
+        </label>
+        <button type="button" class="btn btn-sm" id="btn-fill-labels" title="" data-i18n-title="fillLabelsTitle">
+          <svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>
+          <span data-i18n="fillLabels">写入路书</span>
+        </button>
         <span class="fuel-total" id="fuel-total"></span>
       </div>
 
@@ -450,15 +463,29 @@
           </div>
         </div>
 
-        <!-- COLUMN 4: Associated Text Annotations -->
+        <!-- COLUMN 4: Roadbook labels of the segments on either side, then the older free-position texts -->
         <div class="modal-section">
-          <h4 data-i18n="poiCol4Title">图表内嵌自定义标注</h4>
+          <h4 data-i18n="poiCol4Title">路书标注</h4>
+          <p class="modal-hint" data-i18n="labelsSectionHint">这里写的内容印在路书剖面对应赛段的底部。</p>
+          <div class="modal-form-grid label-fields">
+            <div class="poi-field" id="poi-label-prev-field">
+              <label for="poi-label-prev" id="poi-label-prev-name"></label>
+              <textarea id="poi-label-prev" class="label-textarea" rows="2"></textarea>
+            </div>
+            <div class="poi-field" id="poi-label-next-field">
+              <label for="poi-label-next" id="poi-label-next-name"></label>
+              <textarea id="poi-label-next" class="label-textarea" rows="2"></textarea>
+            </div>
+          </div>
+
+          <details class="labels-advanced">
+          <summary data-i18n="labelsAdvanced">自由位置标注（高级）</summary>
           <div class="poi-texts-settings-row" style="margin-bottom: 8px;">
             <div class="poi-field">
               <label data-i18n="poiCol4Color">标注颜色</label>
               <div class="color-picker-wrapper">
-                <input type="text" id="poi-text-color-hex" value="#4e4e4e">
-                <input type="color" id="poi-text-color" value="#4e4e4e">
+                <input type="text" id="poi-text-color-hex" value="#1e293b">
+                <input type="color" id="poi-text-color" value="#1e293b">
               </div>
             </div>
             <div class="poi-field">
@@ -502,6 +529,7 @@
               <input type="text" id="poi-txt-right-top" placeholder="无" data-i18n-placeholder="placeholderTextNone">
             </div>
           </div>
+          </details>
         </div>
       </div>
 
@@ -523,6 +551,16 @@
       </div>
       <div class="modal-body">
         <div class="modal-section">
+          <label class="fs-auto" title="" data-i18n-title="fsAutoScaleTitle">
+            <input type="checkbox" id="fs-auto-scale" checked>
+            <span data-i18n="fsAutoScale">长赛程自动放大</span>
+            <span class="fs-scale-now" id="fs-scale-now"></span>
+          </label>
+          <p class="modal-hint" data-i18n="fsPhoneHint">「≈ px」是在 1080 像素高的手机屏幕上大约的大小，36 px 以上比较舒服。</p>
+          <div class="fs-warn" id="fs-warn" hidden>
+            <span id="fs-warn-text"></span>
+            <button type="button" class="btn btn-sm" id="btn-fs-split" data-i18n="splitExport">分段导出</button>
+          </div>
           <div class="poi-font-sizes-grid">
             <div class="poi-field">
               <label data-i18n="fsLabelTitle">比赛名称</label>
@@ -548,7 +586,11 @@
               <label data-i18n="fsLabelSegment">区间分段</label>
               <input type="number" id="fs-segment" class="input-field" min="8" max="35" value="17">
             </div>
-            <div class="poi-field" style="grid-column: span 2;">
+            <div class="poi-field">
+              <label data-i18n="fsLabelLabel">路书标注</label>
+              <input type="number" id="fs-label" class="input-field" min="8" max="35" value="16">
+            </div>
+            <div class="poi-field">
               <label data-i18n="fsLabelCumulDist">底部累计距离</label>
               <input type="number" id="fs-cumuldist" class="input-field" min="8" max="35" value="17">
             </div>
@@ -563,6 +605,53 @@
     </div>
   </div>
 
+  <!-- ═══ Split export: one phone image per stretch of the course ═══ -->
+  <div class="modal-backdrop" id="split-modal-backdrop">
+    <div class="modal-card" style="max-width: 560px;" role="dialog" aria-modal="true" aria-labelledby="split-title">
+      <div class="modal-header">
+        <h3 id="split-title" data-i18n="splitTitle">分段导出（多张手机图）</h3>
+        <button type="button" class="modal-close-btn" id="btn-split-close" title="关闭" data-i18n-title="modalCloseTitle">
+          <svg class="icon" aria-hidden="true"><use href="#i-x"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-hint" data-i18n="splitIntro">勾选在哪些 CP 切开。</p>
+        <div class="split-cps" id="split-cps"></div>
+        <ol class="split-parts" id="split-parts"></ol>
+        <label class="field-inline" for="split-scale">
+          <span data-i18n="splitScale">分辨率</span>
+          <select id="split-scale" class="input-field">
+            <option value="1" data-i18n="scale1">标准 1×</option>
+            <option value="2" data-i18n="scale2">高清 2×</option>
+            <option value="3" selected data-i18n="scale3">超清 3×</option>
+          </select>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" id="btn-split-cancel" data-i18n="btnCancel">取消</button>
+        <button type="button" class="btn btn-primary" id="btn-split-run" data-i18n="splitExportBtn">导出 zip</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Roadbook label editor (floating; a bottom sheet on phones) ═══ -->
+  <div class="label-editor" id="label-editor" role="dialog" aria-labelledby="label-editor-title" hidden>
+    <div class="label-editor-head">
+      <strong id="label-editor-title"></strong>
+      <button type="button" class="modal-close-btn" id="label-editor-close" title="关闭" data-i18n-title="modalCloseTitle">
+        <svg class="icon" aria-hidden="true"><use href="#i-x"/></svg>
+      </button>
+    </div>
+    <textarea id="label-editor-text" rows="3" maxlength="160"></textarea>
+    <div class="label-editor-chips" id="label-editor-chips"></div>
+    <div class="label-editor-preview" id="label-editor-preview"></div>
+    <div class="label-editor-warn" id="label-editor-warn" hidden></div>
+    <div class="label-editor-foot">
+      <button type="button" class="btn btn-sm" id="label-editor-clear" data-i18n="labelClear">删除</button>
+      <button type="button" class="btn btn-sm btn-primary" id="label-editor-done" data-i18n="labelDone">完成</button>
+    </div>
+  </div>
+
   <!-- ═══ Tooltip ═══ -->
   <div class="chart-tooltip" id="chartTooltip"></div>
 
@@ -574,15 +663,15 @@
 
   <!-- ═══ Scripts ═══ -->
   <script src="js/leaflet.js"></script>
-  <script src="js/utils.js?v=8.3"></script>
-  <script src="js/trail-math.js?v=8.3"></script>
-  <script src="js/sun.js?v=8.3"></script>
-  <script src="js/storage.js?v=8.3"></script>
-  <script src="js/gpx-parser.js?v=8.3"></script>
-  <script src="js/trail-analysis.js?v=8.3"></script>
-  <script src="js/trail-map.js?v=8.3"></script>
-  <script src="js/profile.js?v=8.3"></script>
-  <script src="js/export.js?v=8.3"></script>
-  <script src="js/app.js?v=8.3"></script>
+  <script src="js/utils.js?v=8.4"></script>
+  <script src="js/trail-math.js?v=8.4"></script>
+  <script src="js/sun.js?v=8.4"></script>
+  <script src="js/storage.js?v=8.4"></script>
+  <script src="js/gpx-parser.js?v=8.4"></script>
+  <script src="js/trail-analysis.js?v=8.4"></script>
+  <script src="js/trail-map.js?v=8.4"></script>
+  <script src="js/profile.js?v=8.4"></script>
+  <script src="js/export.js?v=8.4"></script>
+  <script src="js/app.js?v=8.4"></script>
 </body>
 </html>

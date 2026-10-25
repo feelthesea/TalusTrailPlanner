@@ -66,8 +66,23 @@
     return e;
   }
 
-  var FONT_FAMILY = "var(--font-sans), 'Segoe UI', system-ui, -apple-system, sans-serif";
-  var FONT_NUMERIC = "var(--font-sans), 'Segoe UI', system-ui, -apple-system, sans-serif; font-variant-numeric: tabular-nums;";
+  // Chinese fonts come before the generic family, or per-glyph fallback never reaches them.
+  // No CJK font is embedded (5–15 MB): each device's system font draws the Chinese text.
+  var FONT_FAMILY = "'Plus Jakarta Sans', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', " +
+    "'Noto Sans SC', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Segoe UI', system-ui, -apple-system, sans-serif";
+  var FONT_NUMERIC = FONT_FAMILY + "; font-variant-numeric: tabular-nums;";
+
+  // Text is measured, not read back from the DOM: the print sheet renders while hidden
+  var measureCtx = null;
+  function textWidth(str, size, weight) {
+    if (!measureCtx) measureCtx = document.createElement('canvas').getContext('2d');
+    measureCtx.font = (weight || 700) + ' ' + size + 'px ' + FONT_FAMILY;
+    return measureCtx.measureText(str).width;
+  }
+
+  function overlaps(a, b) {
+    return a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+  }
 
   var C = {
     bg:            '#fcfaf5',
@@ -104,9 +119,8 @@
     }
   }
 
-  function makeMapper(totalDist, minE, maxE, Y, chartH) {
+  function makeMapper(totalDist, minE, maxE, Y, chartH, chartW) {
     chartH = chartH || 280;
-    var chartW = Math.max(totalDist * 14, 800);
     var ePad   = (maxE - minE) * 0.08 || 50;
     var eMin   = minE - ePad;
     var eMax   = maxE + ePad;
@@ -116,8 +130,71 @@
       eMin: eMin,
       eMax: eMax,
       distToX: function (d) { return 70 + (d / totalDist) * chartW; },
+      xToDist: function (x) { return Math.max(0, Math.min(totalDist, (x - 70) / chartW * totalDist)); },
       eleToY:  function (e) { return Y.chartBot - ((e - eMin) / eRange) * chartH; }
     };
+  }
+
+  // The chart gets 14 units per km, so once the image is fitted to a phone screen every label
+  // shrinks as the course gets longer. For the phone ratios the chart is instead only as wide
+  // as the checkpoints need to keep their times and segment boxes apart (never under 800), which
+  // brings 60–120 km courses back to the type size of a short course.
+  function chartWidth(totalDist, cps, ratio, autoScale, fsTime, fsSegment) {
+    var natural = Math.max(totalDist * 14, 800);
+    if (!autoScale || !ratio || ratio === 'auto') return natural;
+    var needed = 800;
+    function need(list, gap) {
+      for (var i = 1; i < list.length; i++) {
+        var d = list[i].distance - list[i - 1].distance;
+        if (d > 0.05) needed = Math.max(needed, gap * totalDist / d);
+      }
+    }
+    need(cps, textWidth('88:88', fsTime, 700) + 12);
+    need(cps.filter(function (cp, i) {
+      return cp.useForIntermediateDistances !== false || i === 0 || i === cps.length - 1;
+    }), textWidth('88.8 km', fsSegment, 800) + 24);
+    return Math.min(natural, Math.round(needed));
+  }
+
+  // One stretch of the course (split export): points and checkpoints are shifted to start at 0,
+  // while checkpoint numbering and times stay those of the whole course
+  function clipWindow(pts, cps, seqLabels, times, win) {
+    var si = tm().findNearestPointIndexByDistance(pts, win.startDist);
+    var ei = tm().findNearestPointIndexByDistance(pts, win.endDist);
+    var offset = pts[si].distance;
+    var hOffset = pts[si].horizontalDistance || 0;
+    var sub = pts.slice(si, ei + 1).map(function (p) {
+      var q = Object.assign({}, p);
+      q.distance = p.distance - offset;
+      q.horizontalDistance = (p.horizontalDistance || 0) - hOffset;
+      return q;
+    });
+    var span = sub[sub.length - 1].distance;
+    var keep = [];
+    cps.forEach(function (cp, i) {
+      if (cp.distance >= win.startDist - 0.01 && cp.distance <= win.endDist + 0.01) keep.push(i);
+    });
+    return {
+      pts: sub,
+      offset: offset,
+      cps: keep.map(function (i) {
+        var c = Object.assign({}, cps[i]);
+        c.distance = Math.max(0, Math.min(span, cps[i].distance - offset));
+        return c;
+      }),
+      seqLabels: keep.map(function (i) { return seqLabels[i]; }),
+      times: keep.map(function (i) { return times[i]; })
+    };
+  }
+
+  // Distance ranges given for the whole course, moved into a window and clipped to it
+  function shiftRanges(list, offset, span) {
+    return (list || []).map(function (r) {
+      var s = Object.assign({}, r);
+      s.startDist = Math.max(0, r.startDist - offset);
+      s.endDist = Math.min(span, r.endDist - offset);
+      return s;
+    }).filter(function (r) { return r.endDist - r.startDist > 0.01; });
   }
 
   // ══════════════════════════════════════════════════════════════════════
@@ -139,6 +216,7 @@
     var fsCPNotes   = fontSizes.cpNotes || 22;
     var fsSegment   = fontSizes.segment || 17;
     var fsCumulDist = fontSizes.cumulDist || 17;
+    var fsLabel     = fontSizes.label || 16;
 
     cps = (cps || []).slice().sort(function (a, b) { return a.distance - b.distance; });
 
@@ -149,16 +227,31 @@
     });
 
     var cumulTimes = computeCumulTimes(cps, pts, options.targetMinutes);
-    var smoothPts  = u().smoothElevation(pts, 7);
 
-    var totalDist = pts[pts.length - 1].distance;
+    // The whole course's altitude range, so the images of a split export share one scale
     var minE = Infinity, maxE = -Infinity;
     pts.forEach(function (p) {
       if (p.elevation < minE) minE = p.elevation;
       if (p.elevation > maxE) maxE = p.elevation;
     });
 
-    var chartW = Math.max(totalDist * 14, 800);
+    var distOffset = 0;
+    if (options.window) {
+      var win = clipWindow(pts, cps, seqLabels, cumulTimes, options.window);
+      pts = win.pts;
+      cps = win.cps;
+      seqLabels = win.seqLabels;
+      cumulTimes = win.times;
+      distOffset = win.offset;
+    }
+
+    var smoothPts  = u().smoothElevation(pts, 7);
+    var totalDist = pts[pts.length - 1].distance;
+    var nightBands = shiftRanges(options.nightBands, distOffset, totalDist);
+    var segmentLabels = shiftRanges(options.segmentLabels, distOffset, totalDist);
+
+    var naturalW = Math.max(totalDist * 14, 800);
+    var chartW = chartWidth(totalDist, cps, ratio, options.autoScale !== false, fsCPTime, fsSegment);
     var svgW = 70 + chartW + 55;
 
     var notesLayout = { lines: 0, fontSize: fsCPNotes };
@@ -186,7 +279,7 @@
     }
 
     var Y = yAnchors(name, chartH, notesLayout);
-    var m = makeMapper(totalDist, minE, maxE, Y, chartH);
+    var m = makeMapper(totalDist, minE, maxE, Y, chartH, chartW);
 
     container.innerHTML = '';
     var outerW = svgW + 2 * margin;
@@ -197,7 +290,8 @@
       width: outerW,
       height: outerH,
       id: 'roadbookSvg',
-      style: "font-family: var(--font-sans), 'Segoe UI', system-ui, -apple-system, sans-serif"
+      'data-scale': (naturalW / chartW).toFixed(2),
+      style: "font-family: " + FONT_FAMILY
     });
 
     svg.appendChild(el('rect', { x: 0, y: 0, width: outerW, height: outerH, fill: C.bg }));
@@ -208,6 +302,7 @@
     // Hover Segment Highlight Overlay
     var hoverSegmentRect = el('rect', {
       id: 'hover-segment-rect',
+      'class': 'screen-only',
       style: 'pointer-events:none; display:none;',
       fill: 'rgba(232, 168, 48, 0.14)',
       stroke: '#e8a830',
@@ -221,7 +316,7 @@
       renderSegmentHighlight(g, pts, m, Y, activeSegment);
     }
 
-    renderNightBands(g, options.nightBands, cps, m, Y);
+    renderNightBands(g, nightBands, cps, m, Y);
     renderTitle(g, name, svgW, Y, fsTitle);
     renderYAxis(g, m, Y, fsCPElev);
 
@@ -236,16 +331,25 @@
     renderCPLines(g, cps, pts, m, Y);
     renderCPIcons(g, cps, seqLabels, m, Y);
     renderCPNames(g, cps, pts, m, Y, fsCPName);
-    renderElevLabels(g, cps, pts, m, Y, fsCPElev);
+    // Free-position texts are placed first; segment label cards go around them, and the CP
+    // altitude labels make way for the cards
+    var freeBoxes = renderAssociatedTexts(g, cps, m, Y);
+    var labelLayout = layoutSegmentLabels(segmentLabels, pts, m, Y, fsLabel, freeBoxes, options);
+    renderElevLabels(g, cps, pts, m, Y, fsCPElev, labelLayout.cards);
     renderTimeLabels(g, cps, cumulTimes, m, Y, fsCPTime);
     renderNotes(g, cps, m, Y, fsCPNotes);
     renderSegmentInfo(g, cps, pts, m, Y, fsSegment, cumulTimes, options);
-    renderCumulDist(g, cps, m, Y, fsCumulDist);
-    renderPeakLabels(g, pts, cps, m, Y, fsCPElev);
-    renderAssociatedTexts(g, cps, m, Y);
+    renderCumulDist(g, cps, m, Y, fsCumulDist, distOffset);
+    renderPeakLabels(g, pts, cps, m, Y, fsCPElev, labelLayout.cards);
+    renderSegmentLabels(g, labelLayout.items, options.showPlaceholders || 'none');
+    if (options.onLabelLayout) {
+      options.onLabelLayout(labelLayout.items.filter(function (it) { return !it.empty; }).map(function (it) {
+        return { key: it.key, status: it.status, size: it.size };
+      }));
+    }
 
     // Crosshair Group
-    var crosshairG = el('g', { id: 'profile-crosshair', style: 'pointer-events:none; display:none;' });
+    var crosshairG = el('g', { id: 'profile-crosshair', 'class': 'screen-only', style: 'pointer-events:none; display:none;' });
     var crosshairLine = el('line', { x1: 0, y1: Y.chartTop, x2: 0, y2: Y.chartBot, stroke: '#e8a830', 'stroke-width': '1.5', 'stroke-dasharray': '3,3' });
     var crosshairDot = el('circle', { cx: 0, cy: 0, r: 5, fill: '#e8a830', stroke: '#fff', 'stroke-width': '2' });
     crosshairG.appendChild(crosshairLine);
@@ -267,10 +371,30 @@
     var onSegmentHover = options.onSegmentHover || null;
     var onSegmentClick = options.onSegmentClick || null;
     var onAddCheckpoint = options.onAddCheckpoint || null;
+    var onEditLabel = options.onEditLabel || null;
     var segments = options.segments || [];
+    var hoverPlaceholders = (options.showPlaceholders === 'hover');
+    var placeholders = svg.querySelectorAll('.seg-label-empty');
 
     var lastSegIdx = -1;
     var clickTimer = null;
+
+    // In 'hover' mode only the placeholder of the segment under the pointer shows
+    function showPlaceholderAt(dist) {
+      if (!hoverPlaceholders) return;
+      Array.prototype.forEach.call(placeholders, function (p) {
+        var inside = dist !== null && dist >= +p.getAttribute('data-start') && dist <= +p.getAttribute('data-end');
+        p.classList.toggle('is-idle', !inside);
+      });
+    }
+
+    function labelAt(e) {
+      return (e.target && e.target.closest) ? e.target.closest('[data-label-key]') : null;
+    }
+
+    function editLabel(node) {
+      if (onEditLabel) onEditLabel(parseInt(node.getAttribute('data-label-key'), 10), node.getBoundingClientRect());
+    }
 
     function esc(s) {
       return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -291,6 +415,7 @@
 
       var distRatio = Math.max(0, Math.min(1, (svgX - 70) / m.chartW));
       var targetDist = distRatio * totalDist;
+      showPlaceholderAt(targetDist);
       var ptIdx = tm().findNearestPointIndexByDistance(pts, targetDist);
       var pt = pts[ptIdx] || pts[0];
 
@@ -376,6 +501,7 @@
     }
 
     function hideCursor() {
+      showPlaceholderAt(null);
       crosshairG.style.display = 'none';
       if (hoverSegmentRect) hoverSegmentRect.style.display = 'none';
       if (tooltipEl) tooltipEl.classList.remove('visible');
@@ -395,6 +521,11 @@
 
     // A single click selects a segment; wait briefly so a double click (add CP) can cancel it
     function handleClick(e) {
+      var label = labelAt(e);
+      if (label) {
+        editLabel(label);
+        return;
+      }
       var targetDist = distanceAtEvent(e);
       if (targetDist === null) return;
       if (clickTimer) clearTimeout(clickTimer);
@@ -412,6 +543,7 @@
       var targetDist = distanceAtEvent(e);
       if (targetDist === null || !onAddCheckpoint) return;
       if (e.target.closest && e.target.closest('[data-seg-idx]')) return; // segment info boxes
+      if (labelAt(e)) return;
       e.preventDefault();
       onAddCheckpoint(Math.max(0.1, Math.min(totalDist - 0.1, targetDist)));
     }
@@ -440,6 +572,12 @@
     svg.addEventListener('touchstart', handlePointer, { passive: true });
     svg.addEventListener('touchmove', handlePointer, { passive: true });
     svg.addEventListener('touchend', hideCursor);
+    svg.addEventListener('keydown', function (e) {
+      var label = labelAt(e);
+      if (!label || (e.key !== 'Enter' && e.key !== ' ')) return;
+      e.preventDefault();
+      editLabel(label);
+    });
   }
 
   // ── Segment Highlight ───────────────────────────────────────────────
@@ -452,6 +590,7 @@
     var w = Math.max(2, x2 - x1);
 
     svg.appendChild(el('rect', {
+      'class': 'screen-only',
       x: x1,
       y: Y.chartTop,
       width: w,
@@ -707,7 +846,7 @@
 
       var symbol = cp.icon || (cp.icons && cp.icons[0] ? cp.icons[0].symbol : '') || '';
 
-      if (idx === 0 || symbol === 'start') {
+      if (seqLabels[idx] === 'S' || symbol === 'start') {
         var grpS = el('g', {});
         grpS.appendChild(el('circle', {
           cx: x, cy: cy, r: r,
@@ -722,7 +861,7 @@
         return;
       }
 
-      if (idx === cps.length - 1 || symbol === 'finish') {
+      if (seqLabels[idx] === 'F' || symbol === 'finish') {
         var grpF = el('g', {});
         grpF.appendChild(el('circle', {
           cx: x, cy: cy, r: r,
@@ -831,7 +970,7 @@
   }
 
   // ── Intelligent Slope-Aware CP Altitude Labels ──────────────────────
-  function renderElevLabels(svg, cps, pts, m, Y, fontSize) {
+  function renderElevLabels(svg, cps, pts, m, Y, fontSize, cards) {
     cps.forEach(function (cp) {
       var x = m.distToX(cp.distance);
       var elev = u().interpolateElevation(pts, cp.distance);
@@ -846,9 +985,23 @@
       if (x < 85) { textX = x + 8; anchor = 'start'; }
       else if (x > 70 + m.chartW - 25) { textX = x - 8; anchor = 'end'; }
 
+      // A CP down in a valley would sit behind the segment label cards: move it up onto its
+      // guide line, just above the cards (the halo keeps it readable over the line)
+      var y = elevY - 4;
+      var label = Math.round(elev) + 'm';
+      var w = textWidth(label, fontSize, 700);
+      var box = { x: anchor === 'start' ? textX : textX - w, y: y - fontSize * 0.8, w: w, h: fontSize };
+      if ((cards || []).some(function (c) { return overlaps(c, box); })) {
+        var tops = cards.filter(function (c) { return c.x < x + w / 2 && x - w / 2 < c.x + c.w && c.y < y + fontSize; })
+          .map(function (c) { return c.y; });
+        textX = x;
+        anchor = 'middle';
+        y = Math.min.apply(null, tops.concat([y])) - 5;
+      }
+
       svg.appendChild(el('text', {
         x: textX,
-        y: elevY - 4,
+        y: y,
         'text-anchor': anchor,
         'font-size': String(fontSize),
         'font-weight': '700',
@@ -860,6 +1013,9 @@
 
   // ── Horizontal CP Arrival Time & Interval Labels ────────────────────
   function renderTimeLabels(svg, cps, times, m, Y, fontSize) {
+    var widths = cps.map(function (cp, idx) {
+      return times[idx].showCumul ? textWidth(u().formatTime(times[idx].cumul), fontSize, 700) : 0;
+    });
     cps.forEach(function (cp, idx) {
       var x = m.distToX(cp.distance);
       var cumulVal = times[idx].cumul;
@@ -877,19 +1033,24 @@
         }, formattedCumul));
       }
 
+      // The segment time between two arrivals is dropped when checkpoints are too close for it
       var segVal = times[idx].segment;
+      var segText = '(' + u().formatTime(segVal) + ')';
+      var segSize = Math.max(fontSize - 3, 9);
       if (idx > 0 && segVal > 0) {
         var xPrev = m.distToX(cps[idx - 1].distance);
+        var room = (x - xPrev) - widths[idx - 1] / 2 - widths[idx] / 2 - 8;
+        if (textWidth(segText, segSize, 600) > room) return;
         var xMid = (xPrev + x) / 2;
         svg.appendChild(el('text', {
           x: xMid,
           y: Y.timeBase - 1,
           'text-anchor': 'middle',
-          'font-size': String(Math.max(fontSize - 3, 9)),
+          'font-size': String(segSize),
           'font-weight': '600',
           fill: C.segTimeLabel,
           style: "font-family: " + FONT_NUMERIC
-        }, '(' + u().formatTime(segVal) + ')'));
+        }, segText));
       }
     });
   }
@@ -1008,7 +1169,8 @@
   }
 
   // ── Bottom Cumulative Distance ──────────────────────────────────────
-  function renderCumulDist(svg, cps, m, Y, fontSize) {
+  // `offset` is where a split-export image starts, so it still shows distances from the start
+  function renderCumulDist(svg, cps, m, Y, fontSize, offset) {
     cps.forEach(function (cp) {
       var x = m.distToX(cp.distance);
       svg.appendChild(el('text', {
@@ -1016,12 +1178,12 @@
         'text-anchor': 'middle', 'font-size': String(fontSize), 'font-weight': '700',
         fill: C.cumulText,
         style: "font-family: " + FONT_NUMERIC
-      }, cp.distance.toFixed(1)));
+      }, (cp.distance + (offset || 0)).toFixed(1)));
     });
   }
 
   // ── Peak Elevation Annotations ──────────────────────────────────────
-  function renderPeakLabels(svg, pts, cps, m, Y, fontSize) {
+  function renderPeakLabels(svg, pts, cps, m, Y, fontSize, cards) {
     var peaks = findPeaks(pts, 100);
     peaks.forEach(function (pk) {
       var x  = m.distToX(pk.distance);
@@ -1030,6 +1192,10 @@
         return Math.abs(cp.distance - pk.distance) < 1.5;
       });
       if (tooClose) return;
+      var label = Math.round(pk.elevation) + 'm';
+      var w = textWidth(label, fontSize - 2, 400);
+      var box = { x: x - w / 2, y: yy - 8 - (fontSize - 2) * 0.8, w: w, h: fontSize - 2 };
+      if ((cards || []).some(function (c) { return overlaps(c, box); })) return;
       svg.appendChild(el('text', {
         x: x, y: yy - 8,
         'text-anchor': 'middle', 'font-size': String(fontSize - 2), 'font-style': 'italic',
@@ -1051,15 +1217,19 @@
     return peaks;
   }
 
-  // ── Chart Inside Custom Annotations ─────────────────────────────────
+  // ── Free-Position Texts (the older six slots around a CP) ───────────
+  // Returns their boxes so the segment label cards can keep clear of them
   function renderAssociatedTexts(svg, cps, m, Y) {
+    var boxes = [];
+    var maxX = 70 + m.chartW + 55;
     cps.forEach(function (cp) {
       if (!cp.texts) return;
 
       var x  = m.distToX(cp.distance);
-      var col = cp.textColor || '#4e4e4e';
-      var size = cp.textSize || 10;
+      var col = cp.textColor || '#1e293b';
+      var size = cp.textSize || 18;
       var orient = cp.textOrientation || 'To the right';
+      var rotation = orient === 'Rotated -90°' ? -90 : (orient === 'Rotated 90°' ? 90 : 0);
 
       var yPositions = {
         top:    Y.chartTop + 20,
@@ -1079,25 +1249,270 @@
       keys.forEach(function (item) {
         var textVal = cp.texts[item.key];
         if (!textVal || !textVal.trim()) return;
+        textVal = textVal.trim();
+
+        var w = textWidth(textVal, size, 700);
+        var level = /Top$/.test(item.key) ? 'top' : (/Bottom$/.test(item.key) ? 'bottom' : 'middle');
+        var tx = item.x;
+        var anchor = item.anchor;
+        var box;
+
+        if (rotation) {
+          // Grow into the chart: down from the top slot, up from the bottom slot
+          var down = (rotation === -90) ? 'end' : 'start';
+          var up = (rotation === -90) ? 'start' : 'end';
+          anchor = level === 'top' ? down : (level === 'bottom' ? up : 'middle');
+          var y0 = level === 'top' ? item.y : (level === 'bottom' ? item.y - w : item.y - w / 2);
+          // Glyphs stand on the baseline, which turns sideways: left of it at -90°, right at 90°
+          box = { x: rotation === -90 ? tx - size * 0.9 : tx - size * 0.3, y: y0, w: size * 1.2, h: w };
+        } else {
+          // Flip to the other side of the guide line rather than run off the image
+          if (anchor === 'start' && tx + w > maxX) { anchor = 'end'; tx = x - 6; }
+          else if (anchor === 'end' && tx - w < 0) { anchor = 'start'; tx = x + 6; }
+          box = { x: anchor === 'start' ? tx : tx - w, y: item.y - size * 0.8, w: w, h: size };
+        }
+        boxes.push(box);
 
         var attrs = {
-          x: item.x,
+          x: tx,
           y: item.y,
-          'text-anchor': item.anchor,
+          'text-anchor': anchor,
           'font-size': size,
           'font-weight': '700',
           fill: col,
-          style: "font-family: " + FONT_FAMILY
+          style: "font-family: " + FONT_FAMILY + "; paint-order: stroke fill; stroke: " + C.bg +
+            "; stroke-width: " + Math.max(3, size * 0.22) + "px; stroke-linejoin: round;"
         };
+        if (rotation) attrs.transform = 'rotate(' + rotation + ', ' + tx + ', ' + item.y + ')';
 
-        if (orient === 'Rotated -90°') {
-          attrs.transform = 'rotate(-90, ' + item.x + ', ' + item.y + ')';
-        } else if (orient === 'Rotated 90°') {
-          attrs.transform = 'rotate(90, ' + item.x + ', ' + item.y + ')';
-        }
-
-        svg.appendChild(el('text', attrs, textVal.trim()));
+        svg.appendChild(el('text', attrs, textVal));
       });
+    });
+    return boxes;
+  }
+
+  // ── Segment Labels (one card per segment, along the bottom) ─────────
+  // The cards share one row at the bottom of the chart, where covering some of the mountain is
+  // fine. A card stays inside its segment and slides sideways to keep the curve clear when it
+  // can. When the segment is too narrow it gives way in steps: a smaller size (down to 85 %),
+  // reaching into neighbouring segments that have no label, a second row, and last an ellipsis.
+  var LABEL = { padX: 0.55, padY: 0.32, lh: 1.25, accent: 3, gap: 0.45, clear: 0.25, radius: 0.3, maxLines: 4 };
+
+  // Whole lines first; then ordinary spaces (never the no-break space between a number and its
+  // unit); characters only as a last resort
+  function wrapLines(text, maxW, size) {
+    var out = [];
+    function fill(units, joiner) {
+      var line = '';
+      units.forEach(function (unit) {
+        var next = line ? line + joiner + unit : unit;
+        if (line && textWidth(next, size) > maxW) { out.push(line); line = unit; } else { line = next; }
+      });
+      return line;
+    }
+    text.split('\n').forEach(function (para) {
+      if (textWidth(para, size) <= maxW) { out.push(para); return; }
+      var rest = fill(para.split(/ +/), ' ');
+      if (textWidth(rest, size) > maxW) rest = fill(Array.from(rest), '');
+      out.push(rest);
+    });
+    return out;
+  }
+
+  // The largest size (in 5 % steps, down to 85 %) at which no line has to break
+  function fitLines(text, maxW, fs) {
+    var natural = text.split('\n').length;
+    for (var step = 0; step <= 3; step++) {
+      var size = fs * (1 - 0.05 * step);
+      var lines = wrapLines(text, maxW, size);
+      if (lines.length <= natural) return { lines: lines, size: size };
+    }
+    return { lines: wrapLines(text, maxW, fs * 0.85), size: fs * 0.85 };
+  }
+
+  function truncateLine(line, maxW, size) {
+    if (textWidth(line, size) <= maxW) return line;
+    var chars = Array.from(line);
+    while (chars.length && textWidth(chars.join('') + '…', size) > maxW) chars.pop();
+    return chars.length ? chars.join('') + '…' : '';
+  }
+
+  function cardSize(lines, size) {
+    var widest = Math.max.apply(null, lines.map(function (l) { return textWidth(l, size); }));
+    return {
+      w: widest + 2 * LABEL.padX * size + LABEL.accent,
+      h: lines.length * LABEL.lh * size + 2 * LABEL.padY * size
+    };
+  }
+
+  function layoutSegmentLabels(labels, pts, m, Y, fs, obstacles, options) {
+    var cards = [];
+    var items = [];
+    var bottom = Y.chartBot - 5;
+    var chartLeft = 70, chartRight = 70 + m.chartW;
+    var sorted = labels.slice().sort(function (a, b) { return a.startDist - b.startDist; });
+
+    var curveYs = null;
+    function curveLow(x0, x1) {
+      if (!curveYs) {
+        curveYs = [];
+        for (var x = 0; x <= m.chartW; x++) curveYs.push(m.eleToY(u().interpolateElevation(pts, m.xToDist(70 + x))));
+      }
+      var low = -Infinity;
+      for (var i = Math.max(0, Math.floor(x0 - 70)); i <= Math.min(m.chartW, Math.ceil(x1 - 70)); i++) low = Math.max(low, curveYs[i]);
+      return low;
+    }
+    function isFree(box) {
+      return !cards.some(function (c) { return overlaps(box, c); }) &&
+        !obstacles.some(function (o) { return overlaps(box, o); });
+    }
+    // Best free spot for a w×h card within [lo, hi] on the row ending at rowBottom
+    function place(w, h, lo, hi, rowBottom, centre, span) {
+      var top = rowBottom - h;
+      var best = null;
+      for (var s = 0; s <= 8; s++) {
+        for (var dir = -1; dir <= 1; dir += 2) {
+          if (s === 0 && dir === 1) continue;
+          var x0 = centre + dir * s * span / 16 - w / 2;
+          if (x0 < lo - 0.01 || x0 + w > hi + 0.01) continue;
+          var box = { x: x0, y: top, w: w, h: h };
+          if (!isFree(box)) continue;
+          var score = (curveLow(x0, x0 + w) > top - LABEL.clear * fs ? 10 : 0) + s;
+          if (!best || score < best.score) best = { box: box, score: score };
+        }
+      }
+      return best ? best.box : null;
+    }
+    function hasText(l) { return !!l && !l.empty && String(l.text || '').trim() !== ''; }
+
+    sorted.forEach(function (label, i) {
+      if (!hasText(label)) return;
+      var gap = LABEL.gap * fs;
+      var xA = m.distToX(label.startDist) + gap;
+      var xB = m.distToX(label.endDist) - gap;
+      var W = Math.max(0, xB - xA);
+      var centre = (xA + xB) / 2;
+      var text = String(label.text).trim().split('\n').slice(0, LABEL.maxLines).join('\n');
+      var natural = text.split('\n').length;
+      var room = function (width) { return width - 2 * LABEL.padX * fs - LABEL.accent; };
+
+      var fit = fitLines(text, room(W), fs);
+      var size = cardSize(fit.lines, fit.size);
+      var status = fit.size < fs - 0.01 ? 'shrunk' : 'ok';
+      var box = null;
+
+      // a. Too tight here: reach into neighbouring segments that carry no label
+      if (fit.size < fs - 0.01 || fit.lines.length > natural) {
+        var prev = sorted[i - 1], next = sorted[i + 1];
+        var lo = (prev && hasText(prev)) ? xA : Math.max(chartLeft, centre - 0.8 * W);
+        var hi = (next && hasText(next)) ? xB : Math.min(chartRight, centre + 0.8 * W);
+        var wide = fitLines(text, room(hi - lo), fs);
+        if (wide.size > fit.size || wide.lines.length < fit.lines.length) {
+          var wideSize = cardSize(wide.lines, wide.size);
+          box = place(wideSize.w, wideSize.h, lo, hi, bottom, centre, hi - lo);
+          if (box) {
+            fit = wide;
+            size = wideSize;
+            status = wide.size < fs - 0.01 ? 'shrunk' : 'wide';
+          }
+        }
+      }
+      if (!box) box = place(size.w, size.h, xA, xB, bottom, centre, W);
+
+      // b. Second row, above whatever is in the way (another card or a free-position text)
+      if (!box) {
+        var probe = { x: Math.max(xA, Math.min(xB - size.w, centre - size.w / 2)), y: bottom - size.h, w: size.w, h: size.h };
+        var blockers = cards.concat(obstacles).filter(function (c) { return overlaps(probe, c); });
+        if (blockers.length) {
+          var rowBottom = Math.min.apply(null, blockers.map(function (c) { return c.y; })) - 4;
+          if (rowBottom - size.h > Y.chartTop) {
+            box = place(size.w, size.h, xA, xB, rowBottom, centre, W);
+            if (box) status = 'raised';
+          }
+        }
+      }
+
+      // c. Shorten the lines to whatever free width is left on the first row
+      if (!box) {
+        var L = Math.max(chartLeft, xA - gap), R = Math.min(chartRight, xB + gap);
+        var rowTop = bottom - size.h;
+        cards.concat(obstacles).forEach(function (c) {
+          if (c.y >= bottom || c.y + c.h <= rowTop) return;
+          if (c.x + c.w / 2 < centre) L = Math.max(L, c.x + c.w + 2);
+          else R = Math.min(R, c.x - 2);
+        });
+        var maxText = room(R - L);
+        var lines = fit.lines.map(function (l) { return truncateLine(l, maxText, fit.size); });
+        if (maxText > fit.size && lines.some(function (l) { return l; })) {
+          fit = { lines: lines, size: fit.size };
+          size = cardSize(lines, fit.size);
+          box = { x: Math.max(L, Math.min(R - size.w, centre - size.w / 2)), y: bottom - size.h, w: size.w, h: size.h };
+        }
+        status = 'truncated';
+      }
+
+      if (box) cards.push(box);
+      items.push({ key: label.key, box: box, lines: fit.lines, size: fit.size, status: status, empty: false,
+        startDist: label.startDist, endDist: label.endDist });
+    });
+
+    // Placeholders go where a card would, when nothing is in the way (screen only)
+    if (options.showPlaceholders && options.showPlaceholders !== 'none') {
+      var phSize = fs * 0.85;
+      var phText = options.labelPlaceholder || '+';
+      sorted.forEach(function (label) {
+        if (!label.empty) return;
+        var gap = LABEL.gap * fs;
+        var xA = m.distToX(label.startDist) + gap;
+        var xB = m.distToX(label.endDist) - gap;
+        if (xB - xA < 40) return;
+        var size = cardSize([phText], phSize);
+        if (size.w > xB - xA) return;
+        var box = { x: (xA + xB) / 2 - size.w / 2, y: bottom - size.h, w: size.w, h: size.h };
+        if (!isFree(box)) return;
+        items.push({ key: label.key, box: box, lines: [phText], size: phSize, status: 'ok', empty: true,
+          startDist: label.startDist, endDist: label.endDist });
+      });
+    }
+
+    return { items: items, cards: cards };
+  }
+
+  function renderSegmentLabels(svg, items, placeholderMode) {
+    items.forEach(function (it) {
+      if (!it.box) return;
+      var b = it.box;
+      var grp = el('g', {
+        'class': 'seg-label' + (it.empty ? ' seg-label-empty screen-only' + (placeholderMode === 'hover' ? ' is-idle' : '') : ''),
+        'data-label-key': String(it.key),
+        'data-start': String(it.startDist),
+        'data-end': String(it.endDist),
+        role: 'button',
+        tabindex: '0',
+        'aria-label': it.lines.join(' ')
+      });
+      grp.appendChild(el('rect', {
+        'class': 'seg-label-card',
+        x: b.x, y: b.y, width: b.w, height: b.h, rx: LABEL.radius * it.size,
+        fill: '#ffffff', 'fill-opacity': it.empty ? '0.75' : '0.92',
+        stroke: it.empty ? '#94a3b8' : 'rgba(30,41,59,0.18)',
+        'stroke-width': '1',
+        'stroke-dasharray': it.empty ? '4,3' : 'none'
+      }));
+      if (!it.empty) {
+        grp.appendChild(el('rect', { x: b.x + 2, y: b.y + 3, width: LABEL.accent, height: Math.max(0, b.h - 6), rx: 1.5, fill: '#d4881e' }));
+      }
+      var text = el('text', {
+        'text-anchor': 'middle', 'font-size': String(it.size), 'font-weight': it.empty ? '600' : '700',
+        fill: it.empty ? '#64748b' : '#1e293b',
+        style: 'font-family: ' + FONT_NUMERIC
+      });
+      var cx = b.x + (it.empty ? b.w / 2 : LABEL.accent + (b.w - LABEL.accent) / 2);
+      it.lines.forEach(function (line, li) {
+        text.appendChild(el('tspan', { x: cx, y: b.y + LABEL.padY * it.size + 0.82 * it.size + li * LABEL.lh * it.size }, line));
+      });
+      grp.appendChild(text);
+      svg.appendChild(grp);
     });
   }
 
